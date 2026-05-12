@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-test test gtestwdsasdsd
-=======
-
->>>>>>> 4e7cbd3cb2b09079020013dd91f39981255d47ec
+Hallo Paul
