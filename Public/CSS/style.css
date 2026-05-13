@@ -49,25 +49,6 @@ body {
     padding: 42px;
 }
 
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 48px;
-}
-
-.brand-mark {
-    width: 54px;
-    height: 54px;
-    border-radius: 16px;
-    display: grid;
-    place-items: center;
-    background: var(--primary);
-    color: var(--white);
-    font-size: 34px;
-    font-weight: 800;
-    line-height: 1;
-}
 
 .brand-name {
     margin: 0;
@@ -314,6 +295,7 @@ body {
     text-decoration: none;
     font-weight: 800;
     font-size: 20px;
+    margin: 0 auto;
 }
 
 .logo-placeholder {
@@ -372,6 +354,7 @@ body {
     text-decoration: none;
     font-weight: 800;
     font-size: 20px;
+    margin-left: 800px;
 }
 
 .topbar-logo {

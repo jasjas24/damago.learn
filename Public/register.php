@@ -7,39 +7,24 @@
     <link rel="stylesheet" href="CSS/style.css">
 </head>
 <body class="auth-page">
-    <header class="topbar">
-    <a href="index.php" class="topbar-brand">
-        <div class="logo-placeholder">damago</div>
-        <span>Quizsystem</span>
-    </a>
 
-    <nav class="topbar-nav">
-        <a href="index.php">Start</a>
-        <a href="login.php">Login</a>
-        <a href="register.php">Registrieren</a>
-    </nav>
-</header>
+    <header class="topbar">
+        <a href="index.php" class="topbar-brand">
+            <img src="damago-logo.png" alt="damago Logo" class="topbar-logo">
+        </a>
+    </header>
 
     <main class="auth-layout">
         <section class="auth-info">
-            <div class="brand">
-                <div class="brand-mark">d</div>
-                <div>
-                    <p class="brand-name">damago</p>
-                    <p class="brand-subtitle">Quizsystem</p>
-                </div>
-            </div>
 
-            <h1>Dein persönlicher Lernzugang.</h1>
+            <h1>Wissen testen. Fortschritt sichtbar machen.</h1>
             <p>
-                Erstelle ein Konto, um an Quizrunden teilzunehmen und später
-                deine Ergebnisse und Lernhistorie einsehen zu können.
+                Erstelle dein Benutzerkonto, nimm an interaktiven Quizrunden teil
+                und nutze das Quizsystem, um dein Wissen gezielt zu festigen.
             </p>
 
             <div class="info-list">
-                <div>Eigene Quiz-Historie</div>
-                <div>Teilnahme an Kurs-Quizzen</div>
-                <div>Klare Rollen für Unterricht und Verwaltung</div>
+                <div>Für Unterricht, Prüfungsvorbereitung und eigenständiges Lernen</div>
             </div>
         </section>
 
@@ -50,7 +35,7 @@
                 <p>Lege dein Benutzerkonto für das Quizsystem an.</p>
             </div>
 
-            <form class="auth-form" action="#" method="post">
+            <form class="auth-form" action="PHP/check_register.php" method="post">
                 <div class="form-group">
                     <label for="username">Benutzername</label>
                     <input
@@ -63,12 +48,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="email">E-Mail-Adresse</label>
+                    <label for="email">E-Mail</label>
                     <input
                         type="email"
                         id="email"
                         name="email"
-                        placeholder="E-Mail-Adresse eingeben"
+                        pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+                        placeholder="E-Mail Adresse eingeben"
                         required
                     >
                 </div>
@@ -95,15 +81,6 @@
                     >
                 </div>
 
-                <div class="form-group">
-                    <label for="role">Rolle</label>
-                    <select id="role" name="role" required>
-                        <option value="">Rolle auswählen</option>
-                        <option value="user">User</option>
-                        <option value="dozent">Dozent</option>
-                    </select>
-                </div>
-
                 <button type="submit" class="btn btn-primary">
                     Konto erstellen
                 </button>
@@ -115,7 +92,6 @@
             </div>
 
             <div class="secondary-links">
-                <a href="index.php">Zur Startseite</a>
                 <a href="quiz_beitreten.php">Als Gast teilnehmen</a>
             </div>
         </section>
