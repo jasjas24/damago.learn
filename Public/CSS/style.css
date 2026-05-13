@@ -2,8 +2,8 @@
     --bg: #f3f7fb;
     --bg-soft: #eaf2f8;
     --card: #ffffff;
-    --primary: #0073b5;
-    --primary-dark: #005f96;
+    --primary: #2f66a3;
+    --primary-dark: #2f66a3;
     --primary-soft: #e4f3fb;
     --accent: #f59e0b;
     --text: #1f2933;
@@ -304,7 +304,6 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0 42px;
-    border-bottom: 4px solid #0073b5;
 }
 
 .topbar-brand {
@@ -340,7 +339,7 @@ body {
 
 .topbar-nav a:hover {
     opacity: 1;
-    color: #4db3e6;
+    color: #2f66a3;
 }
 
 .auth-layout {
@@ -363,7 +362,6 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0 42px;
-    border-bottom: 4px solid #0073b5;
 }
 
 .topbar-brand {
@@ -398,7 +396,7 @@ body {
 
 .topbar-nav a:hover {
     opacity: 1;
-    color: #4db3e6;
+    color: #2f66a3;
 }
 
 .auth-layout {

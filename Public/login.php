@@ -8,27 +8,14 @@
 </head>
 <body class="auth-page">
    <header class="topbar">
-    <a href="index.html" class="topbar-brand">
+    <a href="index.php" class="topbar-brand">
         <img src="damago-logo.png" alt="damago Logo" class="topbar-logo">
-        <span>Quizsystem</span>
     </a>
 
-    <nav class="topbar-nav">
-        <a href="index.html">Start</a>
-        <a href="login.html">Login</a>
-        <a href="register.html">Registrieren</a>
-    </nav>
 </header>
 
     <main class="auth-layout">
         <section class="auth-info">
-            <div class="brand">
-                <div class="brand-mark">d</div>
-                <div>
-                    <p class="brand-name">damago</p>
-                    <p class="brand-subtitle">Quizsystem</p>
-                </div>
-            </div>
 
             <h1>Learning by Damago.</h1>
             <p>
@@ -48,10 +35,10 @@
                 <p>Melde dich mit deinem Benutzerkonto an.</p>
             </div>
 
-            <form class="auth-form" action="#" method="post">
+            <form class="auth-form" action="PHP/check_login.php" method="post">
                 <div class="form-group">
-                    <label for="login">E-Mail oder Benutzername</label>
-                   <input type="email" pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" placeholder="E-Mail Adresse eingeben">
+                    <label for="login">E-Mail</label>
+                   <input type="email" pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" placeholder="E-Mail Adresse eingeben" name="E-Mail">
                 </div>
 
                 <div class="form-group">
