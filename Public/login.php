@@ -17,14 +17,15 @@
     <main class="auth-layout">
         <section class="auth-info">
 
-            <h1>Learning by Damago.</h1>
+            <h1>Digitales Lernen im Unterricht.</h1>
             <p>
-                Melde dich an, um Quizrunden zu starten, an Unterrichtsquizzen
-                teilzunehmen oder deine Lernfortschritte einzusehen.
+                Trainiere dein Wissen in interaktiven Quizrunden,
+                wiederhole wichtige Unterrichtsinhalte und bereite dich
+                gezielt auf Prüfungen und Praxisaufgaben vor.
             </p>
 
             <div class="info-list">
-                <div>Unterrichtsquiz für Kurse und Umschulungen</div>
+                <div>Für Unterricht, Prüfungsvorbereitung und eigenständiges Lernen</div>
             </div>
         </section>
 
