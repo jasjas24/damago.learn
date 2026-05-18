@@ -15,7 +15,7 @@ $options = [
 
 try {
      $pdo = new PDO($dsn, $user, $pass, $options);
-     echo "in Datenbank!"; 
+     echo "Datenbank erfolgreich verbunden"; 
 } catch (\PDOException $e) {
      // Im echten Betrieb Fehlermeldung loggen, nicht direkt ausgeben
      throw new \PDOException($e->getMessage(), (int)$e->getCode());
