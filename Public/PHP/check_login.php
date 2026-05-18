@@ -3,20 +3,22 @@ session_start();
 require_once 'db.php'; 
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $emailInput = trim($_POST['login'] ?? '');
+    $emailInput = trim($_POST['email'] ?? '');
     $passwordInput = $_POST['password'] ?? '';
+    echo"hier";
 
     if (!empty($emailInput) && !empty($passwordInput)) {
         
            
     // SQL-Abfrage nur noch auf das E-Mail-Feld
-        $stmt = $pdo->prepare("SELECT id, email, password_hash FROM users WHERE email = ?");
+        $stmt = $pdo->prepare("SELECT id, email, password_hash FROM user WHERE email = ?");
         $stmt->execute([$emailInput]);
         $user = $stmt->fetch();
+        
 
         // Passwort-Check
         if ($user && password_verify($passwordInput, $user['password_hash'])) {
-            // Session-Fixation verhindern
+            // Session-Fixation verhindern, neue Session-ID nach Login vergeben
             session_regenerate_id();
 
             $_SESSION['user_id'] = $user['id'];

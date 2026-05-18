@@ -1,12 +1,13 @@
 <?php
 
-$host = 'localhost';
-$db   = 'damago_quiz';
-$user = 'root'; 
-$pass = '';     
+$host = 'sql7.freesqldatabase.com';
+$db   = 'sql7827265';
+$user = 'sql7827265'; 
+$pass = '8knyj7VhIR';     
+$port ='3306';
 $charset = 'utf8mb4';
 
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$dsn = "mysql:host=$host;port=$port;dbname=$db;charset=$charset";
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -15,10 +16,8 @@ $options = [
 
 try {
      $pdo = new PDO($dsn, $user, $pass, $options);
-     echo "Datenbank erfolgreich verbunden"; 
-     header("Location: ../dashboard.php");
+     
 } catch (\PDOException $e) {
-     // Im echten Betrieb Fehlermeldung loggen, nicht direkt ausgeben
      throw new \PDOException($e->getMessage(), (int)$e->getCode());
 }
 ?>
