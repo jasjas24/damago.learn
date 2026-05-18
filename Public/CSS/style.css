@@ -354,6 +354,9 @@ body {
     text-decoration: none;
     font-weight: 800;
     font-size: 20px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .topbar-logo {
