@@ -85,7 +85,7 @@ $displayRole = $roleNames[$role];
 
                 <?php if ($role === "admin"): ?>
 
-                    <a href="quiz_beitreten.html" class="dashboard-action-card">
+                    <a href="../lobby.html" class="dashboard-action-card">
                         <div class="dashboard-action-icon">QB</div>
                         <div>
                             <h3>Quiz beitreten</h3>
@@ -135,7 +135,7 @@ $displayRole = $roleNames[$role];
 
                 <?php elseif ($role === "dozent"): ?>
 
-                    <a href="quiz_beitreten.html" class="dashboard-action-card">
+                    <a href="../lobby.html" class="dashboard-action-card">
                         <div class="dashboard-action-icon">QB</div>
                         <div>
                             <h3>Quiz beitreten</h3>
@@ -169,7 +169,7 @@ $displayRole = $roleNames[$role];
 
                 <?php elseif ($role === "user"): ?>
 
-                    <a href="quiz_beitreten.html" class="dashboard-action-card">
+                    <a href="../lobby.html" class="dashboard-action-card">
                         <div class="dashboard-action-icon">QB</div>
                         <div>
                             <h3>Quiz beitreten</h3>
@@ -195,7 +195,7 @@ $displayRole = $roleNames[$role];
 
                 <?php elseif ($role === "gast"): ?>
 
-                    <a href="quiz_beitreten.html" class="dashboard-action-card">
+                    <a href="../lobby.html" class="dashboard-action-card">
                         <div class="dashboard-action-icon">QB</div>
                         <div>
                             <h3>Quiz beitreten</h3>
