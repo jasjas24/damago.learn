@@ -40,7 +40,7 @@ $displayRole = $roleNames[$role];
 
     <header class="topbar">
     <a href="index.html" class="topbar-brand">
-        <img src="damago-logo.png" alt="damago Logo" class="topbar-logo">
+        <img src="../damago-logo.png" alt="damago Logo" class="topbar-logo">
     </a>
 
     <div class="topbar-account">
@@ -48,7 +48,7 @@ $displayRole = $roleNames[$role];
             <?php echo htmlspecialchars($username); ?>
         </span>
 
-        <a href="logout.php" class="logout-button">
+        <a href="../PHP/logout.php" class="logout-button">
             logout
         </a>
     </div>

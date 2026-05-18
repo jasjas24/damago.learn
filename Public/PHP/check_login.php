@@ -5,7 +5,7 @@ require_once 'db.php';
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $emailInput = trim($_POST['email'] ?? '');
     $passwordInput = $_POST['password'] ?? '';
-    echo"hier";
+    
 
     if (!empty($emailInput) && !empty($passwordInput)) {
         
