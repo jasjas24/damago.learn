@@ -16,6 +16,7 @@ $options = [
 try {
      $pdo = new PDO($dsn, $user, $pass, $options);
      echo "Datenbank erfolgreich verbunden"; 
+     header("Location: ../dashboard.php");
 } catch (\PDOException $e) {
      // Im echten Betrieb Fehlermeldung loggen, nicht direkt ausgeben
      throw new \PDOException($e->getMessage(), (int)$e->getCode());
