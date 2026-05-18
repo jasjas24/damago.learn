@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_email'] = $user['email']; // E-Mail statt Username speichern
 
-            header("Location: ../dashboard.php");
+            header("Location: dashboard.php");
             exit;
         } else {
             // Fehlerfall
