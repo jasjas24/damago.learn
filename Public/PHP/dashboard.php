@@ -40,7 +40,7 @@ $displayRole = $roleNames[$role];
 
     <header class="topbar">
         <a href="index.html" class="topbar-brand">
-            <img src="damago-logo.png" alt="damago Logo" class="topbar-logo">
+            <img src="../damago-logo.png" alt="damago Logo" class="topbar-logo">
         </a>
     </header>
 
