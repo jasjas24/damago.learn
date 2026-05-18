@@ -478,3 +478,48 @@ body {
         gap: 8px;
     }
 }
+
+.topbar-account {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: #ffffff;
+}
+
+.account-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.logout-button {
+    padding: 8px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 999px;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    transition: 0.2s ease;
+}
+
+.logout-button:hover {
+    background: #ffffff;
+    color: #050505;
+}
+
+@media (max-width: 600px) {
+    .topbar-account {
+        gap: 8px;
+    }
+
+    .account-name {
+        font-size: 13px;
+    }
+
+    .logout-button {
+        padding: 7px 10px;
+        font-size: 13px;
+    }
+}

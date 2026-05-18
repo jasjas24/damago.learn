@@ -16,7 +16,7 @@ $role = $_SESSION["role"] ?? "gast";
 $allowedRoles = ["admin", "dozent", "user", "gast"];
 
 if (!in_array($role, $allowedRoles)) {
-    $role = "gast";
+    $role = "User";
 }
 
 $roleNames = [
@@ -39,9 +39,19 @@ $displayRole = $roleNames[$role];
 <body class="auth-page">
 
     <header class="topbar">
-        <a href="index.html" class="topbar-brand">
-            <img src="../damago-logo.png" alt="damago Logo" class="topbar-logo">
+    <a href="index.html" class="topbar-brand">
+        <img src="damago-logo.png" alt="damago Logo" class="topbar-logo">
+    </a>
+
+    <div class="topbar-account">
+        <span class="account-name">
+            <?php echo htmlspecialchars($username); ?>
+        </span>
+
+        <a href="logout.php" class="logout-button">
+            logout
         </a>
+    </div>
     </header>
 
     <main class="auth-layout dashboard-auth-layout">
