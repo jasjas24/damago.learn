@@ -823,3 +823,85 @@ body.lobby-page {
         gap: 6px;
     }
 }
+
+/* ==============================
+   Quiz-Code-Seite
+   ============================== */
+
+body {
+    margin: 0;
+}
+
+.auth-page {
+    min-height: 0vh;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Schwarzer Balken ganz oben */
+.topbar {
+    position: relative;
+    width: 100%;
+    height: 76px;
+    background: #050505;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 32px;
+    box-sizing: border-box;
+}
+
+/* Logo exakt mittig im schwarzen Balken */
+.topbar-brand {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.topbar-logo {
+    height: 42px;
+    width: auto;
+    display: block;
+}
+
+/* Account rechts */
+.topbar-account {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: #ffffff;
+    z-index: 2;
+}
+
+.account-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.logout-button {
+    padding: 8px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 999px;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    transition: 0.2s ease;
+}
+
+.logout-button:hover {
+    background: #ffffff;
+    color: #050505;
+}
+
+
+
+
+
