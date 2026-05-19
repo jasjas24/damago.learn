@@ -8,10 +8,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     
 
     if (!empty($emailInput) && !empty($passwordInput)) {
-        
-           
-    // SQL-Abfrage nur noch auf das E-Mail-Feld
-        $stmt = $pdo->prepare("SELECT id, email, password_hash FROM user WHERE email = ?");
+        $stmt = $pdo->prepare("
+            SELECT u.id, u.email, u.password_hash, r.name, u.username 
+            FROM users u
+            INNER JOIN roles r ON u.role_id = r.id
+            WHERE u.email = ?
+        ");
         $stmt->execute([$emailInput]);
         $user = $stmt->fetch();
         
@@ -23,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_email'] = $user['email']; 
-            $_SESSION['user_role'] = $user['role'];
+            $_SESSION['user_role'] = $user['name'];
             $_SESSION['user_name'] = $user['username'];
 
             header("Location: dashboard.php");

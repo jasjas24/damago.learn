@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     try {
         // 3. Prüfen, ob Username oder Email bereits existieren
-        $stmt = $pdo->prepare("SELECT id FROM user WHERE username = ? OR email = ?");
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
         $stmt->execute([$username, $email]);
         
         if ($stmt->rowCount() > 0) {
@@ -35,8 +35,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
         // 5. In die Datenbank einfügen
-        $insert = $pdo->prepare("INSERT INTO user (username, email, password_hash, role) VALUES (?, ?, ?, ?)");
-        if ($insert->execute([$username, $email, $hashedPassword, 1])) {
+        $insert = $pdo->prepare("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)");
+        if ($insert->execute([$username, $email, $hashedPassword])) {
             // Erfolg! Weiterleitung zum Login mit Erfolgsmeldung
             header("Location: ../login.html?registration=success");
             exit;
