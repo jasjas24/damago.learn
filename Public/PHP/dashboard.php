@@ -220,7 +220,7 @@ $displayRole = $roleNames[$role];
             </div>
 
             <div class="dashboard-footer-links">
-                <a href="login.html">Benutzer wechseln</a>
+                <a href="../login.html">Benutzer wechseln</a>
             </div>
         </section>
     </main>
