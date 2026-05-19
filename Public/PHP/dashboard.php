@@ -47,9 +47,9 @@ $dashboardCards = [
         "description" => "Teilnahme-Code eingeben und einer Quizrunde beitreten."
     ],
     "quiz_erstellen" => [
-        "href" => "quiz_erstellen.html",
+        "href" => "quiz_host.php",
         "icon" => "QS",
-        "title" => "Quiz starten",
+        "title" => "Quiz eröffnen",
         "description" => "Eine neue Quizrunde erstellen und hosten."
     ],
     "historie" => [
