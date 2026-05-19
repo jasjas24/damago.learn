@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Als Gast teilnehmen | damago Quizsystem</title>
+    <title>Quiz beitreten | damago Quizsystem</title>
     <link rel="stylesheet" href="CSS/style.css">
 </head>
 <body class="auth-page">
@@ -17,25 +17,25 @@
     <main class="auth-layout">
         <section class="auth-info">
 
-            <h1>Schnell beitreten. Direkt mitlernen.</h1>
+            <h1>Quizcode eingeben. Direkt mitmachen.</h1>
             <p>
-                Nimm ohne Registrierung an einer Quizrunde teil.
-                Gib einfach den Teilnahme-Code ein und starte mit einem Gastnamen.
+                Gib den Teilnahme-Code ein, den du vom Host erhalten hast.
+                Danach wirst du automatisch in die Lobby der Quizrunde weitergeleitet.
             </p>
 
             <div class="info-list">
-                <div>Keine Registrierung und kein Passwort notwendig</div>
+                <div>Beitritt nur mit gültigem Teilnahme-Code möglich</div>
             </div>
         </section>
 
         <section class="auth-card">
             <div class="auth-header">
-                <span class="eyebrow">Gastzugang</span>
-                <h2>Quiz beitreten</h2>
-                <p>Trage den Teilnahme-Code ein und nutze deinen Gastnamen.</p>
+                <span class="eyebrow">Quiz beitreten</span>
+                <h2>Teilnahme-Code</h2>
+                <p>Trage den Code ein, den der Host für diese Quizrunde erstellt hat.</p>
             </div>
 
-            <form class="auth-form" action="#" method="post">
+            <form class="auth-form" action="PHP/check_login.php" method="post">
                 <div class="form-group">
                     <label for="join_code">Teilnahme-Code</label>
                     <input
@@ -55,7 +55,6 @@
                         id="guest_name"
                         name="guest_name"
                         placeholder="Gastname"
-                        required
                     >
                 </div>
 
@@ -64,7 +63,7 @@
                 </button>
 
                 <button type="submit" class="btn btn-primary">
-                    Quiz beitreten
+                    Lobby betreten
                 </button>
             </form>
 
@@ -73,6 +72,10 @@
                 <a href="login.html">Zum Login</a>
             </div>
 
+            <div class="secondary-links">
+                <a href="PHP/dashboard.php">Zurück zum Dashboard</a>
+            </div>
+        </section>
     </main>
 
     <script>

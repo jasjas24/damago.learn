@@ -2,12 +2,17 @@
 session_start();
 
 /*
-    Diese Werte werden später vom Backend nach Login,
-    Registrierung oder Gastbeitritt gesetzt.
+    Diese Werte werden nach Login, Registrierung oder Gastbeitritt gesetzt.
 
-    Beispiel:
+    Beispiele:
     $_SESSION["username"] = "Max";
     $_SESSION["role"] = "user";
+
+    Mögliche Rollen:
+    admin
+    dozent
+    user
+    gast
 */
 
 $username = $_SESSION["username"] ?? "Gast";
@@ -15,8 +20,8 @@ $role = $_SESSION["role"] ?? "gast";
 
 $allowedRoles = ["admin", "dozent", "user", "gast"];
 
-if (!in_array($role, $allowedRoles)) {
-    $role = "User";
+if (!in_array($role, $allowedRoles, true)) {
+    $role = "gast";
 }
 
 $roleNames = [
@@ -27,6 +32,91 @@ $roleNames = [
 ];
 
 $displayRole = $roleNames[$role];
+
+/*
+    Alle möglichen Dashboard-Karten.
+    quiz_code.php liegt im gleichen Ordner wie dashboard.php:
+    Public/PHP/quiz_code.php
+*/
+
+$dashboardCards = [
+    "quiz_beitreten" => [
+        "href" => "quiz_code.php",
+        "icon" => "QB",
+        "title" => "Quiz beitreten",
+        "description" => "Teilnahme-Code eingeben und einer Quizrunde beitreten."
+    ],
+    "quiz_erstellen" => [
+        "href" => "quiz_erstellen.html",
+        "icon" => "QS",
+        "title" => "Quiz starten",
+        "description" => "Eine neue Quizrunde erstellen und hosten."
+    ],
+    "historie" => [
+        "href" => "historie.php",
+        "icon" => "LF",
+        "title" => "Lernfortschritt",
+        "description" => "Eigene Ergebnisse und gespielte Quizrunden ansehen."
+    ],
+    "auswertung" => [
+        "href" => "auswertung.php",
+        "icon" => "AW",
+        "title" => "Quiz-Auswertung",
+        "description" => "Ergebnisse und Zwischenstände von Quizrunden ansehen."
+    ],
+    "admin" => [
+        "href" => "admin.php",
+        "icon" => "AD",
+        "title" => "Adminbereich",
+        "description" => "Fragenpools, Fragen, Medien, Nutzer und Archive verwalten."
+    ],
+    "fragen_verwalten" => [
+        "href" => "fragen_verwalten.php",
+        "icon" => "FV",
+        "title" => "Fragen verwalten",
+        "description" => "Fragen erstellen, bearbeiten, deaktivieren oder importieren."
+    ],
+    "medien_verwalten" => [
+        "href" => "medien_verwalten.php",
+        "icon" => "MV",
+        "title" => "Medien verwalten",
+        "description" => "Bilder hochladen und Fragen zuordnen."
+    ]
+];
+
+/*
+    Rollenbasierte Zugriffskontrolle für die Anzeige.
+    Jede Rolle bekommt nur die Karten, die sie sehen darf.
+*/
+
+$rolePermissions = [
+    "admin" => [
+        "quiz_beitreten",
+        "quiz_erstellen",
+        "historie",
+        "auswertung",
+        "admin",
+        "fragen_verwalten",
+        "medien_verwalten"
+    ],
+    "dozent" => [
+        "quiz_beitreten",
+        "quiz_erstellen",
+        "historie",
+        "auswertung"
+    ],
+    "user" => [
+        "quiz_beitreten",
+        "quiz_erstellen",
+        "historie"
+    ],
+    "gast" => [
+        "quiz_beitreten",
+        "quiz_erstellen"
+    ]
+];
+
+$visibleCards = $rolePermissions[$role] ?? [];
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -39,19 +129,19 @@ $displayRole = $roleNames[$role];
 <body class="auth-page">
 
     <header class="topbar">
-    <a href="index.html" class="topbar-brand">
-        <img src="../damago-logo.png" alt="damago Logo" class="topbar-logo">
-    </a>
-
-    <div class="topbar-account">
-        <span class="account-name">
-            <?php echo htmlspecialchars($username); ?>
-        </span>
-
-        <a href="../PHP/logout.php" class="logout-button">
-            logout
+        <a href="../index.html" class="topbar-brand">
+            <img src="../damago-logo.png" alt="damago Logo" class="topbar-logo">
         </a>
-    </div>
+
+        <div class="topbar-account">
+            <span class="account-name">
+                <?php echo htmlspecialchars($username); ?>
+            </span>
+
+            <a href="logout.php" class="logout-button">
+                logout
+            </a>
+        </div>
     </header>
 
     <main class="auth-layout dashboard-auth-layout">
@@ -83,137 +173,27 @@ $displayRole = $roleNames[$role];
 
             <div class="dashboard-actions">
 
-                <?php if ($role === "admin"): ?>
+                <?php if (empty($visibleCards)): ?>
 
-                    <a href="../lobby.html" class="dashboard-action-card">
-                        <div class="dashboard-action-icon">QB</div>
-                        <div>
-                            <h3>Quiz beitreten</h3>
-                            <p>Mit Teilnahme-Code an einer Quizrunde teilnehmen.</p>
-                        </div>
-                    </a>
-
-                    <a href="quiz_erstellen.html" class="dashboard-action-card">
-                        <div class="dashboard-action-icon">QS</div>
-                        <div>
-                            <h3>Quiz starten</h3>
-                            <p>Eine neue Quizrunde erstellen und hosten.</p>
-                        </div>
-                    </a>
-
-                    <a href="historie.html" class="dashboard-action-card">
-                        <div class="dashboard-action-icon">LF</div>
-                        <div>
-                            <h3>Lernfortschritt</h3>
-                            <p>Eigene Ergebnisse und gespielte Quizrunden ansehen.</p>
-                        </div>
-                    </a>
-
-                    <a href="admin.html" class="dashboard-action-card">
-                        <div class="dashboard-action-icon">AD</div>
-                        <div>
-                            <h3>Adminbereich</h3>
-                            <p>Fragenpools, Fragen, Medien, Nutzer und Archive verwalten.</p>
-                        </div>
-                    </a>
-
-                    <a href="fragen_verwalten.html" class="dashboard-action-card">
-                        <div class="dashboard-action-icon">FV</div>
-                        <div>
-                            <h3>Fragen verwalten</h3>
-                            <p>Fragen erstellen, bearbeiten, deaktivieren oder importieren.</p>
-                        </div>
-                    </a>
-
-                    <a href="medien_verwalten.html" class="dashboard-action-card">
-                        <div class="dashboard-action-icon">MV</div>
-                        <div>
-                            <h3>Medien verwalten</h3>
-                            <p>Bilder hochladen und Fragen zuordnen.</p>
-                        </div>
-                    </a>
-
-                <?php elseif ($role === "dozent"): ?>
-
-                    <a href="../lobby.html" class="dashboard-action-card">
-                        <div class="dashboard-action-icon">QB</div>
-                        <div>
-                            <h3>Quiz beitreten</h3>
-                            <p>Mit Teilnahme-Code an einer Quizrunde teilnehmen.</p>
-                        </div>
-                    </a>
-
-                    <a href="quiz_erstellen.html" class="dashboard-action-card">
-                        <div class="dashboard-action-icon">QS</div>
-                        <div>
-                            <h3>Quiz starten</h3>
-                            <p>Eine Quizrunde für den Unterricht erstellen und steuern.</p>
-                        </div>
-                    </a>
-
-                    <a href="historie.html" class="dashboard-action-card">
-                        <div class="dashboard-action-icon">LF</div>
-                        <div>
-                            <h3>Lernfortschritt</h3>
-                            <p>Eigene Ergebnisse und gespielte Quizrunden ansehen.</p>
-                        </div>
-                    </a>
-
-                    <a href="auswertung.html" class="dashboard-action-card">
-                        <div class="dashboard-action-icon">AW</div>
-                        <div>
-                            <h3>Quiz-Auswertung</h3>
-                            <p>Ergebnisse und Zwischenstände von Quizrunden ansehen.</p>
-                        </div>
-                    </a>
-
-                <?php elseif ($role === "user"): ?>
-
-                    <a href="../lobby.html" class="dashboard-action-card">
-                        <div class="dashboard-action-icon">QB</div>
-                        <div>
-                            <h3>Quiz beitreten</h3>
-                            <p>Mit Teilnahme-Code an einer Quizrunde teilnehmen.</p>
-                        </div>
-                    </a>
-
-                    <a href="quiz_erstellen.html" class="dashboard-action-card">
-                        <div class="dashboard-action-icon">QS</div>
-                        <div>
-                            <h3>Quiz starten</h3>
-                            <p>Eine eigene Quizrunde starten und Lerninhalte üben.</p>
-                        </div>
-                    </a>
-
-                    <a href="historie.html" class="dashboard-action-card">
-                        <div class="dashboard-action-icon">LF</div>
-                        <div>
-                            <h3>Lernfortschritt</h3>
-                            <p>Eigene Ergebnisse und gespielte Quizrunden ansehen.</p>
-                        </div>
-                    </a>
-
-                <?php elseif ($role === "gast"): ?>
-
-                    <a href="../lobby.html" class="dashboard-action-card">
-                        <div class="dashboard-action-icon">QB</div>
-                        <div>
-                            <h3>Quiz beitreten</h3>
-                            <p>Ohne Konto mit Teilnahme-Code an einer Quizrunde teilnehmen.</p>
-                        </div>
-                    </a>
-
-                    <a href="quiz_erstellen.html" class="dashboard-action-card">
-                        <div class="dashboard-action-icon">QS</div>
-                        <div>
-                            <h3>Quiz starten</h3>
-                            <p>Ohne Registrierung eine Quizrunde erstellen und hosten.</p>
-                        </div>
-                    </a>
+                    <p>Für deine Rolle wurden keine Funktionen gefunden.</p>
 
                 <?php else: ?>
 
-                    <p>Deine Rolle konnte nicht erkannt werden.</p>
+                    <?php foreach ($visibleCards as $cardKey): ?>
+                        <?php $card = $dashboardCards[$cardKey]; ?>
+
+                        <a href="<?php echo htmlspecialchars($card["href"]); ?>" class="dashboard-action-card">
+                            <div class="dashboard-action-icon">
+                                <?php echo htmlspecialchars($card["icon"]); ?>
+                            </div>
+
+                            <div>
+                                <h3><?php echo htmlspecialchars($card["title"]); ?></h3>
+                                <p><?php echo htmlspecialchars($card["description"]); ?></p>
+                            </div>
+                        </a>
+
+                    <?php endforeach; ?>
 
                 <?php endif; ?>
 
