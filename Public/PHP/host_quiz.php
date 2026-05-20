@@ -1,8 +1,17 @@
 <?php
 require_once 'init.php';
+require_once 'db.php';
 
 /** @var string $username */
 /** @var string $role */
+
+try {
+    // Holt alle verfügbaren Pools aus der Datenbank
+    $stmt = $pdo->query("SELECT id, name FROM question_pools ORDER BY id ASC");
+    $pools = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Fehler beim Laden der Fragenpools: " . $e->getMessage());
+}
 ?>
 
 <!DOCTYPE html>
@@ -53,15 +62,20 @@ require_once 'init.php';
             <form id="quizForm" class="auth-form" action="setup_lobby.php" method="POST">
             <input type="hidden" id="join_code" name="join_code" value="">    
             <div class="form-group">
-                    <label for="question_pool">Fragenpool</label>
-                    <select id="question_pool" name="question_pool" required>
-                        <option value="">Fragenpool auswählen</option>
-                        <option value="programmierung">Grundlagen Programmierung</option>
-                        <option value="linux">Grundlagen Linux</option>
-                        <option value="netzwerk">Netzwerktechnik</option>
-                        <option value="python">Python Grundlagen</option>
-                    </select>
-                </div>
+                <label for="question_pool">Fragenpool</label>
+                <select id="question_pool" name="question_pool" required>
+                    <option value="">Fragenpool auswählen</option>
+                    
+                    <?php foreach ($pools as $p): ?>
+                        <option value="<?php echo htmlspecialchars($p['name']); ?>">
+                            <?php 
+                                // Macht den ersten Buchstaben groß fürs Auge (z. B. 'Linux' statt 'linux')
+                                echo htmlspecialchars(ucfirst($p['name'])); 
+                            ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
                 <div class="form-group">
                     <label for="question_count">Anzahl Fragen</label>

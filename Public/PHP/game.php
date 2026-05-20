@@ -1,34 +1,32 @@
 <?php
-session_start();
+require_once 'init.php';
+/** @var string $username */
+/** @var string $role */
 
-$username = $_SESSION["username"] ?? "Gast";
-$role = $_SESSION["role"] ?? "gast";
+if (!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) {
+    header("Location: setup_lobby.php");
+    exit;
+}
 
-/* Demo-Daten */
-$questionNumber = 3;
-$totalQuestions = 10;
-$timeLeft = 24;
+// 2. Aktuellen Frage-Index aus der Session holen (falls nicht gesetzt, starte bei 0)
+if (!isset($_SESSION['current_question_index'])) {
+    $_SESSION['current_question_index'] = 0;
+}
 
-$question = "Welche Aussage über HTML ist korrekt?";
+$currentIndex = $_SESSION['current_question_index'];
+$allQuestions = $_SESSION['quiz_questions'];
+$totalQuestions = count($allQuestions);
 
-$answers = [
-    "A" => "HTML ist eine Auszeichnungssprache",
-    "B" => "HTML ist eine Datenbank",
-    "C" => "HTML ersetzt PHP vollständig",
-    "D" => "HTML ist ein Betriebssystem"
-];
+if ($currentIndex >= $totalQuestions) {
+    // Weiterleitung zur Auswertung / Ergebnis-Seite
+    header("Location: results.php");
+    exit;
+}
 
-$ranking = [
-    ["name" => "Lisa", "points" => 2450],
-    ["name" => "Max", "points" => 2100],
-    ["name" => "Gast-4821", "points" => 1750],
-    ["name" => "Ben", "points" => 1200],
-    ["name" => "Sara", "points" => 900]
-];
+// 4. Die exakt aktuelle Frage und ihre 4 Antworten greifen
+$currentQuestion = $allQuestions[$currentIndex];
+$answers = $currentQuestion['answers']; 
 
-usort($ranking, function ($a, $b) {
-    return $b["points"] <=> $a["points"];
-});
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -188,7 +186,7 @@ body.quiz-play-page {
 <body class="quiz-play-page">
 
 <header class="topbar">
-    <a href="dashboard.php" class="topbar-brand">
+    <a class="topbar-brand">
         <img src="../damago-logo.png" alt="damago Logo" class="topbar-logo">
     </a>
 
@@ -206,26 +204,26 @@ body.quiz-play-page {
 
         <div class="quiz-topline">
             <div>
-                <span class="eyebrow">Frage <?php echo $questionNumber; ?> von <?php echo $totalQuestions; ?></span>
+                <span class="eyebrow">Frage <?php echo $currentIndex; ?> von <?php echo $totalQuestions; ?></span>
                 <h1>Quizrunde läuft</h1>
             </div>
 
             <div class="timer-box">
                 <span>Zeit</span>
-                <strong><?php echo $timeLeft; ?></strong>
+                <strong><?php echo 'ZEIT'; ?></strong>
             </div>
         </div>
 
         <section class="question-card">
             <div class="question-label">Aktuelle Frage</div>
-            <h2><?php echo htmlspecialchars($question); ?></h2>
+            <h2><?php echo htmlspecialchars($currentQuestion['question_text']); ?></h2>
         </section>
 
         <form class="millionaire-answers" action="#" method="post">
             <?php foreach ($answers as $letter => $text): ?>
                 <button type="submit" name="answer" value="<?php echo $letter; ?>" class="millionaire-answer">
                     <span class="answer-letter"><?php echo $letter; ?></span>
-                    <span class="answer-text"><?php echo htmlspecialchars($text); ?></span>
+                    <span class="answer-text"><?php echo htmlspecialchars($text['text']); ?></span>
                 </button>
             <?php endforeach; ?>
         </form>
@@ -244,19 +242,11 @@ body.quiz-play-page {
         </div>
 
         <div class="ranking-list">
-            <?php foreach ($ranking as $index => $player): ?>
-                <div class="ranking-item <?php echo $index === 0 ? 'rank-first' : ''; ?>">
-                    <div class="rank-position"><?php echo $index + 1; ?></div>
-                    <div class="rank-player">
-                        <strong><?php echo htmlspecialchars($player["name"]); ?></strong>
-                        <span><?php echo htmlspecialchars($player["points"]); ?> Punkte</span>
-                    </div>
-                </div>
-            <?php endforeach; ?>
+           
         </div>
 
         <div class="ranking-footer">
-            <span>Teilnehmer: <?php echo count($ranking); ?></span>
+            <span>Teilnehmer: <?php echo "PLATZ"; ?></span>
         </div>
     </aside>
 
