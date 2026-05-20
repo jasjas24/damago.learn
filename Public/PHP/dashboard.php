@@ -26,13 +26,8 @@ $displayRole = $roleNames[$role];
 */
 
 $dashboardCards = [
-<<<<<<< HEAD
-    "quiz_beitreten" => [
-        "href" => "../quiz_beitreten.html",
-=======
     "join_quiz" => [
-        "href" => "quiz_code.php",
->>>>>>> 132f4f6ca2d28c655cd225735e51838ca1bc75bd
+        "href" => "../quiz_beitreten.html",
         "icon" => "QB",
         "title" => "Quiz beitreten",
         "description" => "Teilnahme-Code eingeben und einer Quizrunde beitreten."
