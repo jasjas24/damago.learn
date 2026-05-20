@@ -97,8 +97,8 @@ require_once 'init.php';
                 <div class="form-group">
                     <label for="host_plays">Host spielt mit</label>
                     <select id="host_plays" name="host_plays" required>
-                        <option value="no" selected>Nein</option>
-                        <option value="yes">Ja</option>
+                        <option value="no">Nein</option>
+                        <option value="yes"selected>Ja</option>
                     </select>
                 </div>
 
