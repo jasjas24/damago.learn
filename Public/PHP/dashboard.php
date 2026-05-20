@@ -44,15 +44,15 @@ $dashboardCards = [
         "description" => "Eine neue Quizrunde erstellen und hosten."
     ],
     "history" => [
-        "href" => "historie.php",
+        "href" => "history.php",
         "icon" => "LF",
         "title" => "Lernfortschritt",
         "description" => "Eigene Ergebnisse und gespielte Quizrunden ansehen."
     ],
     "evaluation" => [
-        "href" => "auswertung.php",
+        "href" => "evaluation.php",
         "icon" => "AW",
-        "title" => "Quiz-Auswertung",
+        "title" => "Quiz-evaluation",
         "description" => "Ergebnisse und Zwischenstände von Quizrunden ansehen."
     ],
     "admin" => [
@@ -62,13 +62,13 @@ $dashboardCards = [
         "description" => "Fragenpools, Fragen, Medien, Nutzer und Archive verwalten."
     ],
     "manage_questions" => [
-        "href" => "fragen_verwalten.php",
+        "href" => "manage_questions.php",
         "icon" => "FV",
         "title" => "Fragen verwalten",
         "description" => "Fragen erstellen, bearbeiten, deaktivieren oder importieren."
     ],
     "manage_media" => [
-        "href" => "medien_verwalten.php",
+        "href" => "manage_media.php",
         "icon" => "MV",
         "title" => "Medien verwalten",
         "description" => "Bilder hochladen und Fragen zuordnen."
@@ -82,28 +82,28 @@ $dashboardCards = [
 
 $rolePermissions = [
     "admin" => [
-        "quiz_beitreten",
-        "quiz_erstellen",
-        "historie",
-        "auswertung",
+        "join_quiz",
+        "create_quiz",
+        "history",
+        "evaluation",
         "admin",
-        "fragen_verwalten",
-        "medien_verwalten"
+        "manage_questions",
+        "manage_media"
     ],
     "teacher" => [
-        "quiz_beitreten",
-        "quiz_erstellen",
-        "historie",
-        "auswertung"
+        "join_quiz",
+        "create_quiz",
+        "history",
+        "evaluation"
     ],
     "student" => [
-        "quiz_beitreten",
-        "quiz_erstellen",
-        "historie"
+        "join_quiz",
+        "create_quiz",
+        "history"
     ],
     "guest" => [
-        "quiz_beitreten",
-        "quiz_erstellen"
+        "join_quiz",
+        "create_quiz"
     ]
 ];
 
