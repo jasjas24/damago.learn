@@ -947,13 +947,7 @@ body.quiz-play-page {
     color: #333;
 }
 
-.timer-box {
-    background: #007bff;
-    color: #fff;
-    padding: 5px 12px;
-    border-radius: 6px;
-    text-align: center;
-}
+
 
 /* Frage Karte */
 .question-card {
@@ -972,29 +966,35 @@ body.quiz-play-page {
     color: #333;
 }
 
-/* Antwort-Buttons */
 .millionaire-answers {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 15px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 Spalten */
+    gap: 16px 20px;
+    width: 100%;
+    max-width: 700px;
+    margin-top: 24px;
 }
 
 .millionaire-answer {
-    background: #007bff;
-    color: #fff;
+    background: #2f66a3; 
+    color: #ffffff;
     border: none;
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 16px;
+    border-radius: 10px;
+    padding: 18px;
+    font-size: 20px;
     cursor: pointer;
     display: flex;
-    align-items: center;
+    flex-direction: column; /* Text untereinander */
+    justify-content: center;
+    align-items: flex-start;
     transition: all 0.2s ease;
+    min-height: 100px; /* alle Buttons gleich hoch */
+    width: 100%; /* volle Breite innerhalb der Grid-Zelle */
+    box-sizing: border-box;
 }
 
 .millionaire-answer:hover {
-    background: #0056b3;
+    background: #2f66a3;
     transform: translateY(-2px);
 }
 
@@ -1082,5 +1082,191 @@ body.quiz-play-page {
     }
 }
 
+/* ==============================
+   Optimiertes Quiz Layout
+   ============================== */
+body.quiz-play-page {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #e6f0fa;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
 
+.play-layout {
+    display: flex;
+    flex: 1;
+    gap: 20px;
+    padding: 20px;
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.quiz-main {
+    flex: 1 1 65%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.quiz-topline {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    position: relative;
+}
+
+.quiz-topline .eyebrow {
+    font-size: 16px;
+    color: #555;
+}
+
+.quiz-topline h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.timer-box {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #2f66a3;
+    color: #fff;
+    padding: 20px 30px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* Frage mittig */
+.question-card h2 {
+    text-align: center;
+    font-size: 30px;
+    margin: 20px 0;
+    color: #2f66a3;
+}
+
+.millionaire-answers {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 20px;
+    width: 100%;
+    max-width: 700px;
+    margin-top: 24px;
+}
+
+.millionaire-answer {
+    background: #2f66a3;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 18px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    transition: all 0.2s ease;
+}
+
+.millionaire-answer:hover {
+    background: #2f66a3;
+    transform: translateY(-2px);
+}
+
+.answer-letter {
+    font-weight: bold;
+    margin-right: 12px;
+    font-size: 22px;
+}
+
+.answer-text {
+    flex: 1;
+}
+
+/* Ranking rechts */
+.ranking-panel {
+    flex: 1 1 35%;
+    max-width: 450px;
+    height: auto;
+    max-height: 100vh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.ranking-header .eyebrow {
+    font-size: 16px;
+    color: #555;
+}
+
+.ranking-header h2 {
+    font-size: 22px;
+    margin: 4px 0 12px 0;
+}
+
+.ranking-header p {
+    font-size: 16px;
+    color: #333;
+}
+
+.ranking-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid #005ca8;
+    font-size: 18px;
+}
+
+.rank-position {
+    font-weight: bold;
+    font-size: 20px;
+    color: #005ca8;
+    margin-right: 12px;
+}
+
+.rank-player strong {
+    font-size: 20px;
+    color: #2f66a3;
+}
+
+.rank-player span {
+    font-size: 18px;
+    color: #2f66a3;
+}
+
+.ranking-footer span {
+    font-size: 16px;
+    color: #555;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .play-layout {
+        flex-direction: column;
+    }
+
+    .millionaire-answers {
+        grid-template-columns: 1fr;
+    }
+
+    .ranking-panel {
+        flex: 1 1 100%;
+        max-width: 100%;
+        margin-top: 20px;
+    }
+}
 
