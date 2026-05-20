@@ -1,34 +1,20 @@
 <?php
 session_start();
 
-/*
-    Diese Werte werden nach Login, Registrierung oder Gastbeitritt gesetzt.
+$username = $_SESSION["user_name"] ?? "Gast";
+$role = $_SESSION["user_role"] ?? "guest";
 
-    Beispiele:
-    $_SESSION["username"] = "Max";
-    $_SESSION["role"] = "user";
+// $allowedRoles = ["admin", "teacher", "student", "guest"];
 
-    Mögliche Rollen:
-    admin
-    dozent
-    user
-    gast
-*/
-
-$username = $_SESSION["username"] ?? "Gast";
-$role = $_SESSION["role"] ?? "gast";
-
-$allowedRoles = ["admin", "dozent", "user", "gast"];
-
-if (!in_array($role, $allowedRoles, true)) {
-    $role = "gast";
-}
+// if (!in_array($role, $allowedRoles, true)) {
+//     $role = "gast";
+// }
 
 $roleNames = [
-    "admin" => "Admin",
-    "dozent" => "Dozent",
-    "user" => "User",
-    "gast" => "Gast"
+    "admin" => "Administrator",
+    "teacher" => "Dozent",
+    "student" => "User",
+    "guest" => "Gast"
 ];
 
 $displayRole = $roleNames[$role];
@@ -40,25 +26,30 @@ $displayRole = $roleNames[$role];
 */
 
 $dashboardCards = [
+<<<<<<< HEAD
     "quiz_beitreten" => [
         "href" => "../quiz_beitreten.html",
+=======
+    "join_quiz" => [
+        "href" => "quiz_code.php",
+>>>>>>> 132f4f6ca2d28c655cd225735e51838ca1bc75bd
         "icon" => "QB",
         "title" => "Quiz beitreten",
         "description" => "Teilnahme-Code eingeben und einer Quizrunde beitreten."
     ],
-    "quiz_erstellen" => [
+    "create_quiz" => [
         "href" => "quiz_host.php",
         "icon" => "QS",
         "title" => "Quiz eröffnen",
         "description" => "Eine neue Quizrunde erstellen und hosten."
     ],
-    "historie" => [
+    "history" => [
         "href" => "historie.php",
         "icon" => "LF",
         "title" => "Lernfortschritt",
         "description" => "Eigene Ergebnisse und gespielte Quizrunden ansehen."
     ],
-    "auswertung" => [
+    "evaluation" => [
         "href" => "auswertung.php",
         "icon" => "AW",
         "title" => "Quiz-Auswertung",
@@ -70,13 +61,13 @@ $dashboardCards = [
         "title" => "Adminbereich",
         "description" => "Fragenpools, Fragen, Medien, Nutzer und Archive verwalten."
     ],
-    "fragen_verwalten" => [
+    "manage_questions" => [
         "href" => "fragen_verwalten.php",
         "icon" => "FV",
         "title" => "Fragen verwalten",
         "description" => "Fragen erstellen, bearbeiten, deaktivieren oder importieren."
     ],
-    "medien_verwalten" => [
+    "manage_media" => [
         "href" => "medien_verwalten.php",
         "icon" => "MV",
         "title" => "Medien verwalten",
@@ -99,18 +90,18 @@ $rolePermissions = [
         "fragen_verwalten",
         "medien_verwalten"
     ],
-    "dozent" => [
+    "teacher" => [
         "quiz_beitreten",
         "quiz_erstellen",
         "historie",
         "auswertung"
     ],
-    "user" => [
+    "student" => [
         "quiz_beitreten",
         "quiz_erstellen",
         "historie"
     ],
-    "gast" => [
+    "guest" => [
         "quiz_beitreten",
         "quiz_erstellen"
     ]
