@@ -86,7 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <section class="host-card">
             <div class="auth-header">
                 <span class="eyebrow">Host-Einstellungen</span>
-                <h2>Quiz starten</h2>
+                <h2>Quiz erstellen</h2>
                 <p>Lege fest, wie die Quizrunde ablaufen soll.</p>
             </div>
 

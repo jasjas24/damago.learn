@@ -41,7 +41,7 @@ $displayRole = $roleNames[$role];
 
 $dashboardCards = [
     "quiz_beitreten" => [
-        "href" => "quiz_code.php",
+        "href" => "../quiz_beitreten.html",
         "icon" => "QB",
         "title" => "Quiz beitreten",
         "description" => "Teilnahme-Code eingeben und einer Quizrunde beitreten."
