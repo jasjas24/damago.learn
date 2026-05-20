@@ -50,10 +50,9 @@ $joinCode = $_SESSION["current_game_code"] ?? "A7K9";
                 <p>Starte das Quiz, sobald alle Teilnehmer beigetreten sind.</p>
             </div>
 
-            <button class="btn btn-primary">
+            <button class="btn btn-primary" onclick="window.location.href='game.php'">
                 Quiz starten
             </button>
-
             <div class="auth-links">
                 <p>Zurück?</p>
                 <a href="dashboard.php">Zurück zum Dashboard</a>
