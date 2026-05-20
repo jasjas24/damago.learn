@@ -33,7 +33,7 @@ $dashboardCards = [
         "description" => "Teilnahme-Code eingeben und einer Quizrunde beitreten."
     ],
     "create_quiz" => [
-        "href" => "quiz_host.php",
+        "href" => "host_quiz.php",
         "icon" => "QS",
         "title" => "Quiz eröffnen",
         "description" => "Eine neue Quizrunde erstellen und hosten."
@@ -186,10 +186,9 @@ $visibleCards = $rolePermissions[$role] ?? [];
             </div>
 
             <div class="dashboard-footer-links">
-                <a href="../login.html">Benutzer wechseln</a>
+                <a href="logout.php">Benutzer wechseln</a>
             </div>
         </section>
     </main>
-
 </body>
 </html>

@@ -1,8 +1,16 @@
 <?php
-session_start();
+require_once 'init.php';
 
-$username = $_SESSION["username"] ?? "Gast";
-$joinCode = $_SESSION["current_game_code"] ?? "A7K9";
+/** @var string $username */
+/** @var string $role */
+$setup = $_SESSION['quiz_setup'];
+
+$pool  = $setup['pool'];
+$count = $setup['count'];
+$time  = $setup['time_limit'];
+$mode  = $setup['point_mode'];
+$host  = $setup['host_plays'];
+$code  = $setup['code'];
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -39,7 +47,7 @@ $joinCode = $_SESSION["current_game_code"] ?? "A7K9";
             </p>
 
             <div class="info-list">
-                <div>Teilnahme-Code: <?php echo htmlspecialchars($joinCode); ?></div>
+                <div>Teilnahme-Code: <?php echo htmlspecialchars($code); ?></div>
             </div>
         </section>
 

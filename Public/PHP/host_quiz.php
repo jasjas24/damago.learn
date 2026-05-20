@@ -1,47 +1,10 @@
 <?php
-session_start();
+require_once 'init.php';
 
-$username = $_SESSION["username"] ?? "Gast";
-$role = $_SESSION["role"] ?? "gast";
-
-/*
-    Testversion:
-    Der Code wird hier erstmal nur simuliert.
-    Später wird er beim Erstellen eines Spiels in der Datenbank gespeichert.
-*/
-
-function generateJoinCode($length = 5)
-{
-    $characters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    $code = "";
-
-    for ($i = 0; $i < $length; $i++) {
-        $code .= $characters[random_int(0, strlen($characters) - 1)];
-    }
-
-    return $code;
-}
-
-if (!isset($_SESSION["host_join_code"])) {
-    $_SESSION["host_join_code"] = generateJoinCode();
-}
-
-$joinCode = $_SESSION["host_join_code"];
-
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    /*
-        Später:
-        Hier wird das Spiel in der Datenbank erstellt.
-        Danach kommt der Host in die Host-Lobby.
-    */
-
-    $_SESSION["current_game_code"] = $joinCode;
-    $_SESSION["is_host"] = true;
-
-    header("Location: host_lobby.php");
-    exit;
-}
+/** @var string $username */
+/** @var string $role */
 ?>
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -77,11 +40,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 mit dem sie der Lobby beitreten können.
             </p>
 
-            <div class="host-code-preview">
-                <span>Generierter Teilnahme-Code</span>
-                <strong><?php echo htmlspecialchars($joinCode); ?></strong>
-            </div>
-        </section>
+            
+        
 
         <section class="host-card">
             <div class="auth-header">
@@ -90,8 +50,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <p>Lege fest, wie die Quizrunde ablaufen soll.</p>
             </div>
 
-            <form class="auth-form" action="quiz_host.php" method="post">
-                <div class="form-group">
+            <form id="quizForm" class="auth-form" action="setup_lobby.php" method="POST">
+            <input type="hidden" id="join_code" name="join_code" value="">    
+            <div class="form-group">
                     <label for="question_pool">Fragenpool</label>
                     <select id="question_pool" name="question_pool" required>
                         <option value="">Fragenpool auswählen</option>
@@ -154,4 +115,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </main>
 
 </body>
+<script>
+document.getElementById('quizForm').addEventListener('submit', function(event) {
+    // 1. Zeichenpool für den Code (ohne leicht verwechselbare Zeichen wie O, 0, 1, I)
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let generatedCode = "";
+    
+    // 2. Einen 5-stelligen Code generieren
+    for (let i = 0; i < 5; i++) {
+        generatedCode += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    
+    // 3. Den generierten Code in das versteckte Input-Feld schreiben
+    document.getElementById('join_code').value = generatedCode;
+    
+
+});
+</script>
 </html>
