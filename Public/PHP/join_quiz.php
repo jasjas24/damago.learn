@@ -1,16 +1,23 @@
+<?php
+session_start();
+
+//$username = $_SESSION["user_name"] ?? "Gast";
+$role = $_SESSION["user_role"] ?? "guest";
+?>
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz beitreten | damago Quizsystem</title>
-    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="../CSS/style.css">
 </head>
 <body class="auth-page">
 
     <header class="topbar">
         <a href="index.html" class="topbar-brand">
-            <img src="damago-logo.png" alt="damago Logo" class="topbar-logo">
+            <img src="../damago-logo.png" alt="damago Logo" class="topbar-logo">
         </a>
     </header>
 
@@ -48,32 +55,36 @@
                     >
                 </div>
 
-                <div class="form-group">
-                    <label for="guest_name">Gastname</label>
-                    <input
-                        type="text"
-                        id="guest_name"
-                        name="guest_name"
-                        placeholder="Gastname"
-                    >
-                </div>
+                <?php if($role === 'guest'): ?>
+                    <div class="form-group">
+                        <label for="guest_name">Gastname</label>
+                        <input
+                            type="text"
+                            id="guest_name"
+                            name="guest_name"
+                            placeholder="Gastname"
+                        >
+                    </div>
 
-                <button type="button" class="btn btn-secondary" onclick="generateGuestName()">
-                    Gastnamen generieren
-                </button>
-                <button type="button" class="btn btn-primary" onclick="window.location.href='PHP/host_lobby.php'">
+                    <button type="button" class="btn btn-secondary" onclick="generateGuestName()">
+                        Gastnamen generieren
+                    </button>
+                <?php endif; ?>
+                <button type="button" class="btn btn-primary" onclick="window.location.href='host_lobby.php'">
                     Lobby betreten
                 </button>
             </form> 
             </form>
 
-            <div class="auth-links">
-                <p>Du hast bereits ein Konto?</p>
-                <a href="login.html">Zum Login</a>
-            </div>
+            <?php if($role === 'guest'): ?>
+                <div class="auth-links">
+                    <p>Du hast bereits ein Konto?</p>
+                    <a href="../login.html">Zum Login</a>
+                </div>
+            <?php endif; ?>
 
             <div class="secondary-links">
-                <a href="PHP/dashboard.php">Zurück zum Dashboard</a>
+                <a href="dashboard.php">Zurück zum Dashboard</a>
             </div>
         </section>
     </main>
