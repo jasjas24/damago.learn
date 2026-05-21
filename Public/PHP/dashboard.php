@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+
 $username = $_SESSION["user_name"] ?? "Gast";
 $role = $_SESSION["user_role"] ?? "guest";
 
