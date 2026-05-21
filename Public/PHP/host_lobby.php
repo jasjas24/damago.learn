@@ -73,6 +73,10 @@ if (!isset($_SESSION['quiz_questions'])) {
         // 6. Frage-Index für den Start auf 0 setzen
         $_SESSION['current_question_index'] = 0;
 
+        if (!isset($_SESSION['quiz_score'])) {
+        $_SESSION['quiz_score'] = 0;
+}
+
     } catch (PDOException $e) {
         die("Fehler beim Vorbereiten der Fragen: " . $e->getMessage());
     }

@@ -27,6 +27,20 @@ if ($currentIndex >= $totalQuestions) {
 $currentQuestion = $allQuestions[$currentIndex];
 $answers = $currentQuestion['answers']; 
 
+$rankingPlayers = [
+    [
+        'username' => $_SESSION['username'] ?? 'Gast', 
+        'score'    => $_SESSION['quiz_score'] ?? 0
+    ]
+    // Hier würden später weitere Spieler landen, z.B.:
+    // ['username' => 'Max', 'score' => 450],
+    ];
+
+    // Sortiert das Ranking automatisch immer vom höchsten zum niedrigsten Punktestand
+    usort($rankingPlayers, function($a, $b) {
+        return $b['score'] <=> $a['score'];
+    });
+
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -95,19 +109,39 @@ $answers = $currentQuestion['answers'];
     </section>
 
     <aside class="ranking-panel">
-        <div class="ranking-header">
-            <span class="eyebrow">Live-Ranking</span>
-            <h2>Punktestand</h2>
-            <p>Die Teilnehmer mit den meisten Punkten stehen oben.</p>
-        </div>
+        <section class="auth-card" style="height: fit-content;">
+    <div class="auth-header">
+        <span class="eyebrow">Live-Ranking</span>
+        <h2>Punktestand</h2>
+        <p>Die Teilnehmer mit den meisten Punkten stehen oben.</p>
+    </div>
 
-        <div class="ranking-list">
-           
-        </div>
-
-        <div class="ranking-footer">
-            <span>Teilnehmer: <?php echo "PLATZ"; ?></span>
-        </div>
+    <div class="ranking-list" style="margin-top: 20px;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 2px solid #eee; color: #666; font-size: 0.9rem;">
+                    <th style="padding: 8px;">Pl.</th>
+                    <th style="padding: 8px;">Name</th>
+                    <th style="padding: 8px; text-align: right;">Punkte</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($rankingPlayers as $index => $player): ?>
+                    <tr style="border-bottom: 1px solid #f4f4f4; <?php echo ($player['username'] === $username) ? 'font-weight: bold; background-color: #f9f9f9;' : ''; ?>">
+                        <td style="padding: 10px 8px;"><?php echo ($index + 1); ?>.</td>
+                        <td style="padding: 10px 8px;">
+                            <?php echo htmlspecialchars($player['username']); ?>
+                            <?php if ($player['username'] === $username) echo ' (Du)'; ?>
+                        </td>
+                        <td style="padding: 10px 8px; text-align: right; color: #0066cc;">
+                            <?php echo $player['score']; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</section>
     </aside>
 
 </main>
