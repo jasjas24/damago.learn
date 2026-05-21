@@ -48,13 +48,38 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quiz spielen | damago Quizsystem</title>
 <link rel="stylesheet" href="../CSS/style.css">
+
 <style>
-/* Der Style der style.css bleibt unangetastet. */
+/* 1. Toggeln für die Mehrfachauswahl */
 .millionaire-answer.selected {
-    border: 5px solid #f6092d !important;
+    border: 5px solid #dbff0f !important;
+}
+
+/* 2. Absolute Zentrierung für BEIDE Wrapper */
+.confirm-button-wrapper {
+    margin-top: 20px;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
     
+    /* NEU: Bricht aus dem CSS-Grid aus und nutzt die volle Breite des Formulars */
+    grid-column: 1 / -1 !important; 
+}
+
+/* 3. Begrenzung und Zentrierung der Buttons selbst */
+.confirm-button-wrapper .confirm-button {
+    width: max-content !important;
+    min-width: 280px;
+    margin: 0 auto !important;
+}
+
+/* 4. Das Formular für den "Nächste Frage"-Button kompakt halten */
+.next-question-form {
+    width: max-content;
+    margin: 0;
 }
 </style>
+
 </head>
 <body class="quiz-play-page">
 
@@ -117,21 +142,25 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
                 </button>
             <?php endforeach; ?>
 
-            <div class="confirm-button-wrapper" style="margin-top: 20px; width: 100%;">
+            <div class="confirm-button-wrapper">
                 <?php if (!$showExplanation): ?>
-                    <button type="submit" id="confirm-btn" class="millionaire-answer confirm-button" style="width: 100%; background-color: #007bff; color: white;">
+                    <button type="submit" id="confirm-btn" class="millionaire-answer confirm-button" style="background-color: #007bff; color: white;">
                         <span class="answer-text">Antwort bestätigen</span>
-                    </button>
-                <?php else: ?>
-                    <button type="submit" class="millionaire-answer confirm-button" style="width: 100%; background-color: #28a745; color: white;">
-                        <span class="answer-text">Nächste Frage ➡️</span>
                     </button>
                 <?php endif; ?>
             </div>
         </form>
 
         <?php if ($showExplanation): ?>
-            <section class="question-card" style="margin-top: 30px; border-left: 5px solid #007bff;">
+            <div class="confirm-button-wrapper">
+                <form action="go_next.php" method="POST" class="next-question-form">
+                    <button type="submit" class="millionaire-answer confirm-button" style="background-color: #28a745; color: white;">
+                        <span class="answer-text">Nächste Frage ➡️</span>
+                    </button>
+                </form>
+            </div>
+
+            <section class="question-card" style="margin-top: 30px; border-left: 5px solid #007bff; text-align: left;">
                 <div class="question-label" style="color: #007bff;">ℹ️ Auflösung & Erklärungen</div>
                 <div style="margin-top: 10px;">
                     <strong>Ergebnis:</strong> 
@@ -197,7 +226,6 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
 <script>
 (function() {
     <?php if (!$showExplanation): ?>
-        // 1. Logik zur Mehrfachauswahl
         const answerButtons = document.querySelectorAll('.millionaire-answer:not(.confirm-button)');
         answerButtons.forEach(button => {
             button.addEventListener('click', function() {
@@ -215,7 +243,6 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
             });
         });
 
-        // 2. Timer-Countdown Logik
         let timeLeft = <?php echo intval($timeLimit); ?>;
         const display = document.getElementById('timer-display');
         const form = document.getElementById('quiz-form');
@@ -233,9 +260,7 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
                 timeoutInput.value = '1';
                 form.appendChild(timeoutInput);
                 
-                // Absolute Absicherung: Datei liegt direkt nebenan im gleichen Ordner
                 form.action = 'next_question.php'; 
-                
                 form.submit();
             }
         }, 1000);
