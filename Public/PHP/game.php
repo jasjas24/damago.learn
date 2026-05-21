@@ -3,6 +3,10 @@ require_once 'init.php';
 /** @var string $username */
 /** @var string $role */
 
+// Befinden wir uns im Auflösungs-Modus?
+$showExplanation = isset($_SESSION['show_explanation']) && $_SESSION['show_explanation'] === true;
+$lastResult = $_SESSION['last_result'] ?? null;
+
 if (!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) {
     header("Location: setup_lobby.php");
     exit;
@@ -40,6 +44,8 @@ $rankingPlayers = [
     usort($rankingPlayers, function($a, $b) {
         return $b['score'] <=> $a['score'];
     });
+
+    $timeLimit = $_SESSION['quiz_setup']['time_limit'];
 
 ?>
 <!DOCTYPE html>
@@ -83,8 +89,8 @@ $rankingPlayers = [
             </div>
 
             <div class="timer-box">
-                <span>Zeit</span>
-                <strong><?php echo 'ZEIT'; ?></strong>
+                <span>Zeit:</span>
+                <strong><span id="timer-display"><?php echo $timeLimit; ?></span></strong>
             </div>
         </div>
 
@@ -93,7 +99,7 @@ $rankingPlayers = [
             <h2><?php echo htmlspecialchars($currentQuestion['question_text']); ?></h2>
         </section>
 
-        <form class="millionaire-answers" action="#" method="post">
+        <form class="millionaire-answers" id="quiz-form" action="next_question.php" method="post">
             <?php foreach ($answers as $letter => $text): ?>
                 <button type="submit" name="answer" value="<?php echo $letter; ?>" class="millionaire-answer">
                    
@@ -145,5 +151,38 @@ $rankingPlayers = [
     </aside>
 
 </main>
+
+<script>
+// 1. Übergabe der Zeit von PHP an JavaScript
+let timeLeft = <?php echo intval($timeLimit); ?>;
+const timerDisplay = document.getElementById('timer-display');
+const quizForm = document.getElementById('quiz-form');
+
+// 2. Der Intervall, der jede Sekunde (1000ms) ausgeführt wird
+const countdown = setInterval(function() {
+    timeLeft--;
+    
+    // Aktualisiere die Anzeige im HTML
+    timerDisplay.textContent = timeLeft;
+    
+
+    // 3. Wenn die Zeit abgelaufen ist
+    if (timeLeft <= 0) {
+        clearInterval(countdown); // Timer stoppen
+        
+        // Erstelle ein unsichtbares Input-Feld, damit next_question.php weiß, 
+        // dass die Zeit abgelaufen ist (keine Antwort ausgewählt)
+        let timeoutInput = document.createElement('input');
+        timeoutInput.type = 'hidden';
+        timeoutInput.name = 'timeout';
+        timeoutInput.value = '1';
+        quizForm.appendChild(timeoutInput);
+        
+        // Formular automatisch abschicken!
+        quizForm.submit();
+    }
+}, 1000);
+</script>
+
 </body>
 </html>
