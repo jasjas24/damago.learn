@@ -51,9 +51,8 @@ $rankingPlayers = [
 
 <link rel="stylesheet" href="../CSS/style.css">
 
-
 <style>
-
+/* Keine weiteren Styles hier, alles in style.css */
 </style>
 
 </head>
@@ -95,16 +94,18 @@ $rankingPlayers = [
 
         <form class="millionaire-answers" action="#" method="post">
             <?php foreach ($answers as $letter => $text): ?>
-                <button type="submit" name="answer" value="<?php echo $letter; ?>" class="millionaire-answer">
-                   
-                    <span class="answer-text"><?php echo htmlspecialchars($text['text']); ?></span>
-                </button>
+        <button type="submit" name="answer" value="<?php echo $letter; ?>" class="millionaire-answer">
+            <span class="answer-text"><?php echo htmlspecialchars($text['text']); ?></span>
+        </button>
             <?php endforeach; ?>
-        </form>
+</form>
 
-        <div class="quiz-help">
-            <p>Wähle die richtige Antwort aus. Deine Antwort wird direkt gespeichert.</p>
-        </div>
+<!-- Separater Bestätigungsbutton unter dem Antwortblock -->
+<div class="confirm-button-wrapper">
+    <button type="submit" name="confirm" value="1" class="millionaire-answer confirm-button">
+        <span class="answer-text">Antwort bestätigen</span>
+    </button>
+</div>
 
     </section>
 

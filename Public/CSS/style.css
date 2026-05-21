@@ -1013,6 +1013,37 @@ body.quiz-play-page {
     color: #6c757d;
 }
 
+.confirm-button-wrapper {
+    display: flex;
+    justify-content: flex; /* bleibt wie gehabt */
+    margin-top: 20px;
+}
+
+.confirm-button {
+    width: 100%;
+    max-width: 400px; /* gleiche Breite wie Antwortbuttons */
+    background-color: #28a745; /* grün */
+    color: #fff; /* weißer Text für Kontrast */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s; /* für sanften Hover-Effekt */
+}
+
+.confirm-button:hover {
+    background-color: #1e7e34; /* etwas dunkler beim Hover */
+}
+
+/* Bestätigungsbutton: grüner Hintergrund, überschreibt andere Regeln */
+.millionaire-answer.confirm-button {
+    background-color: #28a745 !important; /* !important erzwingt die Farbe */
+    color: #fff;
+}
+
+.millionaire-answer.confirm-button:hover {
+    background-color: #1e7e34 !important;
+}
+
 /* Rechte Spalte: Ranking */
 .ranking-panel {
     flex: 1;
