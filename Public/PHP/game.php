@@ -50,30 +50,25 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
 <link rel="stylesheet" href="../CSS/style.css">
 
 <style>
-/* 1. Toggeln für die Mehrfachauswahl */
+
 .millionaire-answer.selected {
     border: 5px solid #dbff0f !important;
 }
 
-/* 2. Absolute Zentrierung für BEIDE Wrapper */
 .confirm-button-wrapper {
     margin-top: 20px;
     width: 100% !important;
     display: flex !important;
     justify-content: center !important;
-    
-    /* NEU: Bricht aus dem CSS-Grid aus und nutzt die volle Breite des Formulars */
     grid-column: 1 / -1 !important; 
 }
 
-/* 3. Begrenzung und Zentrierung der Buttons selbst */
 .confirm-button-wrapper .confirm-button {
     width: max-content !important;
     min-width: 280px;
     margin: 0 auto !important;
 }
 
-/* 4. Das Formular für den "Nächste Frage"-Button kompakt halten */
 .next-question-form {
     width: max-content;
     margin: 0;
@@ -114,33 +109,40 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
         <form class="millionaire-answers" id="quiz-form" action="<?php echo $showExplanation ? 'go_next.php' : 'next_question.php'; ?>" method="POST">
             
             <?php foreach ($answers as $letter => $ans): 
-                $inlineStyle = "";
-                
-                if ($showExplanation) {
-                    $isCorrect = intval($ans['is_correct']) === 1;
-                    $wasSelected = $lastResult && is_array($lastResult['chosen_ids']) && in_array($ans['id'], $lastResult['chosen_ids']);
-                    
-                    if ($isCorrect) {
-                        $inlineStyle = "background-color: #d4edda !important; color: #155724 !important; border-color: #c3e6cb !important;";
-                    } elseif ($wasSelected && !$isCorrect) {
-                        $inlineStyle = "background-color: #f8d7da !important; color: #721c24 !important; border-color: #f5c6cb !important;";
-                    }
-                }
-            ?>
-                <button type="<?php echo $showExplanation ? 'submit' : 'button'; ?>" 
-                        class="millionaire-answer" 
-                        data-id="<?php echo $ans['id']; ?>"
-                        style="<?php echo $inlineStyle; ?>"
-                        <?php echo $showExplanation ? 'disabled' : ''; ?>>
-                    <span class="answer-text">
-                        <?php echo htmlspecialchars($ans['text']); ?>
-                    </span>
-                    
-                    <?php if (!$showExplanation): ?>
-                        <input type="checkbox" name="selected_answers[]" value="<?php echo $ans['id']; ?>" style="display:none;" id="check-<?php echo $ans['id']; ?>">
-                    <?php endif; ?>
-                </button>
-            <?php endforeach; ?>
+    $inlineStyle = "";
+    
+    if ($showExplanation) {
+        $isCorrect = intval($ans['is_correct']) === 1;
+        $wasSelected = $lastResult && is_array($lastResult['chosen_ids']) && in_array($ans['id'], $lastResult['chosen_ids']);
+        
+        // 1. Basis-Farbgebung für richtig (grün) oder falsch (rot)
+        if ($isCorrect) {
+            $inlineStyle = "background-color: #d4edda !important; color: #155724 !important; border-color: #c3e6cb !important;";
+        } elseif ($wasSelected && !$isCorrect) {
+            $inlineStyle = "background-color: #f8d7da !important; color: #721c24 !important; border-color: #f5c6cb !important;";
+        }
+        
+        // 2. ERGÄNZUNG: Wenn die Antwort vom User ausgewählt war, überschreiben wir 
+        // den Rahmen JETZT nachträglich mit deinem Gelb (#ffc107 oder dein genauer Gelbton)
+        if ($wasSelected) {
+            $inlineStyle .= " border: 3px solid #ffc107 !important;";
+        }
+    }
+?>
+    <button type="<?php echo $showExplanation ? 'submit' : 'button'; ?>" 
+            class="millionaire-answer" 
+            data-id="<?php echo $ans['id']; ?>"
+            style="<?php echo $inlineStyle; ?>"
+            <?php echo $showExplanation ? 'disabled' : ''; ?>>
+        <span class="answer-text">
+            <?php echo htmlspecialchars($ans['text']); ?>
+        </span>
+        
+        <?php if (!$showExplanation): ?>
+            <input type="checkbox" name="selected_answers[]" value="<?php echo $ans['id']; ?>" style="display:none;" id="check-<?php echo $ans['id']; ?>">
+        <?php endif; ?>
+    </button>
+<?php endforeach; ?>
 
             <div class="confirm-button-wrapper">
                 <?php if (!$showExplanation): ?>
@@ -155,13 +157,13 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
             <div class="confirm-button-wrapper">
                 <form action="go_next.php" method="POST" class="next-question-form">
                     <button type="submit" class="millionaire-answer confirm-button" style="background-color: #28a745; color: white;">
-                        <span class="answer-text">Nächste Frage ➡️</span>
+                        <span class="answer-text">Nächste Frage</span>
                     </button>
                 </form>
             </div>
 
             <section class="question-card" style="margin-top: 30px; border-left: 5px solid #007bff; text-align: left;">
-                <div class="question-label" style="color: #007bff;">ℹ️ Auflösung & Erklärungen</div>
+                <div class="question-label" style="color: #007bff;">Auflösung & Erklärungen</div>
                 <div style="margin-top: 10px;">
                     <strong>Ergebnis:</strong> 
                     <?php 
