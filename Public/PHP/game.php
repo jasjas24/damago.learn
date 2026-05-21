@@ -64,7 +64,7 @@ $answers = $currentQuestion['answers'];
 
         <div class="quiz-topline">
             <div>
-                <span class="eyebrow">Frage <?php echo $currentIndex; ?> von <?php echo $totalQuestions; ?></span>
+                <span class="eyebrow">Frage <?php echo $currentIndex + 1; ?> von <?php echo $totalQuestions; ?></span>
                 <h1>Quizrunde läuft</h1>
             </div>
 
@@ -82,7 +82,7 @@ $answers = $currentQuestion['answers'];
         <form class="millionaire-answers" action="#" method="post">
             <?php foreach ($answers as $letter => $text): ?>
                 <button type="submit" name="answer" value="<?php echo $letter; ?>" class="millionaire-answer">
-                    <span class="answer-letter"><?php echo $letter; ?></span>
+                   
                     <span class="answer-text"><?php echo htmlspecialchars($text['text']); ?></span>
                 </button>
             <?php endforeach; ?>
