@@ -1,8 +1,8 @@
-CREATE DATABASE IF NOT EXISTS damago_learn_quiz_db
+CREATE DATABASE IF NOT EXISTS damago_quiz
   DEFAULT CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE damago_learn_quiz_db;
+USE damago_quiz;
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -15,7 +15,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Datenbank: `damago_learn_quiz_db`
+-- Datenbank: `damago_quiz`
 --
 
 -- --------------------------------------------------------
@@ -33,7 +33,7 @@ CREATE TABLE `answer_options` (
   `explanation` text NOT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp()
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Daten für Tabelle `answer_options`
@@ -111,6 +111,22 @@ INSERT INTO `departments` (`id`, `parent_id`, `name`, `display_name`, `descripti
 -- --------------------------------------------------------
 
 --
+-- Tabellenstruktur für Tabelle `media_files`
+--
+
+CREATE TABLE `media_files` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `original_name` varchar(255) NOT NULL,
+  `file_type` varchar(100) NOT NULL,
+  `file_size` int(10) UNSIGNED NOT NULL,
+  `uploaded_by` int(10) UNSIGNED DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Tabellenstruktur für Tabelle `questions`
 --
 
@@ -118,28 +134,29 @@ CREATE TABLE `questions` (
   `id` int(10) UNSIGNED NOT NULL,
   `question_pool_id` int(10) UNSIGNED NOT NULL,
   `question_text` text NOT NULL,
+  `image_id` int(10) UNSIGNED DEFAULT NULL,
   `explanation` text DEFAULT NULL,
   `created_by` int(10) UNSIGNED NOT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp()
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Daten für Tabelle `questions`
 --
 
-INSERT INTO `questions` (`id`, `question_pool_id`, `question_text`, `explanation`, `created_by`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Which import statement loads the entire math module so that all its functions must be accessed using the module name as a prefix?', 'Korrekt ist die Variante, bei der das komplette math-Modul unter dem Namen math eingebunden wird.', 1, 1, '2026-05-18 23:16:07', '2026-05-19 01:37:20'),
-(2, 1, 'Consider the following code. Which statement about isinstance() and inheritance is incorrect?\r\n\r\nclass Animal:\r\n    pass\r\n\r\nclass Dog(Animal):\r\n    pass\r\n\r\nd = Dog()', 'Gesucht ist die fachlich falsche Aussage über isinstance() und Vererbung.', 1, 1, '2026-05-18 23:16:07', '2026-05-19 01:37:20'),
-(3, 1, 'Which two statements about names starting with underscores in classes are correct?', 'Diese Frage prüft Python-Konventionen zu nicht öffentlichen Namen und Name Mangling.', 1, 1, '2026-05-18 23:16:07', '2026-05-19 01:37:20'),
-(4, 1, 'Which of the following statements about combining map() and filter() are correct? (Choose three)', 'Diese Frage prüft die Kombination von map() und filter() sowie deren Rückgabewerte in Python 3.', 1, 1, '2026-05-18 23:16:07', '2026-05-19 01:37:20'),
-(5, 1, 'Which two statements about instance attributes initialized in __init__ are correct?', 'Diese Frage prüft, wie Instanzattribute in Python über self erzeugt und gespeichert werden.', 1, 1, '2026-05-18 23:16:07', '2026-05-19 01:37:20'),
-(6, 1, 'What value does the variable __name__ hold when a Python module is executed directly as the main program, for example python script.py?', 'Diese Frage prüft das Python-Standardmuster if __name__ == \"__main__\".', 1, 1, '2026-05-18 23:16:07', '2026-05-19 01:37:20'),
-(7, 1, 'Consider the following code. Which of the following statements about this code are correct?\r\n\r\nclass Config:\r\n    debug = False\r\n\r\nclass AppConfig(Config):\r\n    debug = True\r\n\r\nac = AppConfig()\r\nprint(ac.debug)', 'Diese Frage prüft die Reihenfolge der Attributauflösung bei Instanzen, Klassen und Basisklassen.', 1, 1, '2026-05-18 23:16:07', '2026-05-19 01:37:20'),
-(8, 1, 'Which two statements about instance methods are correct?', 'Diese Frage prüft den self-Parameter und den automatischen Methodenaufruf über eine Instanz.', 1, 1, '2026-05-18 23:16:08', '2026-05-19 01:37:20'),
-(9, 1, 'What output does the following code produce?\r\n\r\nimport math\r\nprint(math.floor(-3.7))', 'Diese Frage prüft das Verhalten von math.floor() bei negativen Zahlen.', 1, 1, '2026-05-18 23:16:08', '2026-05-19 01:37:20'),
-(10, 1, 'Consider the following code. What is printed?\r\n\r\ntry:\r\n    print(\"A\", end=\" \")\r\n    raise ValueError(\"bad\")\r\nexcept ValueError:\r\n    print(\"B\", end=\" \")\r\nfinally:\r\n    print(\"C\")', 'Diese Frage prüft die Ausführungsreihenfolge von try, except und finally.', 1, 1, '2026-05-18 23:16:08', '2026-05-19 01:37:20');
+INSERT INTO `questions` (`id`, `question_pool_id`, `question_text`, `image_id`, `explanation`, `created_by`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Which import statement loads the entire math module so that all its functions must be accessed using the module name as a prefix?', NULL, 'Korrekt ist die Variante, bei der das komplette math-Modul unter dem Namen math eingebunden wird.', 1, 1, '2026-05-18 23:16:07', '2026-05-19 01:37:20'),
+(2, 1, 'Consider the following code. Which statement about isinstance() and inheritance is incorrect?\r\n\r\nclass Animal:\r\n    pass\r\n\r\nclass Dog(Animal):\r\n    pass\r\n\r\nd = Dog()', NULL, 'Gesucht ist die fachlich falsche Aussage über isinstance() und Vererbung.', 1, 1, '2026-05-18 23:16:07', '2026-05-19 01:37:20'),
+(3, 1, 'Which two statements about names starting with underscores in classes are correct?', NULL, 'Diese Frage prüft Python-Konventionen zu nicht öffentlichen Namen und Name Mangling.', 1, 1, '2026-05-18 23:16:07', '2026-05-19 01:37:20'),
+(4, 1, 'Which of the following statements about combining map() and filter() are correct? (Choose three)', NULL, 'Diese Frage prüft die Kombination von map() und filter() sowie deren Rückgabewerte in Python 3.', 1, 1, '2026-05-18 23:16:07', '2026-05-19 01:37:20'),
+(5, 1, 'Which two statements about instance attributes initialized in __init__ are correct?', NULL, 'Diese Frage prüft, wie Instanzattribute in Python über self erzeugt und gespeichert werden.', 1, 1, '2026-05-18 23:16:07', '2026-05-19 01:37:20'),
+(6, 1, 'What value does the variable __name__ hold when a Python module is executed directly as the main program, for example python script.py?', NULL, 'Diese Frage prüft das Python-Standardmuster if __name__ == \"__main__\".', 1, 1, '2026-05-18 23:16:07', '2026-05-19 01:37:20'),
+(7, 1, 'Consider the following code. Which of the following statements about this code are correct?\r\n\r\nclass Config:\r\n    debug = False\r\n\r\nclass AppConfig(Config):\r\n    debug = True\r\n\r\nac = AppConfig()\r\nprint(ac.debug)', NULL, 'Diese Frage prüft die Reihenfolge der Attributauflösung bei Instanzen, Klassen und Basisklassen.', 1, 1, '2026-05-18 23:16:07', '2026-05-19 01:37:20'),
+(8, 1, 'Which two statements about instance methods are correct?', NULL, 'Diese Frage prüft den self-Parameter und den automatischen Methodenaufruf über eine Instanz.', 1, 1, '2026-05-18 23:16:08', '2026-05-19 01:37:20'),
+(9, 1, 'What output does the following code produce?\r\n\r\nimport math\r\nprint(math.floor(-3.7))', NULL, 'Diese Frage prüft das Verhalten von math.floor() bei negativen Zahlen.', 1, 1, '2026-05-18 23:16:08', '2026-05-19 01:37:20'),
+(10, 1, 'Consider the following code. What is printed?\r\n\r\ntry:\r\n    print(\"A\", end=\" \")\r\n    raise ValueError(\"bad\")\r\nexcept ValueError:\r\n    print(\"B\", end=\" \")\r\nfinally:\r\n    print(\"C\")', NULL, 'Diese Frage prüft die Ausführungsreihenfolge von try, except und finally.', 1, 1, '2026-05-18 23:16:08', '2026-05-19 01:37:20');
 
 -- --------------------------------------------------------
 
@@ -155,7 +172,7 @@ CREATE TABLE `question_pools` (
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp()
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Daten für Tabelle `question_pools`
@@ -194,7 +211,7 @@ CREATE TABLE `roles` (
   `id` int(10) UNSIGNED NOT NULL,
   `name` varchar(30) NOT NULL,
   `display_name` varchar(50) NOT NULL
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Daten für Tabelle `roles`
@@ -222,7 +239,7 @@ CREATE TABLE `users` (
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp()
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Daten für Tabelle `users`
@@ -258,13 +275,22 @@ ALTER TABLE `departments`
   ADD KEY `idx_departments_is_active` (`is_active`);
 
 --
+-- Indizes für die Tabelle `media_files`
+--
+ALTER TABLE `media_files`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_media_files_file_name` (`file_name`),
+  ADD KEY `idx_media_files_uploaded_by` (`uploaded_by`);
+
+--
 -- Indizes für die Tabelle `questions`
 --
 ALTER TABLE `questions`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_questions_question_pool_id` (`question_pool_id`),
   ADD KEY `idx_questions_created_by` (`created_by`),
-  ADD KEY `idx_questions_is_active` (`is_active`);
+  ADD KEY `idx_questions_is_active` (`is_active`),
+  ADD KEY `idx_questions_image_id` (`image_id`);
 
 --
 -- Indizes für die Tabelle `question_pools`
@@ -306,7 +332,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT für Tabelle `answer_options`
 --
 ALTER TABLE `answer_options`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT für Tabelle `departments`
@@ -315,22 +341,28 @@ ALTER TABLE `departments`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
+-- AUTO_INCREMENT für Tabelle `media_files`
+--
+ALTER TABLE `media_files`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT für Tabelle `questions`
 --
 ALTER TABLE `questions`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT für Tabelle `question_pools`
 --
 ALTER TABLE `question_pools`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT für Tabelle `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints der exportierten Tabellen
@@ -349,10 +381,17 @@ ALTER TABLE `departments`
   ADD CONSTRAINT `fk_departments_parent` FOREIGN KEY (`parent_id`) REFERENCES `departments` (`id`) ON UPDATE CASCADE;
 
 --
+-- Constraints der Tabelle `media_files`
+--
+ALTER TABLE `media_files`
+  ADD CONSTRAINT `fk_media_files_uploaded_by` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
 -- Constraints der Tabelle `questions`
 --
 ALTER TABLE `questions`
   ADD CONSTRAINT `fk_questions_created_by` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_questions_image` FOREIGN KEY (`image_id`) REFERENCES `media_files` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_questions_question_pool` FOREIGN KEY (`question_pool_id`) REFERENCES `question_pools` (`id`) ON UPDATE CASCADE;
 
 --

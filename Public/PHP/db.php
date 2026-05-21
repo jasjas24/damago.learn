@@ -1,9 +1,9 @@
 <?php
 
-$host = 'sql7.freesqldatabase.com';
-$db   = 'sql7827265';
-$user = 'sql7827265'; 
-$pass = '8knyj7VhIR';     
+$host = '127.0.0.1';
+$db   = 'damago_quiz';
+$user = 'root'; 
+$pass = '';     
 $port ='3306';
 $charset = 'utf8mb4';
 
