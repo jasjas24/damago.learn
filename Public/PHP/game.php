@@ -188,7 +188,6 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
         <?php endif; ?>
 
     </section>
-
     <aside class="ranking-panel">
         <section class="auth-card" style="height: fit-content;">
             <div class="auth-header">
