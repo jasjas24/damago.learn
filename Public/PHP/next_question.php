@@ -1,62 +1,49 @@
 <?php
 require_once 'init.php';
+require_once 'db.php';
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $currentIndex = $_SESSION['current_question_index'] ?? 0;
-    $allQuestions = $_SESSION['quiz_questions'] ?? [];
-    
-    if (!isset($allQuestions[$currentIndex])) {
-        header("Location: ../game.php");
-        exit;
-    }
-    
-    $currentQuestion = $allQuestions[$currentIndex];
-    $answers = $currentQuestion['answers'];
+$lobby_id = $_SESSION['quiz_setup']['lobby_id'] ?? $_SESSION['player_lobby_id'] ?? null;
+$username = $_SESSION['player_name'] ?? $_SESSION['username'] ?? 'Gast';
+$current_index = $_SESSION['current_question_index'] ?? 0;
+$questions = $_SESSION['quiz_questions'] ?? [];
+$current_question = $questions[$current_index] ?? null;
 
-    // Gewählte IDs des Users sammeln (leeres Array falls nichts gewählt oder Timeout)
-    $chosenIds = isset($_POST['selected_answers']) ? array_map('intval', $_POST['selected_answers']) : [];
+if ($lobby_id && $current_question) {
+    // 1. Deine bestehende Punkte-Auswertung hier machen ...
+    // (Lass deine Berechnungen für $_SESSION['last_result'] und $_SESSION['quiz_score'] genau so laufen wie vorher!)
     
-    // Ermittle alle korrekten Antwort-IDs aus der Datenbank für diese Frage
-    $correctIds = [];
-    foreach ($answers as $ans) {
-        if (intval($ans['is_correct']) === 1) {
-            $correctIds[] = intval($ans['id']);
+    // Angenommen hier ist deine Punkteberechnung...
+    $_SESSION['waiting_for_reveal'] = true; // Flag: Spieler hat abgegeben und wartet
+
+    try {
+        // 2. In DB eintragen, dass dieser Spieler geantwortet hat
+        $stmt = $pdo->prepare("INSERT IGNORE INTO player_answers (lobby_id, question_id, player_name) VALUES (?, ?, ?)");
+        $stmt->execute([$lobby_id, $current_question['id'], $username]);
+
+        // 3. Prüfen, ob alle abgegeben haben oder ob es ein Timeout war
+        $is_timeout = isset($_POST['timeout']) && $_POST['timeout'] == '1';
+
+        // Spieler zählen
+        $stmtPlayers = $pdo->prepare("SELECT COUNT(*) FROM lobby_players WHERE lobby_id = ?");
+        $stmtPlayers->execute([$lobby_id]);
+        $totalPlayers = (int)$stmtPlayers->fetchColumn();
+
+        // Antworten zählen
+        $stmtAnswers = $pdo->prepare("SELECT COUNT(*) FROM player_answers WHERE lobby_id = ? AND question_id = ?");
+        $stmtAnswers->execute([$lobby_id, $current_question['id']]);
+        $answeredPlayers = (int)$stmtAnswers->fetchColumn();
+
+        // Wenn alle fertig sind ODER die Zeit ablief -> Auflösung für alle freischalten!
+        if ($answeredPlayers >= $totalPlayers || $is_timeout) {
+            $stmtUpdate = $pdo->prepare("UPDATE quiz_lobbies SET show_explanation = 1 WHERE id = ?");
+            $stmtUpdate->execute([$lobby_id]);
         }
+
+    } catch (PDOException $e) {
+        // Fehlerhandling
     }
-
-    $pointsEarned = 0;
-    $status = 'wrong';
-
-    if (isset($_POST['timeout']) && $_POST['timeout'] === '1') {
-        $status = 'timeout';
-    } else {
-        // Abgleich der Arrays für Multiple-Choice
-        $correctChosen = array_intersect($chosenIds, $correctIds);
-        $wrongChosen = array_diff($chosenIds, $correctIds);
-
-        // Volle Punkte: Genau alle richtigen erwischt und keine falsche
-        if (count($correctChosen) === count($correctIds) && count($wrongChosen) === 0) {
-            $pointsEarned = 100;
-            $status = 'correct';
-        } 
-        // Teilpunkte: Mindestens eine richtige, aber nicht alle, und KEINE falsche
-        elseif (count($correctChosen) > 0 && count($correctChosen) < count($correctIds) && count($wrongChosen) === 0) {
-            $pointsEarned = 50;
-            $status = 'partial';
-        }
-    }
-
-    // Punkte auf die Session aufrechnen
-    $_SESSION['quiz_score'] = ($_SESSION['quiz_score'] ?? 0) + $pointsEarned;
-
-    // Zustand für den Erklärungsmodus sichern
-    $_SESSION['last_result'] = [
-        'status' => $status,
-        'chosen_ids' => $chosenIds,
-        'points_earned' => $pointsEarned
-    ];
-    $_SESSION['show_explanation'] = true;
-
-    header("Location: game.php");
-    exit;
 }
+
+// WICHTIG: Zurück zur game.php. Die game.php entscheidet per Polling, wann die Auflösung sichtbar wird!
+header("Location: game.php");
+exit;
