@@ -3,13 +3,14 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 22. Mai 2026 um 10:48
+-- Erstellungszeit: 22. Mai 2026 um 15:17
 -- Server-Version: 10.4.32-MariaDB
 -- PHP-Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
+
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -177,6 +178,141 @@ CREATE TABLE `lobby_players` (
   `joined_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Daten für Tabelle `lobby_players`
+--
+
+INSERT INTO `lobby_players` (`id`, `lobby_id`, `player_name`, `joined_at`) VALUES
+(1, 1, 'Gast', '2026-05-22 09:03:06'),
+(2, 2, 'Gast', '2026-05-22 09:11:10'),
+(3, 2, 'test', '2026-05-22 09:11:19'),
+(4, 2, 'testspieler', '2026-05-22 09:14:14'),
+(5, 3, 'testspieler', '2026-05-22 09:22:10'),
+(6, 4, 'testspieler', '2026-05-22 09:23:21'),
+(7, 5, 'Gast', '2026-05-22 09:24:29'),
+(8, 5, 'testspieler', '2026-05-22 09:24:55'),
+(9, 6, 'Gast', '2026-05-22 09:44:52'),
+(10, 6, 'Gast-9543', '2026-05-22 09:45:28'),
+(11, 6, 'test', '2026-05-22 09:50:22'),
+(12, 7, 'test', '2026-05-22 09:51:26'),
+(13, 8, 'test', '2026-05-22 10:55:25'),
+(14, 8, 'Gast-2803', '2026-05-22 10:55:55'),
+(15, 9, 'test', '2026-05-22 10:58:51'),
+(16, 10, 'Gast', '2026-05-22 11:01:32'),
+(17, 10, 'Gast-9358', '2026-05-22 11:01:54'),
+(18, 11, 'test', '2026-05-22 11:18:10'),
+(19, 12, 'Gast', '2026-05-22 11:37:52'),
+(20, 13, 'Gast', '2026-05-22 11:53:05'),
+(21, 13, 'Gast-6593', '2026-05-22 11:53:29'),
+(22, 14, 'test', '2026-05-22 11:56:28'),
+(23, 14, 'Gast-6914', '2026-05-22 11:56:53'),
+(24, 15, 'Gast', '2026-05-22 11:57:50'),
+(25, 15, 'Gast-5687', '2026-05-22 11:58:13'),
+(26, 16, 'Gast', '2026-05-22 12:50:28'),
+(27, 17, 'test', '2026-05-22 12:58:24'),
+(28, 18, 'test', '2026-05-22 13:09:42'),
+(29, 19, 'test', '2026-05-22 13:10:21'),
+(30, 20, 'Gast', '2026-05-22 13:10:48');
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `lobby_questions`
+--
+
+CREATE TABLE `lobby_questions` (
+  `id` int(11) NOT NULL,
+  `lobby_id` int(11) NOT NULL,
+  `question_id` int(11) NOT NULL,
+  `sort_order` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Daten für Tabelle `lobby_questions`
+--
+
+INSERT INTO `lobby_questions` (`id`, `lobby_id`, `question_id`, `sort_order`) VALUES
+(1, 8, 10, 0),
+(2, 8, 2, 1),
+(3, 8, 6, 2),
+(4, 8, 4, 3),
+(5, 8, 9, 4),
+(6, 8, 8, 5),
+(7, 8, 1, 6),
+(8, 8, 7, 7),
+(9, 8, 3, 8),
+(10, 8, 5, 9),
+(11, 10, 4, 0),
+(12, 10, 5, 1),
+(13, 10, 7, 2),
+(14, 10, 8, 3),
+(15, 10, 3, 4),
+(16, 10, 9, 5),
+(17, 10, 10, 6),
+(18, 10, 1, 7),
+(19, 10, 6, 8),
+(20, 10, 2, 9),
+(21, 11, 6, 0),
+(22, 11, 4, 1),
+(23, 11, 10, 2),
+(24, 11, 8, 3),
+(25, 11, 7, 4),
+(26, 11, 9, 5),
+(27, 11, 3, 6),
+(28, 11, 2, 7),
+(29, 11, 1, 8),
+(30, 11, 5, 9),
+(31, 12, 9, 0),
+(32, 12, 7, 1),
+(33, 12, 8, 2),
+(34, 12, 2, 3),
+(35, 12, 1, 4),
+(36, 12, 10, 5),
+(37, 12, 3, 6),
+(38, 12, 5, 7),
+(39, 12, 6, 8),
+(40, 12, 4, 9),
+(41, 13, 4, 0),
+(42, 13, 9, 1),
+(43, 13, 2, 2),
+(44, 13, 8, 3),
+(45, 13, 1, 4),
+(46, 13, 10, 5),
+(47, 13, 5, 6),
+(48, 13, 3, 7),
+(49, 13, 7, 8),
+(50, 13, 6, 9),
+(51, 15, 6, 0),
+(52, 15, 9, 1),
+(53, 15, 7, 2),
+(54, 15, 4, 3),
+(55, 15, 5, 4),
+(56, 15, 3, 5),
+(57, 15, 8, 6),
+(58, 15, 10, 7),
+(59, 15, 2, 8),
+(60, 15, 1, 9),
+(61, 17, 8, 0),
+(62, 17, 10, 1),
+(63, 17, 1, 2),
+(64, 17, 9, 3),
+(65, 17, 3, 4),
+(66, 17, 4, 5),
+(67, 17, 5, 6),
+(68, 17, 2, 7),
+(69, 17, 7, 8),
+(70, 17, 6, 9),
+(71, 20, 1, 0),
+(72, 20, 7, 1),
+(73, 20, 6, 2),
+(74, 20, 4, 3),
+(75, 20, 10, 4),
+(76, 20, 5, 5),
+(77, 20, 3, 6),
+(78, 20, 9, 7),
+(79, 20, 8, 8),
+(80, 20, 2, 9);
+
 -- --------------------------------------------------------
 
 --
@@ -304,11 +440,42 @@ INSERT INTO `question_pool_departments` (`question_pool_id`, `department_id`, `c
 
 CREATE TABLE `quiz_lobbies` (
   `id` int(11) NOT NULL,
-  `join_code` varchar(6) NOT NULL,
-  `host_id` int(11) NOT NULL,
+  `join_code` varchar(5) NOT NULL,
+  `host_name` varchar(255) NOT NULL,
+  `question_pool` varchar(100) DEFAULT NULL,
+  `question_count` int(11) DEFAULT NULL,
+  `time_limit` int(11) DEFAULT NULL,
+  `point_mode` varchar(50) DEFAULT NULL,
+  `host_plays` varchar(3) DEFAULT NULL,
   `is_started` tinyint(1) DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Daten für Tabelle `quiz_lobbies`
+--
+
+INSERT INTO `quiz_lobbies` (`id`, `join_code`, `host_name`, `question_pool`, `question_count`, `time_limit`, `point_mode`, `host_plays`, `is_started`, `created_at`) VALUES
+(1, 'JSQK2', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:03:06'),
+(2, 'G5G34', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:11:10'),
+(3, 'TYHBH', 'testspieler', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:22:10'),
+(4, 'AZ5EY', 'testspieler', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:23:21'),
+(5, '9RAAC', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:24:29'),
+(6, 'T4SLK', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:44:52'),
+(7, 'YSKQN', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'no', 1, '2026-05-22 09:51:12'),
+(8, 'A4PWY', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 10:55:25'),
+(9, '8M2KW', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 10:58:51'),
+(10, 'NJBZ7', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:01:32'),
+(11, 'AMNPW', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:18:10'),
+(12, 'KCJTH', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:37:52'),
+(13, 'FLU4M', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:53:05'),
+(14, 'Q3MHQ', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:56:28'),
+(15, 'HWAF2', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:57:50'),
+(16, 'H8WTR', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 12:50:28'),
+(17, 'JFE6P', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 12:58:24'),
+(18, 'YESYC', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 13:09:42'),
+(19, 'D7MZZ', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 13:10:21'),
+(20, 'P4CD5', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 13:10:48');
 
 -- --------------------------------------------------------
 
@@ -385,7 +552,8 @@ INSERT INTO `users` (`id`, `role_id`, `department_id`, `avatar_image_id`, `usern
 (4, 1, 3, NULL, 'Marcin_Banaszkiewicz', 'Marcin_Banaszkiewicz@damago.learn', '$2y$12$sC82J9LRjI.ye9RV1yScAOShFWkRLCDfuKmmYgRdrhfTGU35lYPOq', 1, '2026-05-19 01:29:09', NULL, NULL, NULL),
 (5, 1, 3, NULL, 'Pascal_Arndt', 'Pascal_Arndt@damago.learn', '$2y$12$FH3SZiEtOqcXsb1bo6QqmeYIlhS.m0.vw449lXXRlx01k/nTaEthC', 1, '2026-05-19 01:29:09', NULL, NULL, NULL),
 (6, 3, NULL, NULL, 'test', 'test@test.de', '$2y$10$sDaz15LWYvRjfKQjcApXm.uXzkED2Za32Q9IhjvdiDA.SsbSpJ49i', 1, '2026-05-22 09:36:58', '2026-05-22 09:49:26', NULL, NULL),
-(7, 3, NULL, NULL, 'Pascal-A.', 'test3@test.de', '$2y$10$ZtewH.f61IE75yj/aF0omez5rUhgsnOklu7g/Hu/q7NktOioY4mjq', 1, '2026-05-22 09:58:37', '2026-05-22 10:00:06', NULL, NULL);
+(7, 3, NULL, NULL, 'Pascal-A.', 'test3@test.de', '$2y$10$ZtewH.f61IE75yj/aF0omez5rUhgsnOklu7g/Hu/q7NktOioY4mjq', 1, '2026-05-22 09:58:37', '2026-05-22 10:00:06', NULL, NULL),
+(9, 1, NULL, NULL, 'testspieler', 'test1@test.de', '$2y$10$taKvc2PU2Gu7E9DlMkTWrubQIB8v.b8cXpY4M8mOi9vVWzp331gEy', 1, '2026-05-22 11:13:55', NULL, NULL, NULL);
 
 --
 -- Indizes der exportierten Tabellen
@@ -438,6 +606,13 @@ ALTER TABLE `game_statuses`
 -- Indizes für die Tabelle `lobby_players`
 --
 ALTER TABLE `lobby_players`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `lobby_id` (`lobby_id`);
+
+--
+-- Indizes für die Tabelle `lobby_questions`
+--
+ALTER TABLE `lobby_questions`
   ADD PRIMARY KEY (`id`),
   ADD KEY `lobby_id` (`lobby_id`);
 
@@ -557,7 +732,13 @@ ALTER TABLE `game_statuses`
 -- AUTO_INCREMENT für Tabelle `lobby_players`
 --
 ALTER TABLE `lobby_players`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+
+--
+-- AUTO_INCREMENT für Tabelle `lobby_questions`
+--
+ALTER TABLE `lobby_questions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
 
 --
 -- AUTO_INCREMENT für Tabelle `media_files`
@@ -587,7 +768,7 @@ ALTER TABLE `question_pools`
 -- AUTO_INCREMENT für Tabelle `quiz_lobbies`
 --
 ALTER TABLE `quiz_lobbies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT für Tabelle `roles`
@@ -605,7 +786,7 @@ ALTER TABLE `score_modes`
 -- AUTO_INCREMENT für Tabelle `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Constraints der exportierten Tabellen
@@ -643,6 +824,12 @@ ALTER TABLE `games`
 --
 ALTER TABLE `lobby_players`
   ADD CONSTRAINT `lobby_players_ibfk_1` FOREIGN KEY (`lobby_id`) REFERENCES `quiz_lobbies` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints der Tabelle `lobby_questions`
+--
+ALTER TABLE `lobby_questions`
+  ADD CONSTRAINT `lobby_questions_ibfk_1` FOREIGN KEY (`lobby_id`) REFERENCES `quiz_lobbies` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints der Tabelle `media_files`
