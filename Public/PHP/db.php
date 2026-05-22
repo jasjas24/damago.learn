@@ -1,9 +1,9 @@
 <?php
 
-$host = '127.0.0.1';
+$host = 'localhost';
 $db   = 'damago_quiz';
 $user = 'root'; 
-$pass = 'Pa$$w0rd';     
+$pass = '';     
 $port ='3306';
 $charset = 'utf8mb4';
 
