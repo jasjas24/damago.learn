@@ -1,15 +1,81 @@
 <?php
 require_once 'init.php';
+require_once 'db.php';
+
 /** @var string $username */
 
-// Befinden wir uns im Auflösungs-Modus?
-$showExplanation = isset($_SESSION['show_explanation']) && $_SESSION['show_explanation'] === true;
-$lastResult = $_SESSION['last_result'] ?? null;
+// ==========================================
+// NEU: ABSICHERUNG FÜR MITSPIELER (SESSION BEFÜLLEN)
+// ==========================================
+$lobby_id = $_SESSION['quiz_setup']['lobby_id'] ?? $_SESSION['player_lobby_id'] ?? null;
 
+// Falls die Fragen in der Session fehlen, versuchen wir sie aus der DB nachzuladen
+if ((!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) && $lobby_id) {
+    try {
+        // 1. Fragen-IDs holen, die der Host in 'lobby_questions' hinterlegt hat
+        $stmtLobbyQ = $pdo->prepare("
+            SELECT q.id AS question_id, q.question_text, q.explanation AS general_explanation
+            FROM lobby_questions lq
+            INNER JOIN questions q ON q.id = lq.question_id
+            WHERE lq.lobby_id = ?
+            ORDER BY lq.sort_order ASC
+        ");
+        $stmtLobbyQ->execute([$lobby_id]);
+        $questionsRaw = $stmtLobbyQ->fetchAll(PDO::FETCH_ASSOC);
+
+        // Wenn Fragen in der DB existieren, bauen wir die Session für den Spieler auf
+        if (!empty($questionsRaw)) {
+            $quizQuestions = [];
+            $stmtAnswers = $pdo->prepare("
+                SELECT id, answer_text AS text, is_correct, explanation 
+                FROM answer_options 
+                WHERE question_id = ?
+            ");
+
+            foreach ($questionsRaw as $q) {
+                $stmtAnswers->execute([$q['question_id']]);
+                $answers = $stmtAnswers->fetchAll(PDO::FETCH_ASSOC);
+
+                // Antworten für den Spieler mischen (Verhindert Abschreiben)
+                shuffle($answers);
+
+                $quizQuestions[] = [
+                    'id'            => $q['question_id'],
+                    'question_text' => $q['question_text'],
+                    'explanation'   => $q['general_explanation'],
+                    'answers'       => $answers
+                ];
+            }
+
+            // Session für den Mitspieler initialisieren
+            $_SESSION['quiz_questions'] = $quizQuestions;
+            $_SESSION['current_question_index'] = 0;
+            $_SESSION['quiz_score'] = 0;
+            
+            // Falls das Zeitlimit in der Session fehlt, aus der Lobby-Tabelle holen
+            if (!isset($_SESSION['quiz_setup']['time_limit'])) {
+                $stmtTime = $pdo->prepare("SELECT time_limit FROM quiz_lobbies WHERE id = ?");
+                $stmtTime->execute([$lobby_id]);
+                $dbTime = $stmtTime->fetchColumn();
+                $_SESSION['quiz_setup']['time_limit'] = $dbTime ? (int)$dbTime : 30;
+            }
+        }
+    } catch (PDOException $e) {
+        // Falls was schiefgeht, greift unten der originale Türsteher
+    }
+}
+
+// ==========================================
+// ORIGINALER TÜRSTEHER (Jetzt modifiziert/abgesichert)
+// ==========================================
 if (!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) {
     header("Location: setup_lobby.php");
     exit;
 }
+
+// Befinden wir uns im Auflösungs-Modus?
+$showExplanation = isset($_SESSION['show_explanation']) && $_SESSION['show_explanation'] === true;
+$lastResult = $_SESSION['last_result'] ?? null;
 
 if (!isset($_SESSION['current_question_index'])) {
     $_SESSION['current_question_index'] = 0;
@@ -27,9 +93,12 @@ if ($currentIndex >= $totalQuestions) {
 $currentQuestion = $allQuestions[$currentIndex];
 $answers = $currentQuestion['answers']; 
 
+// Dynamischer Name, falls Mitspieler (die haben oft 'player_name' statt 'username')
+$currentDisplayName = $_SESSION['player_name'] ?? $username ?? 'Gast';
+
 $rankingPlayers = [
     [
-        'username' => $_SESSION['username'] ?? 'Gast', 
+        'username' => $currentDisplayName, 
         'score'    => $_SESSION['quiz_score'] ?? 0
     ]
 ];
@@ -38,7 +107,7 @@ usort($rankingPlayers, function($a, $b) {
     return $b['score'] <=> $a['score'];
 });
 
-$timeLimit = $_SESSION['quiz_setup']['time_limit'];
+$timeLimit = $_SESSION['quiz_setup']['time_limit'] ?? 30;
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -49,7 +118,6 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
 <link rel="stylesheet" href="../CSS/style.css">
 
 <style>
-
 .millionaire-answer.selected {
     border: 5px solid #dbff0f !important;
 }
@@ -73,7 +141,6 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
     margin: 0;
 }
 </style>
-
 </head>
 <body class="quiz-play-page">
 
@@ -100,59 +167,55 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
         <form class="millionaire-answers" id="quiz-form" action="<?php echo $showExplanation ? 'go_next.php' : 'next_question.php'; ?>" method="POST">
             
             <?php foreach ($answers as $letter => $ans): 
-    $inlineStyle = "";
-    
-    if ($showExplanation) {
-        $isCorrect = intval($ans['is_correct']) === 1;
-        $wasSelected = $lastResult && is_array($lastResult['chosen_ids']) && in_array($ans['id'], $lastResult['chosen_ids']);
-        
-        // 1. Basis-Farbgebung für richtig (grün) oder falsch (rot)
-        if ($isCorrect) {
-            $inlineStyle = "background-color: #d4edda !important; color: #155724 !important; border-color: #c3e6cb !important;";
-        } elseif ($wasSelected && !$isCorrect) {
-            $inlineStyle = "background-color: #f8d7da !important; color: #721c24 !important; border-color: #f5c6cb !important;";
-        }
-        
-        // 2. ERGÄNZUNG: Wenn die Antwort vom User ausgewählt war, überschreiben wir 
-        // den Rahmen JETZT nachträglich mit deinem Gelb (#ffc107 oder dein genauer Gelbton)
-        if ($wasSelected) {
-            $inlineStyle .= " border: 3px solid #ffc107 !important;";
-        }
-    }
-?>
-    <button type="<?php echo $showExplanation ? 'submit' : 'button'; ?>" 
-            class="millionaire-answer" 
-            data-id="<?php echo $ans['id']; ?>"
-            style="<?php echo $inlineStyle; ?>"
-            <?php echo $showExplanation ? 'disabled' : ''; ?>>
-        <span class="answer-text">
-            <?php echo htmlspecialchars($ans['text']); ?>
-        </span>
-        
-        <?php if (!$showExplanation): ?>
-            <input type="checkbox" name="selected_answers[]" value="<?php echo $ans['id']; ?>" style="display:none;" id="check-<?php echo $ans['id']; ?>">
-        <?php endif; ?>
-    </button>
-<?php endforeach; ?>
-
-                    <div class="confirm-button-wrapper">
-            <?php if (!$showExplanation): ?>
-                <button type="submit" id="confirm-btn" class="millionaire-answer confirm-button btn-blue">
-                    <span class="answer-text">Antwort bestätigen</span>
+                $inlineStyle = "";
+                
+                if ($showExplanation) {
+                    $isCorrect = intval($ans['is_correct']) === 1;
+                    $wasSelected = $lastResult && is_array($lastResult['chosen_ids']) && in_array($ans['id'], $lastResult['chosen_ids']);
+                    
+                    if ($isCorrect) {
+                        $inlineStyle = "background-color: #d4edda !important; color: #155724 !important; border-color: #c3e6cb !important;";
+                    } elseif ($wasSelected && !$isCorrect) {
+                        $inlineStyle = "background-color: #f8d7da !important; color: #721c24 !important; border-color: #f5c6cb !important;";
+                    }
+                    
+                    if ($wasSelected) {
+                        $inlineStyle .= " border: 3px solid #ffc107 !important;";
+                    }
+                }
+            ?>
+                <button type="<?php echo $showExplanation ? 'submit' : 'button'; ?>" 
+                        class="millionaire-answer" 
+                        data-id="<?php echo $ans['id']; ?>"
+                        style="<?php echo $inlineStyle; ?>"
+                        <?php echo $showExplanation ? 'disabled' : ''; ?>>
+                    <span class="answer-text">
+                        <?php echo htmlspecialchars($ans['text']); ?>
+                    </span>
+                    
+                    <?php if (!$showExplanation): ?>
+                        <input type="checkbox" name="selected_answers[]" value="<?php echo $ans['id']; ?>" style="display:none;" id="check-<?php echo $ans['id']; ?>">
+                    <?php endif; ?>
                 </button>
-            <?php endif; ?>
-        </div>
+            <?php endforeach; ?>
+
+            <div class="confirm-button-wrapper">
+                <?php if (!$showExplanation): ?>
+                    <button type="submit" id="confirm-btn" class="millionaire-answer confirm-button btn-blue">
+                        <span class="answer-text">Antwort bestätigen</span>
+                    </button>
+                <?php endif; ?>
+            </div>
         </form>
 
         <?php if ($showExplanation): ?>
-        <div class="confirm-button-wrapper">
-            <form action="go_next.php" method="POST" class="next-question-form">
-                <button type="submit" class="millionaire-answer confirm-button btn-green">
-                    <span class="answer-text">Nächste Frage</span>
-                </button>
-            </form>
-        </div>
-
+            <div class="confirm-button-wrapper">
+                <form action="go_next.php" method="POST" class="next-question-form">
+                    <button type="submit" class="millionaire-answer confirm-button btn-green">
+                        <span class="answer-text">Nächste Frage</span>
+                    </button>
+                </form>
+            </div>
 
             <section class="question-card" style="margin-top: 30px; border-left: 5px solid #007bff; text-align: left;">
                 <div class="question-label" style="color: #007bff;">Auflösung & Erklärungen</div>
@@ -198,11 +261,11 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
                     </thead>
                     <tbody>
                         <?php foreach ($rankingPlayers as $index => $player): ?>
-                            <tr style="border-bottom: 1px solid #f4f4f4; <?php echo ($player['username'] === $username) ? 'font-weight: bold; background-color: #f9f9f9;' : ''; ?>">
+                            <tr style="border-bottom: 1px solid #f4f4f4; <?php echo ($player['username'] === $currentDisplayName) ? 'font-weight: bold; background-color: #f9f9f9;' : ''; ?>">
                                 <td style="padding: 10px 8px;"><?php echo ($index + 1); ?>.</td>
                                 <td style="padding: 10px 8px;">
                                     <?php echo htmlspecialchars($player['username']); ?>
-                                    <?php if ($player['username'] === $username) echo ' (Du)'; ?>
+                                    <?php if ($player['username'] === $currentDisplayName) echo ' (Du)'; ?>
                                 </td>
                                 <td style="padding: 10px 8px; text-align: right; color: #0066cc;">
                                     <?php echo $player['score']; ?>

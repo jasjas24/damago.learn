@@ -1306,7 +1306,7 @@ body.quiz-play-page {
 /* ==============================
    Statistik-Seite
    ============================== */    
-/* Container */
+
 main, .container {
     margin-top: 60px; /* Abstand unter der Topbar */
 }
@@ -1321,7 +1321,17 @@ body {
     padding: 0;
 }
 
-
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #000000;
+    color: white;
+    padding: 10px 20px;
+}
 
 .topbar-logo {
     height: 40px;
