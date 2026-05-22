@@ -26,16 +26,12 @@ try {
 <body class="auth-page">
     <?php include_once 'topbar.php'; ?>
 
-    <main class="host-layout">
-
-            <p>
-                Wähle die Einstellungen für deine Quizrunde aus.
-                Danach erhalten die Teilnehmer einen Teilnahme-Code,
-                mit dem sie der Lobby beitreten können.
-            </p>
-
-            
-        
+    <main class="host-layout" style="padding-top: 76px;"> <!-- HIER: Padding entspricht Topbar-Höhe -->
+        <p>
+            Wähle die Einstellungen für deine Quizrunde aus.
+            Danach erhalten die Teilnehmer einen Teilnahme-Code,
+            mit dem sie der Lobby beitreten können.
+        </p>
 
         <section class="host-card">
             <div class="auth-header">
@@ -45,22 +41,18 @@ try {
             </div>
 
             <form id="quizForm" class="auth-form" action="setup_lobby.php" method="POST">
-            <input type="hidden" id="join_code" name="join_code" value="">    
-            <div class="form-group">
-                <label for="question_pool">Fragenpool</label>
-                <select id="question_pool" name="question_pool" required>
-                    <option value="">Fragenpool auswählen</option>
-                    
-                    <?php foreach ($pools as $p): ?>
-                        <option value="<?php echo htmlspecialchars($p['name']); ?>">
-                            <?php 
-                                // Macht den ersten Buchstaben groß fürs Auge (z. B. 'Linux' statt 'linux')
-                                echo htmlspecialchars(ucfirst($p['name'])); 
-                            ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+                <input type="hidden" id="join_code" name="join_code" value="">    
+                <div class="form-group">
+                    <label for="question_pool">Fragenpool</label>
+                    <select id="question_pool" name="question_pool" required>
+                        <option value="">Fragenpool auswählen</option>
+                        <?php foreach ($pools as $p): ?>
+                            <option value="<?php echo htmlspecialchars($p['name']); ?>">
+                                <?php echo htmlspecialchars(ucfirst($p['name'])); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
 
                 <div class="form-group">
                     <label for="question_count">Anzahl Fragen</label>
@@ -116,19 +108,12 @@ try {
 </body>
 <script>
 document.getElementById('quizForm').addEventListener('submit', function(event) {
-    // 1. Zeichenpool für den Code (ohne leicht verwechselbare Zeichen wie O, 0, 1, I)
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     let generatedCode = "";
-    
-    // 2. Einen 5-stelligen Code generieren
     for (let i = 0; i < 5; i++) {
         generatedCode += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    
-    // 3. Den generierten Code in das versteckte Input-Feld schreiben
     document.getElementById('join_code').value = generatedCode;
-    
-
 });
 </script>
 </html>
