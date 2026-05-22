@@ -77,15 +77,7 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
 </head>
 <body class="quiz-play-page">
 
-<header class="topbar">
-    <a class="topbar-brand">
-        <img src="../damago-logo.png" alt="damago Logo" class="topbar-logo">
-    </a>
-    <div class="topbar-account">
-        <span class="account-name"><?php echo htmlspecialchars($username); ?></span>
-        <a href="logout.php" class="logout-button">logout</a>
-    </div>
-</header>
+<?php include_once 'topbar.php'; ?>
 
 <main class="play-layout">
     <section class="quiz-main">

@@ -80,11 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </head>
 <body class="auth-page">
 
-    <header class="topbar">
-        <a href="index.html" class="topbar-brand">
-            <img src="../damago-logo.png" alt="damago Logo" class="topbar-logo">
-        </a>
-    </header>
+    <?php include_once 'topbar.php'; ?>
 
     <main class="auth-layout">
         <section class="auth-info">

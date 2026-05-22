@@ -38,15 +38,7 @@ $statistics = [
     <link rel="stylesheet" href="../CSS/style.css">
 </head>
 <body>
-    <header class="topbar">
-        <a href="dashboard.php" class="topbar-brand">
-            <img src="../damago-logo.png" alt="damago Logo" class="topbar-logo">
-        </a>
-        <div class="topbar-account">
-            <span class="account-name"><?php echo htmlspecialchars($username); ?></span>
-            <a href="../logout.php" class="logout-button">Logout</a>
-        </div>
-    </header>
+   <?php include_once 'topbar.php'; ?>
 
     <main class="container">
         <h1>Lernfortschritt</h1>
