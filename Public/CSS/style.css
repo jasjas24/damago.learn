@@ -1297,4 +1297,147 @@ body.quiz-play-page {
     }   
 
 }
+/* ==============================
+   Statistik-Seite
+   ============================== */    
+/* Container */
 
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #000000;
+    color: white;
+    padding: 10px 20px;
+}
+
+.topbar-logo {
+    height: 40px;
+}
+
+.topbar-account {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logout-button {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.logout-button:hover {
+    text-decoration: underline;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+h1 {
+    color: #2f66a3;
+    margin-bottom: 15px;
+}
+
+.statistics-table {
+    overflow-x: auto;
+}
+
+.statistics-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.statistics-table th, .statistics-table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.statistics-table th {
+    background-color: #2f66a3;
+    color: white;
+}
+
+.statistics-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Container für die Statistikseite */
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+.statistics-card {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.stat-row {
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f7faff;
+    border: 1px solid #d0e1ff;
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2f66a3;
+    margin-bottom: 8px;
+}
+
+.stat-values span {
+    display: block;
+    font-size: 0.95rem;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+/* Mobile Anpassung */
+@media (max-width: 600px) {
+    .stat-values span {
+        font-size: 0.9rem;
+    }
+}
+
+.back-button-wrapper {
+    margin-bottom: 20px;
+}
+
+.back-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #2f66a3;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.back-button:hover {
+    background-color: #2f66a3;
+}

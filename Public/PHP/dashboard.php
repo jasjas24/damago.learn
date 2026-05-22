@@ -41,7 +41,7 @@ $dashboardCards = [
         "description" => "Eine neue Quizrunde erstellen und hosten."
     ],
     "history" => [
-        "href" => "history.php",
+        "href" => "statistic.php",
         "icon" => "LF",
         "title" => "Lernfortschritt",
         "description" => "Eigene Ergebnisse und gespielte Quizrunden ansehen."
