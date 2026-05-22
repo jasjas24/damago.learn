@@ -144,23 +144,24 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
     </button>
 <?php endforeach; ?>
 
-            <div class="confirm-button-wrapper">
-                <?php if (!$showExplanation): ?>
-                    <button type="submit" id="confirm-btn" class="millionaire-answer confirm-button" style="background-color: #007bff; color: white;">
-                        <span class="answer-text">Antwort bestätigen</span>
-                    </button>
-                <?php endif; ?>
-            </div>
+                    <div class="confirm-button-wrapper">
+            <?php if (!$showExplanation): ?>
+                <button type="submit" id="confirm-btn" class="millionaire-answer confirm-button btn-blue">
+                    <span class="answer-text">Antwort bestätigen</span>
+                </button>
+            <?php endif; ?>
+        </div>
         </form>
 
         <?php if ($showExplanation): ?>
-            <div class="confirm-button-wrapper">
-                <form action="go_next.php" method="POST" class="next-question-form">
-                    <button type="submit" class="millionaire-answer confirm-button" style="background-color: #28a745; color: white;">
-                        <span class="answer-text">Nächste Frage</span>
-                    </button>
-                </form>
-            </div>
+        <div class="confirm-button-wrapper">
+            <form action="go_next.php" method="POST" class="next-question-form">
+                <button type="submit" class="millionaire-answer confirm-button btn-green">
+                    <span class="answer-text">Nächste Frage</span>
+                </button>
+            </form>
+        </div>
+
 
             <section class="question-card" style="margin-top: 30px; border-left: 5px solid #007bff; text-align: left;">
                 <div class="question-label" style="color: #007bff;">Auflösung & Erklärungen</div>
