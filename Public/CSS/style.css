@@ -277,6 +277,10 @@ body {
 }
 
 .topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
     width: 100%;
     height: 76px;
     background: #050505;
@@ -839,9 +843,9 @@ body {
     flex-direction: column;
 }
 
-/* Schwarzer Balken ganz oben */
+/* Schwarzer Balken ganz oben,dashboard.php */
 .topbar {
-    position: relative;
+    position: fixed;
     width: 100%;
     height: 76px;
     background: #000000;
