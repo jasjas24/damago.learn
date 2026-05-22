@@ -24,8 +24,7 @@ try {
     <link rel="stylesheet" href="../CSS/quiz_host.css">
 </head>
 <body class="auth-page">
-
-   <?php include_once 'topbar.php'; ?>
+    <?php include_once 'topbar.php'; ?>
 
     <main class="host-layout">
 
