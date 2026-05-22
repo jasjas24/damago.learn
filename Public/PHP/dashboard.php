@@ -1,9 +1,10 @@
 <?php
-session_start();
+require_once 'init.php';
+
+/** @var string $username */
+/** @var string $role */
 
 
-$username = $_SESSION["user_name"] ?? "Gast";
-$role = $_SESSION["user_role"] ?? "guest";
 
 // $allowedRoles = ["admin", "teacher", "student", "guest"];
 

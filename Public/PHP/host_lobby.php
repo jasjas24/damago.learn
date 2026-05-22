@@ -81,11 +81,21 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
         }
         unset($singleQuestion);
 
+        // 5. In der Session des Hosts verankern
         $_SESSION['quiz_questions'] = $quizQuestions;
         $_SESSION['current_question_index'] = 0;
+        if (!isset($_SESSION['quiz_score'])) { $_SESSION['quiz_score'] = 0; }
 
-        if (!isset($_SESSION['quiz_score'])) {
-            $_SESSION['quiz_score'] = 0;
+        // 6. NEU: Die Fragen-IDs für die Spieler in die Datenbank eintragen
+        // Zuerst schauen, ob sie nicht schon drin sind (Dopplungen vermeiden bei Refresh)
+        $stmtCheck = $pdo->prepare("SELECT COUNT(*) FROM lobby_questions WHERE lobby_id = ?");
+        $stmtCheck->execute([$lobby_id]);
+        
+        if ((int)$stmtCheck->fetchColumn() === 0) {
+            $stmtInsertQ = $pdo->prepare("INSERT INTO lobby_questions (lobby_id, question_id, sort_order) VALUES (?, ?, ?)");
+            foreach ($quizQuestions as $index => $q) {
+                $stmtInsertQ->execute([$lobby_id, $q['id'], $index]);
+            }
         }
 
     } catch (PDOException $e) {
@@ -191,17 +201,30 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
         }
 
         function startQuiz() {
-            // Sende dem Server das Signal, die Lobby auf 'is_started = 1' zu setzen
-            fetch('start_lobby_action.php?lobby_id=' + lobbyId, { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.href = 'game.php';
-                    } else {
-                        alert("Fehler beim Starten des Spiels.");
-                    }
-                });
+    console.log("Start-Button geklickt. Sende Anfrage für Lobby-ID:", lobbyId);
+
+    // Sende dem Server das Signal, die Lobby auf 'is_started = 1' zu setzen
+    fetch('start_lobby_action.php?lobby_id=' + lobbyId, { 
+        method: 'POST' 
+    })
+    .then(response => {
+        console.log("Server-Response erhalten:", response);
+        return response.json();
+    })
+    .then(data => {
+        console.log("Daten vom Server:", data);
+        if (data.success) {
+            console.log("Erfolg! Leite weiter zur game.php");
+            window.location.href = 'game.php';
+        } else {
+            alert("Der Server hat das Starten verweigert. Erfolg-Status: " + data.success);
         }
+    })
+    .catch(err => {
+        console.error("Netzwerkfehler beim Starten des Quiz:", err);
+        alert("Fehler bei der Netzwerk-Anfrage. Schau in die Browser-Konsole (F12)!");
+    });
+}
 
         // Alle 2 Sekunden die Lobby aktualisieren (Polling)
         setInterval(updateLobby, 2000);

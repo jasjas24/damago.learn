@@ -1,8 +1,7 @@
 <?php
-session_start();
+require_once 'init.php';
+/** @var string $username */
 
-$username = $_SESSION["username"] ?? "Gast";
-$role = $_SESSION["role"] ?? "gast";
 
 /*
     Test-Code für das Frontend.

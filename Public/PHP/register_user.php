@@ -1,6 +1,5 @@
 <?php
-// PHP/register_process.php
-session_start();
+require_once 'init.php';
 require_once 'db.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {

@@ -1,7 +1,6 @@
 <?php
 require_once 'init.php';
 /** @var string $username */
-/** @var string $role */
 
 // Befinden wir uns im Auflösungs-Modus?
 $showExplanation = isset($_SESSION['show_explanation']) && $_SESSION['show_explanation'] === true;
