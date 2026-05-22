@@ -1,8 +1,62 @@
 <?php
-session_start();
+require_once 'init.php';
+require_once 'db.php';
 
-//$username = $_SESSION["user_name"] ?? "Gast";
-$role = $_SESSION["user_role"] ?? "guest";
+/** @var string $username */
+/** @var string $role */
+
+$error = '';
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    // Code vereinheitlichen (Leerzeichen weg und alles in Großbuchstaben)
+    $joinCode = strtoupper(trim($_POST['join_code'] ?? ''));
+    
+    // Name ermitteln: Entweder der eingetippte Gastname oder der des eingeloggten Users
+    if ($role === 'guest') {
+        $playerName = trim($_POST['guest_name'] ?? '');
+    } else {
+        $playerName = $username;
+    }
+
+    if (empty($joinCode) || empty($playerName)) {
+        $error = 'Bitte fülle alle Felder aus.';
+    } else {
+        try {
+            // 1. Prüfen, ob die Lobby mit diesem Code existiert und offen ist
+            $stmt = $pdo->prepare("SELECT id, is_started FROM quiz_lobbies WHERE join_code = ?");
+            $stmt->execute([$joinCode]);
+            $lobby = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$lobby) {
+                $error = 'Ungültiger Code. Diese Lobby existiert nicht.';
+            } elseif ((int)$lobby['is_started'] === 1) {
+                $error = 'Dieses Spiel hat leider schon begonnen!';
+            } else {
+                // 2. Prüfen, ob der Name in dieser Lobby schon existiert (doppelte Namen verhindern)
+                $stmtCheck = $pdo->prepare("SELECT id FROM lobby_players WHERE lobby_id = ? AND player_name = ?");
+                $stmtCheck->execute([$lobby['id'], $playerName]);
+                
+                if ($stmtCheck->fetch()) {
+                    $error = 'Dieser Name wird in der Lobby bereits verwendet.';
+                } else {
+                    // 3. Spieler in die Tabelle eintragen
+                    $stmtJoin = $pdo->prepare("INSERT INTO lobby_players (lobby_id, player_name) VALUES (?, ?)");
+                    $stmtJoin->execute([$lobby['id'], $playerName]);
+
+                    // 4. Wichtige Daten für den Spieler in die Session schreiben
+                    $_SESSION['player_lobby_id'] = $lobby['id'];
+                    $_SESSION['player_name']     = $playerName;
+
+                    // Weiterleitung in den Warteraum für Spieler
+                    header("Location: host_lobby.php");
+                    exit;
+                }
+            }
+        } catch (PDOException $e) {
+            $error = 'Datenbankfehler: ' . $e->getMessage();
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -12,6 +66,17 @@ $role = $_SESSION["user_role"] ?? "guest";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz beitreten | damago Quizsystem</title>
     <link rel="stylesheet" href="../CSS/style.css">
+    <style>
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            border-left: 5px solid #f5c6cb;
+            font-size: 0.95rem;
+        }
+    </style>
 </head>
 <body class="auth-page">
 
@@ -23,7 +88,6 @@ $role = $_SESSION["user_role"] ?? "guest";
 
     <main class="auth-layout">
         <section class="auth-info">
-
             <h1>Quizcode eingeben. Direkt mitmachen.</h1>
             <p>
                 Gib den Teilnahme-Code ein, den du vom Host erhalten hast.
@@ -42,14 +106,19 @@ $role = $_SESSION["user_role"] ?? "guest";
                 <p>Trage den Code ein, den der Host für diese Quizrunde erstellt hat.</p>
             </div>
 
-            <form class="auth-form">
+            <?php if (!empty($error)): ?>
+                <div class="alert-error"><?php echo htmlspecialchars($error); ?></div>
+            <?php endif; ?>
+
+            <form class="auth-form" action="join_quiz.php" method="POST">
                 <div class="form-group">
                     <label for="join_code">Teilnahme-Code</label>
                     <input
                         type="text"
                         id="join_code"
                         name="join_code"
-                        placeholder="z. B. A7K9"
+                        placeholder="z. B. A7K9X"
+                        style="text-transform: uppercase; letter-spacing: 2px;"
                         maxlength="6"
                         required
                     >
@@ -63,6 +132,7 @@ $role = $_SESSION["user_role"] ?? "guest";
                             id="guest_name"
                             name="guest_name"
                             placeholder="Gastname"
+                            required
                         >
                     </div>
 
@@ -70,10 +140,10 @@ $role = $_SESSION["user_role"] ?? "guest";
                         Gastnamen generieren
                     </button>
                 <?php endif; ?>
-                <button type="button" class="btn btn-primary" onclick="window.location.href='host_lobby.php'">
+
+                <button type="submit" class="btn btn-primary">
                     Lobby betreten
                 </button>
-            </form> 
             </form>
 
             <?php if($role === 'guest'): ?>
@@ -91,8 +161,12 @@ $role = $_SESSION["user_role"] ?? "guest";
 
     <script>
         function generateGuestName() {
-            const randomNumber = Math.floor(1000 + Math.random() * 9000);
-            document.getElementById("guest_name").value = "Gast-" + randomNumber;
+            // Falls das Feld existiert (nur beim Gast vorhanden)
+            const guestInput = document.getElementById("guest_name");
+            if(guestInput) {
+                const randomNumber = Math.floor(1000 + Math.random() * 9000);
+                guestInput.value = "Gast-" + randomNumber;
+            }
         }
 
         window.addEventListener("DOMContentLoaded", generateGuestName);

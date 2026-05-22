@@ -4,18 +4,35 @@ require_once 'db.php';
 
 /** @var string $username */
 /** @var string $role */
-$setup = $_SESSION['quiz_setup'];
 
-$pool  = $setup['pool'];
-$count = $setup['count'];
-$time  = $setup['time_limit'];
-$mode  = $setup['point_mode'];
-$host  = $setup['host_plays'];
-$code  = $setup['code'];
+// 1. Prüfen, ob wir über das Host-Setup kommen oder als Spieler per Join
+if (isset($_SESSION['quiz_setup'])) {
+    // Ansicht für den Host
+    $setup = $_SESSION['quiz_setup'];
+    $code  = $setup['code'];
+    $lobby_id = $setup['lobby_id'] ?? null;
+    $is_host = true;
+} elseif (isset($_SESSION['player_lobby_id'])) {
+    // Ansicht für den beitretenden Spieler / Gast
+    $lobby_id = $_SESSION['player_lobby_id'];
+    $is_host = false;
+    
+    // Code aus der DB holen für die Anzeige
+    $stmtCode = $pdo->prepare("SELECT join_code FROM quiz_lobbies WHERE id = ?");
+    $stmtCode->execute([$lobby_id]);
+    $code = $stmtCode->fetchColumn();
+} else {
+    // Weder Host noch Spieler? Ab zurück zum Dashboard
+    header("Location: dashboard.php");
+    exit;
+}
 
-if (!isset($_SESSION['quiz_questions'])) {
+// 2. NUR DER HOST generiert und mischt die Fragen
+if ($is_host && !isset($_SESSION['quiz_questions'])) {
+    $pool  = $setup['pool'];
+    $count = $setup['count'];
+    
     try {
-        // 1. SQL-Abfrage ausführen (Fragen + Antworten holen)
         $stmt = $pdo->prepare("
             SELECT 
                 q.id AS question_id,
@@ -35,7 +52,6 @@ if (!isset($_SESSION['quiz_questions'])) {
         $stmt->execute([$pool]);
         $rawResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // 2. Daten für PHP strukturieren
         $questions = [];
         foreach ($rawResults as $row) {
             $qId = $row['question_id'];
@@ -57,31 +73,25 @@ if (!isset($_SESSION['quiz_questions'])) {
         }
         $questions = array_values($questions);
 
-        // 3. Mischen und auf gewünschte Anzahl kürzen
         shuffle($questions);
         $quizQuestions = array_slice($questions, 0, $count);
 
-        // 4. Antworten innerhalb der Fragen mischen
         foreach ($quizQuestions as &$singleQuestion) {
             shuffle($singleQuestion['answers']);
         }
         unset($singleQuestion);
 
-        // 5. JETZT fest für game.php in der Session verankern!
         $_SESSION['quiz_questions'] = $quizQuestions;
-        
-        // 6. Frage-Index für den Start auf 0 setzen
         $_SESSION['current_question_index'] = 0;
 
         if (!isset($_SESSION['quiz_score'])) {
-        $_SESSION['quiz_score'] = 0;
-}
+            $_SESSION['quiz_score'] = 0;
+        }
 
     } catch (PDOException $e) {
         die("Fehler beim Vorbereiten der Fragen: " . $e->getMessage());
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -89,8 +99,13 @@ if (!isset($_SESSION['quiz_questions'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Host-Lobby | damago Quizsystem</title>
+    <title>Lobby | damago Quizsystem</title>
     <link rel="stylesheet" href="../CSS/style.css">
+    <style>
+        .player-list { list-style: none; padding: 0; margin: 20px 0; text-align: left; }
+        .player-item { padding: 10px 15px; background: #f4f6f7; margin-bottom: 8px; border-radius: 4px; border-left: 5px solid #3498db; font-size: 1.1rem; }
+        .status-message { font-style: italic; color: #7f8c8d; margin-top: 15px; }
+    </style>
 </head>
 <body class="auth-page">
 
@@ -103,36 +118,41 @@ if (!isset($_SESSION['quiz_questions'])) {
             <span class="account-name">
                 <?php echo htmlspecialchars($username); ?>
             </span>
-
-            <a href="logout.php" class="logout-button">
-                logout
-            </a>
+            <a href="logout.php" class="logout-button">logout</a>
         </div>
     </header>
 
     <main class="auth-layout">
         <section class="auth-info">
-            <h1>Host-Lobby.</h1>
+            <h1><?php echo $is_host ? 'Host-Lobby.' : 'Spieler-Lobby.'; ?></h1>
             <p>
                 Teile diesen Code mit den Teilnehmern.
                 Sie müssen ihn eingeben, um der Lobby beizutreten.
             </p>
 
             <div class="info-list">
-                <div>Teilnahme-Code: <?php echo htmlspecialchars($code); ?></div>
+                <div style="font-size: 1.3rem; font-weight: bold;">Teilnahme-Code: <?php echo htmlspecialchars($code); ?></div>
             </div>
         </section>
 
         <section class="auth-card">
             <div class="auth-header">
-                <span class="eyebrow">Lobby bereit</span>
-                <h2>Teilnehmer warten</h2>
-                <p>Starte das Quiz, sobald alle Teilnehmer beigetreten sind.</p>
+                <span class="eyebrow">Lobby aktiv</span>
+                <h2>Teilnehmer (<span id="player-count">0</span>)</h2>
+                <p>Hier siehst du alle verbundenen Spieler:</p>
             </div>
 
-            <button class="btn btn-primary" onclick="window.location.href='game.php'">
-                Quiz starten
-            </button>
+            <ul id="players" class="player-list">
+                </ul>
+
+            <?php if ($is_host): ?>
+                <button class="btn btn-primary" onclick="startQuiz()">
+                    Quiz für alle starten
+                </button>
+            <?php else: ?>
+                <div class="status-message">Warte darauf, dass der Host das Spiel startet...</div>
+            <?php endif; ?>
+
             <div class="auth-links">
                 <p>Zurück?</p>
                 <a href="dashboard.php">Zurück zum Dashboard</a>
@@ -140,5 +160,52 @@ if (!isset($_SESSION['quiz_questions'])) {
         </section>
     </main>
 
+    <script>
+        const lobbyId = <?php echo (int)$lobby_id; ?>;
+        const isHost = <?php echo $is_host ? 'true' : 'false'; ?>;
+
+        function updateLobby() {
+            // 1. Spielerliste laden und den Status der Lobby abfragen
+            fetch('get_lobby_status.php?lobby_id=' + lobbyId)
+                .then(response => response.json())
+                .then(data => {
+                    // Spielerliste aktualisieren
+                    const list = document.getElementById('players');
+                    const count = document.getElementById('player-count');
+                    list.innerHTML = '';
+                    count.innerText = data.players.length;
+
+                    data.players.forEach(p => {
+                        const li = document.createElement('li');
+                        li.className = 'player-item';
+                        li.innerText = p.player_name;
+                        list.appendChild(li);
+                    });
+
+                    // 2. Wenn das Spiel gestartet wurde, leite zum Spiel weiter
+                    if (data.is_started === 1) {
+                        window.location.href = 'game.php';
+                    }
+                })
+                .catch(err => console.error("Fehler beim Aktualisieren der Lobby:", err));
+        }
+
+        function startQuiz() {
+            // Sende dem Server das Signal, die Lobby auf 'is_started = 1' zu setzen
+            fetch('start_lobby_action.php?lobby_id=' + lobbyId, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = 'game.php';
+                    } else {
+                        alert("Fehler beim Starten des Spiels.");
+                    }
+                });
+        }
+
+        // Alle 2 Sekunden die Lobby aktualisieren (Polling)
+        setInterval(updateLobby, 2000);
+        updateLobby(); // Sofort einmal ausführen
+    </script>
 </body>
 </html>
