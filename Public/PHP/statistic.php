@@ -7,12 +7,15 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$username = isset($_SESSION['username']) ? $_SESSION['username'] : "Gast";
+// Session-Infos
+$username = isset($_SESSION['username']) ? $_SESSION['username'] : "test";
+$bereich = isset($_SESSION['bereich']) ? $_SESSION['bereich'] : ""; // IT oder Pflege
 
-// Platzhalter-Daten
+// Platzhalter-Daten (werden später aus DB geladen)
 $statistics = [
     [
         "thema" => "IT",
+        "bereich" => "IT",
         "richtige_fragen" => 8,
         "endpunktzahl" => 80,
         "platz" => 2,
@@ -21,6 +24,7 @@ $statistics = [
     ],
     [
         "thema" => "Pflege",
+        "bereich" => "Pflege",
         "richtige_fragen" => 10,
         "endpunktzahl" => 100,
         "platz" => 1,
@@ -28,6 +32,11 @@ $statistics = [
         "datum" => "2026-05-21 14:15"
     ]
 ];
+
+// Filter auf den Bereich des Users
+$statistics = array_filter($statistics, function($stat) use ($bereich) {
+    return $stat['bereich'] === $bereich;
+});
 ?>
 <!DOCTYPE html>
 <html lang="de">
