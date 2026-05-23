@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 22. Mai 2026 um 15:17
+-- Erstellungszeit: 23. Mai 2026 um 12:20
 -- Server-Version: 10.4.32-MariaDB
 -- PHP-Version: 8.2.12
 
@@ -212,7 +212,23 @@ INSERT INTO `lobby_players` (`id`, `lobby_id`, `player_name`, `joined_at`) VALUE
 (27, 17, 'test', '2026-05-22 12:58:24'),
 (28, 18, 'test', '2026-05-22 13:09:42'),
 (29, 19, 'test', '2026-05-22 13:10:21'),
-(30, 20, 'Gast', '2026-05-22 13:10:48');
+(30, 20, 'Gast', '2026-05-22 13:10:48'),
+(31, 21, 'Gast', '2026-05-22 13:30:46'),
+(32, 21, 'test', '2026-05-22 13:31:19'),
+(33, 22, 'Gast', '2026-05-22 13:45:01'),
+(34, 22, 'test', '2026-05-22 13:45:52'),
+(35, 23, 'Gast', '2026-05-22 13:50:14'),
+(36, 23, 'test', '2026-05-22 13:50:39'),
+(37, 24, 'Gast', '2026-05-22 13:54:07'),
+(38, 24, 'test', '2026-05-22 13:54:16'),
+(39, 25, 'Gast', '2026-05-22 13:56:31'),
+(40, 25, 'test', '2026-05-22 13:57:11'),
+(41, 26, 'Gast', '2026-05-22 13:58:06'),
+(42, 26, 'test', '2026-05-22 13:58:32'),
+(43, 27, 'test', '2026-05-23 08:31:07'),
+(44, 27, 'Gast-1887', '2026-05-23 08:31:34'),
+(45, 28, 'Gast', '2026-05-23 08:37:18'),
+(46, 28, 'Gast-9719', '2026-05-23 08:37:41');
 
 -- --------------------------------------------------------
 
@@ -311,7 +327,87 @@ INSERT INTO `lobby_questions` (`id`, `lobby_id`, `question_id`, `sort_order`) VA
 (77, 20, 3, 6),
 (78, 20, 9, 7),
 (79, 20, 8, 8),
-(80, 20, 2, 9);
+(80, 20, 2, 9),
+(81, 21, 10, 0),
+(82, 21, 9, 1),
+(83, 21, 7, 2),
+(84, 21, 4, 3),
+(85, 21, 6, 4),
+(86, 21, 1, 5),
+(87, 21, 2, 6),
+(88, 21, 8, 7),
+(89, 21, 5, 8),
+(90, 21, 3, 9),
+(91, 22, 7, 0),
+(92, 22, 4, 1),
+(93, 22, 8, 2),
+(94, 22, 6, 3),
+(95, 22, 9, 4),
+(96, 22, 10, 5),
+(97, 22, 5, 6),
+(98, 22, 3, 7),
+(99, 22, 1, 8),
+(100, 22, 2, 9),
+(101, 23, 9, 0),
+(102, 23, 6, 1),
+(103, 23, 8, 2),
+(104, 23, 5, 3),
+(105, 23, 4, 4),
+(106, 23, 3, 5),
+(107, 23, 10, 6),
+(108, 23, 2, 7),
+(109, 23, 1, 8),
+(110, 23, 7, 9),
+(111, 24, 2, 0),
+(112, 24, 7, 1),
+(113, 24, 5, 2),
+(114, 24, 8, 3),
+(115, 24, 3, 4),
+(116, 24, 9, 5),
+(117, 24, 1, 6),
+(118, 24, 4, 7),
+(119, 24, 10, 8),
+(120, 24, 6, 9),
+(121, 25, 1, 0),
+(122, 25, 5, 1),
+(123, 25, 9, 2),
+(124, 25, 4, 3),
+(125, 25, 7, 4),
+(126, 25, 8, 5),
+(127, 25, 2, 6),
+(128, 25, 10, 7),
+(129, 25, 6, 8),
+(130, 25, 3, 9),
+(131, 26, 2, 0),
+(132, 26, 3, 1),
+(133, 26, 9, 2),
+(134, 26, 10, 3),
+(135, 26, 8, 4),
+(136, 26, 5, 5),
+(137, 26, 7, 6),
+(138, 26, 1, 7),
+(139, 26, 4, 8),
+(140, 26, 6, 9),
+(141, 27, 1, 0),
+(142, 27, 6, 1),
+(143, 27, 7, 2),
+(144, 27, 4, 3),
+(145, 27, 8, 4),
+(146, 27, 2, 5),
+(147, 27, 5, 6),
+(148, 27, 9, 7),
+(149, 27, 3, 8),
+(150, 27, 10, 9),
+(151, 28, 5, 0),
+(152, 28, 8, 1),
+(153, 28, 1, 2),
+(154, 28, 6, 3),
+(155, 28, 3, 4),
+(156, 28, 4, 5),
+(157, 28, 2, 6),
+(158, 28, 7, 7),
+(159, 28, 10, 8),
+(160, 28, 9, 9);
 
 -- --------------------------------------------------------
 
@@ -351,6 +447,63 @@ CREATE TABLE `participants` (
   `removed_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `player_answers`
+--
+
+CREATE TABLE `player_answers` (
+  `id` int(11) NOT NULL,
+  `lobby_id` int(11) NOT NULL,
+  `question_id` int(11) NOT NULL,
+  `player_name` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Daten für Tabelle `player_answers`
+--
+
+INSERT INTO `player_answers` (`id`, `lobby_id`, `question_id`, `player_name`) VALUES
+(4, 22, 4, 'Gast'),
+(3, 22, 4, 'test'),
+(2, 22, 7, 'Gast'),
+(1, 22, 7, 'test'),
+(8, 23, 6, 'Gast'),
+(7, 23, 6, 'test'),
+(5, 23, 9, 'Gast'),
+(6, 23, 9, 'test'),
+(10, 25, 1, 'Gast'),
+(9, 25, 1, 'test'),
+(11, 25, 5, 'Gast'),
+(12, 25, 5, 'test'),
+(27, 26, 1, 'Gast'),
+(28, 26, 1, 'test'),
+(13, 26, 2, 'Gast'),
+(14, 26, 2, 'test'),
+(16, 26, 3, 'Gast'),
+(15, 26, 3, 'test'),
+(30, 26, 4, 'Gast'),
+(29, 26, 4, 'test'),
+(24, 26, 5, 'Gast'),
+(23, 26, 5, 'test'),
+(31, 26, 6, 'Gast'),
+(32, 26, 6, 'test'),
+(25, 26, 7, 'Gast'),
+(26, 26, 7, 'test'),
+(21, 26, 8, 'Gast'),
+(22, 26, 8, 'test'),
+(18, 26, 9, 'Gast'),
+(17, 26, 9, 'test'),
+(20, 26, 10, 'Gast'),
+(19, 26, 10, 'test'),
+(33, 27, 1, 'Gast'),
+(34, 27, 1, 'Gast-1887'),
+(35, 27, 6, 'Gast'),
+(36, 27, 6, 'Gast-1887'),
+(37, 28, 5, 'Gast'),
+(38, 28, 5, 'Gast-9719');
 
 -- --------------------------------------------------------
 
@@ -448,34 +601,44 @@ CREATE TABLE `quiz_lobbies` (
   `point_mode` varchar(50) DEFAULT NULL,
   `host_plays` varchar(3) DEFAULT NULL,
   `is_started` tinyint(1) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `current_question_index` int(11) DEFAULT 0,
+  `show_explanation` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Daten für Tabelle `quiz_lobbies`
 --
 
-INSERT INTO `quiz_lobbies` (`id`, `join_code`, `host_name`, `question_pool`, `question_count`, `time_limit`, `point_mode`, `host_plays`, `is_started`, `created_at`) VALUES
-(1, 'JSQK2', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:03:06'),
-(2, 'G5G34', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:11:10'),
-(3, 'TYHBH', 'testspieler', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:22:10'),
-(4, 'AZ5EY', 'testspieler', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:23:21'),
-(5, '9RAAC', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:24:29'),
-(6, 'T4SLK', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:44:52'),
-(7, 'YSKQN', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'no', 1, '2026-05-22 09:51:12'),
-(8, 'A4PWY', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 10:55:25'),
-(9, '8M2KW', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 10:58:51'),
-(10, 'NJBZ7', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:01:32'),
-(11, 'AMNPW', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:18:10'),
-(12, 'KCJTH', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:37:52'),
-(13, 'FLU4M', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:53:05'),
-(14, 'Q3MHQ', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:56:28'),
-(15, 'HWAF2', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:57:50'),
-(16, 'H8WTR', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 12:50:28'),
-(17, 'JFE6P', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 12:58:24'),
-(18, 'YESYC', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 13:09:42'),
-(19, 'D7MZZ', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 13:10:21'),
-(20, 'P4CD5', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 13:10:48');
+INSERT INTO `quiz_lobbies` (`id`, `join_code`, `host_name`, `question_pool`, `question_count`, `time_limit`, `point_mode`, `host_plays`, `is_started`, `created_at`, `current_question_index`, `show_explanation`) VALUES
+(1, 'JSQK2', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:03:06', 0, 0),
+(2, 'G5G34', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:11:10', 0, 0),
+(3, 'TYHBH', 'testspieler', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:22:10', 0, 0),
+(4, 'AZ5EY', 'testspieler', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:23:21', 0, 0),
+(5, '9RAAC', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:24:29', 0, 0),
+(6, 'T4SLK', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 09:44:52', 0, 0),
+(7, 'YSKQN', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'no', 1, '2026-05-22 09:51:12', 0, 0),
+(8, 'A4PWY', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 10:55:25', 0, 0),
+(9, '8M2KW', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 10:58:51', 0, 0),
+(10, 'NJBZ7', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:01:32', 0, 0),
+(11, 'AMNPW', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:18:10', 0, 0),
+(12, 'KCJTH', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:37:52', 0, 0),
+(13, 'FLU4M', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:53:05', 0, 0),
+(14, 'Q3MHQ', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:56:28', 0, 0),
+(15, 'HWAF2', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 11:57:50', 0, 0),
+(16, 'H8WTR', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 12:50:28', 0, 0),
+(17, 'JFE6P', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 12:58:24', 0, 0),
+(18, 'YESYC', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-22 13:09:42', 0, 0),
+(19, 'D7MZZ', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 13:10:21', 0, 0),
+(20, 'P4CD5', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 13:10:48', 0, 0),
+(21, '5H2QR', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 13:30:46', 8, 0),
+(22, '9NXSH', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 13:45:01', 1, 1),
+(23, 'KU5K9', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 13:50:14', 1, 1),
+(24, 'JTAXC', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 13:54:07', 0, 0),
+(25, '6LNH7', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 13:56:31', 1, 1),
+(26, '4AAT2', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 13:58:06', 10, 0),
+(27, 'JWZVL', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-23 08:31:07', 1, 1),
+(28, '6PCJX', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-23 08:37:18', 1, 0);
 
 -- --------------------------------------------------------
 
@@ -638,6 +801,13 @@ ALTER TABLE `participants`
   ADD KEY `idx_participants_is_removed` (`is_removed`);
 
 --
+-- Indizes für die Tabelle `player_answers`
+--
+ALTER TABLE `player_answers`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_player_question` (`lobby_id`,`question_id`,`player_name`);
+
+--
 -- Indizes für die Tabelle `questions`
 --
 ALTER TABLE `questions`
@@ -732,13 +902,13 @@ ALTER TABLE `game_statuses`
 -- AUTO_INCREMENT für Tabelle `lobby_players`
 --
 ALTER TABLE `lobby_players`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- AUTO_INCREMENT für Tabelle `lobby_questions`
 --
 ALTER TABLE `lobby_questions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=161;
 
 --
 -- AUTO_INCREMENT für Tabelle `media_files`
@@ -751,6 +921,12 @@ ALTER TABLE `media_files`
 --
 ALTER TABLE `participants`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT für Tabelle `player_answers`
+--
+ALTER TABLE `player_answers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT für Tabelle `questions`
@@ -768,7 +944,7 @@ ALTER TABLE `question_pools`
 -- AUTO_INCREMENT für Tabelle `quiz_lobbies`
 --
 ALTER TABLE `quiz_lobbies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT für Tabelle `roles`
