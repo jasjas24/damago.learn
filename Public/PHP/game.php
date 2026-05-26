@@ -202,7 +202,11 @@ foreach ($answers as $ans) {
                         } elseif ($wasSelected && !$isCorrect) {
                             $inlineStyle = "background: rgba(239,68,68,0.20) !important; color: #fca5a5 !important; border: 1px solid rgba(239,68,68,0.50) !important;";
                         }
-                        if ($wasSelected && $isCorrect) { $inlineStyle .= " border: 2px solid #fbbf24 !important;"; }
+                        if ($wasSelected && $isCorrect) {
+                            $inlineStyle .= " border: 4px solid #86efac !important; box-shadow: 0 0 0 5px rgba(34,197,94,0.45) !important;";
+                        } elseif ($wasSelected && !$isCorrect) {
+                            $inlineStyle .= " border: 4px solid #fca5a5 !important; box-shadow: 0 0 0 5px rgba(239,68,68,0.45) !important;";
+                        }
                     }
                 ?>
                     <button type="button"
