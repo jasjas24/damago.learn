@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 23. Mai 2026 um 12:20
+-- Erstellungszeit: 26. Mai 2026 um 11:31
 -- Server-Version: 10.4.32-MariaDB
 -- PHP-Version: 8.2.12
 
@@ -84,7 +84,47 @@ INSERT INTO `answer_options` (`id`, `question_id`, `sort_order`, `answer_text`, 
 (37, 10, 1, 'A B C', 1, 'Richtig. Der try-Block gibt zuerst A aus, die ValueError wird im except-Block behandelt und finally läuft immer am Ende.', 1, '2026-05-18 23:16:08', NULL, NULL),
 (38, 10, 2, 'A C', 0, 'Falsch. Der except-Block wird ausgeführt, daher fehlt B nicht in der Ausgabe.', 1, '2026-05-18 23:16:08', NULL, NULL),
 (39, 10, 3, 'B C', 0, 'Falsch. A wird bereits vor dem Auslösen der Exception ausgegeben.', 1, '2026-05-18 23:16:08', NULL, NULL),
-(40, 10, 4, 'A ValueError C', 0, 'Falsch. Die ValueError wird abgefangen und erscheint deshalb nicht als ungefangener Fehler in der Ausgabe.', 1, '2026-05-18 23:16:08', NULL, NULL);
+(40, 10, 4, 'A ValueError C', 0, 'Falsch. Die ValueError wird abgefangen und erscheint deshalb nicht als ungefangener Fehler in der Ausgabe.', 1, '2026-05-18 23:16:08', NULL, NULL),
+(41, 11, 1, '12', 1, 'Richtig. 3 × 4 = 12.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(42, 11, 2, '9', 0, 'Falsch. 9 wäre das Ergebnis von 3 × 3, nicht 3 × 4.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(43, 11, 3, '16', 0, 'Falsch. 16 ist das Ergebnis von 4 × 4.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(44, 11, 4, '11', 0, 'Falsch. 11 ist keine Zahl aus der Dreier- oder Vierreihe im kleinen Einmaleins.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(45, 12, 1, '42', 1, 'Richtig. 6 × 7 = 42.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(46, 12, 2, '36', 0, 'Falsch. 36 ist das Ergebnis von 6 × 6.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(47, 12, 3, '48', 0, 'Falsch. 48 ist das Ergebnis von 6 × 8.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(48, 12, 4, '35', 0, 'Falsch. 35 ist das Ergebnis von 5 × 7.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(49, 13, 1, '72', 1, 'Richtig. 8 × 9 = 72.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(50, 13, 2, '63', 0, 'Falsch. 63 ist das Ergebnis von 7 × 9.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(51, 13, 3, '81', 0, 'Falsch. 81 ist das Ergebnis von 9 × 9.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(52, 13, 4, '64', 0, 'Falsch. 64 ist das Ergebnis von 8 × 8.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(53, 14, 1, '20', 1, 'Richtig. 4 × 5 = 20.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(54, 14, 2, '16', 0, 'Falsch. 16 ist das Ergebnis von 4 × 4.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(55, 14, 3, '25', 0, 'Falsch. 25 ist das Ergebnis von 5 × 5.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(56, 14, 4, '18', 0, 'Falsch. 18 ist das Ergebnis von 3 × 6 oder 2 × 9.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(57, 15, 1, '56', 1, 'Richtig. 7 × 8 = 56.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(58, 15, 2, '49', 0, 'Falsch. 49 ist das Ergebnis von 7 × 7.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(59, 15, 3, '64', 0, 'Falsch. 64 ist das Ergebnis von 8 × 8.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(60, 15, 4, '54', 0, 'Falsch. 54 ist das Ergebnis von 6 × 9.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(61, 16, 1, '54', 1, 'Richtig. 9 × 6 = 54.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(62, 16, 2, '63', 0, 'Falsch. 63 ist das Ergebnis von 9 × 7.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(63, 16, 3, '48', 0, 'Falsch. 48 ist das Ergebnis von 6 × 8.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(64, 16, 4, '45', 0, 'Falsch. 45 ist das Ergebnis von 9 × 5.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(65, 17, 1, '25', 1, 'Richtig. 5 × 5 = 25. Quadratzahl der 5.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(66, 17, 2, '20', 0, 'Falsch. 20 ist das Ergebnis von 4 × 5.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(67, 17, 3, '30', 0, 'Falsch. 30 ist das Ergebnis von 5 × 6.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(68, 17, 4, '10', 0, 'Falsch. 10 ist das Ergebnis von 5 × 2.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(69, 18, 1, '27', 1, 'Richtig. 3 × 9 = 27.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(70, 18, 2, '21', 0, 'Falsch. 21 ist das Ergebnis von 3 × 7.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(71, 18, 3, '24', 0, 'Falsch. 24 ist das Ergebnis von 3 × 8.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(72, 18, 4, '30', 0, 'Falsch. 30 ist das Ergebnis von 3 × 10.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(73, 19, 1, '36', 1, 'Richtig. 6 × 6 = 36. Quadratzahl der 6.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(74, 19, 2, '30', 0, 'Falsch. 30 ist das Ergebnis von 5 × 6.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(75, 19, 3, '42', 0, 'Falsch. 42 ist das Ergebnis von 6 × 7.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(76, 19, 4, '32', 0, 'Falsch. 32 ist das Ergebnis von 4 × 8.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(77, 20, 1, '28', 1, 'Richtig. 7 × 4 = 28.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(78, 20, 2, '21', 0, 'Falsch. 21 ist das Ergebnis von 7 × 3.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(79, 20, 3, '32', 0, 'Falsch. 32 ist das Ergebnis von 4 × 8.', 1, '2026-05-26 10:00:00', NULL, NULL),
+(80, 20, 4, '24', 0, 'Falsch. 24 ist das Ergebnis von 4 × 6.', 1, '2026-05-26 10:00:00', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -175,60 +215,86 @@ CREATE TABLE `lobby_players` (
   `id` int(11) NOT NULL,
   `lobby_id` int(11) NOT NULL,
   `player_name` varchar(50) NOT NULL,
-  `joined_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `joined_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `points` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Daten für Tabelle `lobby_players`
 --
 
-INSERT INTO `lobby_players` (`id`, `lobby_id`, `player_name`, `joined_at`) VALUES
-(1, 1, 'Gast', '2026-05-22 09:03:06'),
-(2, 2, 'Gast', '2026-05-22 09:11:10'),
-(3, 2, 'test', '2026-05-22 09:11:19'),
-(4, 2, 'testspieler', '2026-05-22 09:14:14'),
-(5, 3, 'testspieler', '2026-05-22 09:22:10'),
-(6, 4, 'testspieler', '2026-05-22 09:23:21'),
-(7, 5, 'Gast', '2026-05-22 09:24:29'),
-(8, 5, 'testspieler', '2026-05-22 09:24:55'),
-(9, 6, 'Gast', '2026-05-22 09:44:52'),
-(10, 6, 'Gast-9543', '2026-05-22 09:45:28'),
-(11, 6, 'test', '2026-05-22 09:50:22'),
-(12, 7, 'test', '2026-05-22 09:51:26'),
-(13, 8, 'test', '2026-05-22 10:55:25'),
-(14, 8, 'Gast-2803', '2026-05-22 10:55:55'),
-(15, 9, 'test', '2026-05-22 10:58:51'),
-(16, 10, 'Gast', '2026-05-22 11:01:32'),
-(17, 10, 'Gast-9358', '2026-05-22 11:01:54'),
-(18, 11, 'test', '2026-05-22 11:18:10'),
-(19, 12, 'Gast', '2026-05-22 11:37:52'),
-(20, 13, 'Gast', '2026-05-22 11:53:05'),
-(21, 13, 'Gast-6593', '2026-05-22 11:53:29'),
-(22, 14, 'test', '2026-05-22 11:56:28'),
-(23, 14, 'Gast-6914', '2026-05-22 11:56:53'),
-(24, 15, 'Gast', '2026-05-22 11:57:50'),
-(25, 15, 'Gast-5687', '2026-05-22 11:58:13'),
-(26, 16, 'Gast', '2026-05-22 12:50:28'),
-(27, 17, 'test', '2026-05-22 12:58:24'),
-(28, 18, 'test', '2026-05-22 13:09:42'),
-(29, 19, 'test', '2026-05-22 13:10:21'),
-(30, 20, 'Gast', '2026-05-22 13:10:48'),
-(31, 21, 'Gast', '2026-05-22 13:30:46'),
-(32, 21, 'test', '2026-05-22 13:31:19'),
-(33, 22, 'Gast', '2026-05-22 13:45:01'),
-(34, 22, 'test', '2026-05-22 13:45:52'),
-(35, 23, 'Gast', '2026-05-22 13:50:14'),
-(36, 23, 'test', '2026-05-22 13:50:39'),
-(37, 24, 'Gast', '2026-05-22 13:54:07'),
-(38, 24, 'test', '2026-05-22 13:54:16'),
-(39, 25, 'Gast', '2026-05-22 13:56:31'),
-(40, 25, 'test', '2026-05-22 13:57:11'),
-(41, 26, 'Gast', '2026-05-22 13:58:06'),
-(42, 26, 'test', '2026-05-22 13:58:32'),
-(43, 27, 'test', '2026-05-23 08:31:07'),
-(44, 27, 'Gast-1887', '2026-05-23 08:31:34'),
-(45, 28, 'Gast', '2026-05-23 08:37:18'),
-(46, 28, 'Gast-9719', '2026-05-23 08:37:41');
+INSERT INTO `lobby_players` (`id`, `lobby_id`, `player_name`, `joined_at`, `points`) VALUES
+(1, 1, 'Gast', '2026-05-22 09:03:06', 0),
+(2, 2, 'Gast', '2026-05-22 09:11:10', 0),
+(3, 2, 'test', '2026-05-22 09:11:19', 0),
+(4, 2, 'testspieler', '2026-05-22 09:14:14', 0),
+(5, 3, 'testspieler', '2026-05-22 09:22:10', 0),
+(6, 4, 'testspieler', '2026-05-22 09:23:21', 0),
+(7, 5, 'Gast', '2026-05-22 09:24:29', 0),
+(8, 5, 'testspieler', '2026-05-22 09:24:55', 0),
+(9, 6, 'Gast', '2026-05-22 09:44:52', 0),
+(10, 6, 'Gast-9543', '2026-05-22 09:45:28', 0),
+(11, 6, 'test', '2026-05-22 09:50:22', 0),
+(12, 7, 'test', '2026-05-22 09:51:26', 0),
+(13, 8, 'test', '2026-05-22 10:55:25', 0),
+(14, 8, 'Gast-2803', '2026-05-22 10:55:55', 0),
+(15, 9, 'test', '2026-05-22 10:58:51', 0),
+(16, 10, 'Gast', '2026-05-22 11:01:32', 0),
+(17, 10, 'Gast-9358', '2026-05-22 11:01:54', 0),
+(18, 11, 'test', '2026-05-22 11:18:10', 0),
+(19, 12, 'Gast', '2026-05-22 11:37:52', 0),
+(20, 13, 'Gast', '2026-05-22 11:53:05', 0),
+(21, 13, 'Gast-6593', '2026-05-22 11:53:29', 0),
+(22, 14, 'test', '2026-05-22 11:56:28', 0),
+(23, 14, 'Gast-6914', '2026-05-22 11:56:53', 0),
+(24, 15, 'Gast', '2026-05-22 11:57:50', 0),
+(25, 15, 'Gast-5687', '2026-05-22 11:58:13', 0),
+(26, 16, 'Gast', '2026-05-22 12:50:28', 0),
+(27, 17, 'test', '2026-05-22 12:58:24', 0),
+(28, 18, 'test', '2026-05-22 13:09:42', 0),
+(29, 19, 'test', '2026-05-22 13:10:21', 0),
+(30, 20, 'Gast', '2026-05-22 13:10:48', 0),
+(31, 21, 'Gast', '2026-05-22 13:30:46', 0),
+(32, 21, 'test', '2026-05-22 13:31:19', 0),
+(33, 22, 'Gast', '2026-05-22 13:45:01', 0),
+(34, 22, 'test', '2026-05-22 13:45:52', 0),
+(35, 23, 'Gast', '2026-05-22 13:50:14', 0),
+(36, 23, 'test', '2026-05-22 13:50:39', 0),
+(37, 24, 'Gast', '2026-05-22 13:54:07', 0),
+(38, 24, 'test', '2026-05-22 13:54:16', 0),
+(39, 25, 'Gast', '2026-05-22 13:56:31', 0),
+(40, 25, 'test', '2026-05-22 13:57:11', 0),
+(41, 26, 'Gast', '2026-05-22 13:58:06', 0),
+(42, 26, 'test', '2026-05-22 13:58:32', 0),
+(43, 27, 'test', '2026-05-23 08:31:07', 0),
+(44, 27, 'Gast-1887', '2026-05-23 08:31:34', 0),
+(45, 28, 'Gast', '2026-05-23 08:37:18', 0),
+(46, 28, 'Gast-9719', '2026-05-23 08:37:41', 0),
+(47, 29, 'Gast', '2026-05-26 06:00:13', 0),
+(48, 29, 'test', '2026-05-26 06:00:56', 0),
+(49, 30, 'Gast', '2026-05-26 06:29:18', 0),
+(50, 30, 'Gast-8292', '2026-05-26 06:29:45', 0),
+(51, 31, 'Gast', '2026-05-26 06:30:50', 0),
+(52, 31, 'Gast-7443', '2026-05-26 06:31:12', 0),
+(53, 32, 'Gast', '2026-05-26 07:58:22', 0),
+(54, 33, 'Gast', '2026-05-26 08:07:07', 0),
+(55, 34, 'Gast', '2026-05-26 08:08:42', 0),
+(56, 35, 'Gast', '2026-05-26 08:10:23', 0),
+(57, 36, 'Gast', '2026-05-26 08:19:11', 2000),
+(58, 37, 'Gast', '2026-05-26 08:50:31', 3000),
+(59, 37, 'Gast-5151', '2026-05-26 08:50:46', 3000),
+(60, 38, 'Gast', '2026-05-26 08:54:41', 0),
+(61, 38, 'Gast-4856', '2026-05-26 08:54:48', 0),
+(62, 38, 'Gast-5434', '2026-05-26 09:05:06', 0),
+(63, 39, 'Gast', '2026-05-26 09:05:49', 0),
+(64, 40, 'Gast', '2026-05-26 09:05:59', 0),
+(65, 41, 'Gast', '2026-05-26 09:06:46', 0),
+(66, 42, 'Gast', '2026-05-26 09:09:33', 0),
+(67, 42, 'Gast-4050', '2026-05-26 09:10:26', 0),
+(68, 42, 'Gast-2432', '2026-05-26 09:10:47', 0),
+(69, 43, 'Gast', '2026-05-26 09:12:40', 1000),
+(70, 43, 'Gast-4701', '2026-05-26 09:12:46', 2000),
+(71, 44, 'Gast', '2026-05-26 09:28:51', 4000);
 
 -- --------------------------------------------------------
 
@@ -407,7 +473,117 @@ INSERT INTO `lobby_questions` (`id`, `lobby_id`, `question_id`, `sort_order`) VA
 (157, 28, 2, 6),
 (158, 28, 7, 7),
 (159, 28, 10, 8),
-(160, 28, 9, 9);
+(160, 28, 9, 9),
+(161, 29, 3, 0),
+(162, 29, 7, 1),
+(163, 29, 4, 2),
+(164, 29, 9, 3),
+(165, 29, 6, 4),
+(166, 29, 2, 5),
+(167, 29, 8, 6),
+(168, 29, 5, 7),
+(169, 29, 1, 8),
+(170, 29, 10, 9),
+(171, 31, 6, 0),
+(172, 31, 8, 1),
+(173, 31, 9, 2),
+(174, 31, 5, 3),
+(175, 31, 3, 4),
+(176, 31, 10, 5),
+(177, 31, 2, 6),
+(178, 31, 1, 7),
+(179, 31, 7, 8),
+(180, 31, 4, 9),
+(181, 32, 2, 0),
+(182, 32, 9, 1),
+(183, 32, 7, 2),
+(184, 32, 10, 3),
+(185, 32, 1, 4),
+(186, 32, 3, 5),
+(187, 32, 6, 6),
+(188, 32, 8, 7),
+(189, 32, 5, 8),
+(190, 32, 4, 9),
+(191, 33, 8, 0),
+(192, 33, 2, 1),
+(193, 33, 4, 2),
+(194, 33, 10, 3),
+(195, 33, 1, 4),
+(196, 33, 9, 5),
+(197, 33, 3, 6),
+(198, 33, 7, 7),
+(199, 33, 5, 8),
+(200, 33, 6, 9),
+(201, 34, 7, 0),
+(202, 34, 1, 1),
+(203, 34, 4, 2),
+(204, 34, 5, 3),
+(205, 34, 6, 4),
+(206, 34, 9, 5),
+(207, 34, 3, 6),
+(208, 34, 2, 7),
+(209, 34, 8, 8),
+(210, 34, 10, 9),
+(211, 35, 4, 0),
+(212, 35, 2, 1),
+(213, 35, 3, 2),
+(214, 35, 5, 3),
+(215, 35, 9, 4),
+(216, 35, 1, 5),
+(217, 35, 10, 6),
+(218, 35, 7, 7),
+(219, 35, 6, 8),
+(220, 35, 8, 9),
+(221, 36, 6, 0),
+(222, 36, 1, 1),
+(223, 36, 2, 2),
+(224, 36, 7, 3),
+(225, 36, 4, 4),
+(226, 36, 10, 5),
+(227, 36, 8, 6),
+(228, 36, 3, 7),
+(229, 36, 9, 8),
+(230, 36, 5, 9),
+(231, 37, 8, 0),
+(232, 37, 6, 1),
+(233, 37, 3, 2),
+(234, 37, 7, 3),
+(235, 37, 2, 4),
+(236, 37, 5, 5),
+(237, 37, 10, 6),
+(238, 37, 9, 7),
+(239, 37, 1, 8),
+(240, 37, 4, 9),
+(241, 42, 3, 0),
+(242, 42, 1, 1),
+(243, 42, 10, 2),
+(244, 42, 9, 3),
+(245, 42, 4, 4),
+(246, 42, 7, 5),
+(247, 42, 6, 6),
+(248, 42, 8, 7),
+(249, 42, 2, 8),
+(250, 42, 5, 9),
+(251, 43, 1, 0),
+(252, 43, 2, 1),
+(253, 43, 4, 2),
+(254, 43, 5, 3),
+(255, 43, 8, 4),
+(256, 43, 10, 5),
+(257, 43, 3, 6),
+(258, 43, 9, 7),
+(259, 43, 7, 8),
+(260, 43, 6, 9),
+(261, 44, 17, 0),
+(262, 44, 13, 1),
+(263, 44, 15, 2),
+(264, 44, 18, 3),
+(265, 44, 11, 4),
+(266, 44, 19, 5),
+(267, 44, 16, 6),
+(268, 44, 14, 7),
+(269, 44, 20, 8),
+(270, 44, 12, 9);
 
 -- --------------------------------------------------------
 
@@ -503,7 +679,83 @@ INSERT INTO `player_answers` (`id`, `lobby_id`, `question_id`, `player_name`) VA
 (35, 27, 6, 'Gast'),
 (36, 27, 6, 'Gast-1887'),
 (37, 28, 5, 'Gast'),
-(38, 28, 5, 'Gast-9719');
+(38, 28, 5, 'Gast-9719'),
+(39, 29, 3, 'Gast'),
+(40, 29, 3, 'test'),
+(41, 31, 6, 'Gast'),
+(42, 31, 6, 'Gast-7443'),
+(43, 31, 8, 'Gast'),
+(44, 31, 8, 'Gast-7443'),
+(45, 32, 2, 'Gast'),
+(47, 32, 7, 'Gast'),
+(46, 32, 9, 'Gast'),
+(49, 33, 2, 'Gast'),
+(50, 33, 4, 'Gast'),
+(48, 33, 8, 'Gast'),
+(51, 33, 10, 'Gast'),
+(53, 34, 1, 'Gast'),
+(52, 34, 7, 'Gast'),
+(55, 35, 2, 'Gast'),
+(56, 35, 3, 'Gast'),
+(54, 35, 4, 'Gast'),
+(57, 35, 5, 'Gast'),
+(58, 35, 9, 'Gast'),
+(60, 36, 1, 'Gast'),
+(61, 36, 2, 'Gast'),
+(66, 36, 3, 'Gast'),
+(63, 36, 4, 'Gast'),
+(59, 36, 6, 'Gast'),
+(62, 36, 7, 'Gast'),
+(65, 36, 8, 'Gast'),
+(67, 36, 9, 'Gast'),
+(64, 36, 10, 'Gast'),
+(84, 37, 1, 'Gast'),
+(85, 37, 1, 'Gast-5151'),
+(76, 37, 2, 'Gast'),
+(77, 37, 2, 'Gast-5151'),
+(72, 37, 3, 'Gast'),
+(73, 37, 3, 'Gast-5151'),
+(87, 37, 4, 'Gast'),
+(86, 37, 4, 'Gast-5151'),
+(79, 37, 5, 'Gast'),
+(78, 37, 5, 'Gast-5151'),
+(71, 37, 6, 'Gast'),
+(70, 37, 6, 'Gast-5151'),
+(75, 37, 7, 'Gast'),
+(74, 37, 7, 'Gast-5151'),
+(69, 37, 8, 'Gast'),
+(68, 37, 8, 'Gast-5151'),
+(83, 37, 9, 'Gast'),
+(82, 37, 9, 'Gast-5151'),
+(80, 37, 10, 'Gast'),
+(81, 37, 10, 'Gast-5151'),
+(89, 42, 3, 'Gast'),
+(88, 42, 3, 'Gast-2432'),
+(90, 43, 1, 'Gast'),
+(91, 43, 1, 'Gast-4701'),
+(92, 43, 2, 'Gast'),
+(93, 43, 2, 'Gast-4701'),
+(104, 43, 3, 'Gast'),
+(103, 43, 3, 'Gast-4701'),
+(94, 43, 4, 'Gast'),
+(95, 43, 4, 'Gast-4701'),
+(97, 43, 5, 'Gast'),
+(96, 43, 5, 'Gast-4701'),
+(109, 43, 6, 'Gast'),
+(110, 43, 6, 'Gast-4701'),
+(107, 43, 7, 'Gast'),
+(108, 43, 7, 'Gast-4701'),
+(98, 43, 8, 'Gast'),
+(99, 43, 8, 'Gast-4701'),
+(105, 43, 9, 'Gast'),
+(106, 43, 9, 'Gast-4701'),
+(102, 43, 10, 'Gast'),
+(101, 43, 10, 'Gast-4701'),
+(115, 44, 11, 'Gast'),
+(112, 44, 13, 'Gast'),
+(113, 44, 15, 'Gast'),
+(111, 44, 17, 'Gast'),
+(114, 44, 18, 'Gast');
 
 -- --------------------------------------------------------
 
@@ -538,7 +790,17 @@ INSERT INTO `questions` (`id`, `question_pool_id`, `question_text`, `image_id`, 
 (7, 1, 'Consider the following code. Which of the following statements about this code are correct?\r\n\r\nclass Config:\r\n    debug = False\r\n\r\nclass AppConfig(Config):\r\n    debug = True\r\n\r\nac = AppConfig()\r\nprint(ac.debug)', NULL, 'Diese Frage prüft die Reihenfolge der Attributauflösung bei Instanzen, Klassen und Basisklassen.', 1, 1, '2026-05-18 23:16:07', NULL, NULL),
 (8, 1, 'Which two statements about instance methods are correct?', NULL, 'Diese Frage prüft den self-Parameter und den automatischen Methodenaufruf über eine Instanz.', 1, 1, '2026-05-18 23:16:08', NULL, NULL),
 (9, 1, 'What output does the following code produce?\r\n\r\nimport math\r\nprint(math.floor(-3.7))', NULL, 'Diese Frage prüft das Verhalten von math.floor() bei negativen Zahlen.', 1, 1, '2026-05-18 23:16:08', NULL, NULL),
-(10, 1, 'Consider the following code. What is printed?\r\n\r\ntry:\r\n    print(\"A\", end=\" \")\r\n    raise ValueError(\"bad\")\r\nexcept ValueError:\r\n    print(\"B\", end=\" \")\r\nfinally:\r\n    print(\"C\")', NULL, 'Diese Frage prüft die Ausführungsreihenfolge von try, except und finally.', 1, 1, '2026-05-18 23:16:08', NULL, NULL);
+(10, 1, 'Consider the following code. What is printed?\r\n\r\ntry:\r\n    print(\"A\", end=\" \")\r\n    raise ValueError(\"bad\")\r\nexcept ValueError:\r\n    print(\"B\", end=\" \")\r\nfinally:\r\n    print(\"C\")', NULL, 'Diese Frage prüft die Ausführungsreihenfolge von try, except und finally.', 1, 1, '2026-05-18 23:16:08', NULL, NULL),
+(11, 2, 'Was ist 3 × 4?', NULL, '3 × 4 bedeutet: dreimal die 4 addieren → 4 + 4 + 4 = 12.', 1, 1, '2026-05-26 10:00:00', NULL, NULL),
+(12, 2, 'Was ist 6 × 7?', NULL, '6 × 7 = 42. Eine gute Merkhilfe: „Sechs mal sieben ist zwei und vierzig\" – eine der häufig verwechselten Aufgaben im Einmaleins.', 1, 1, '2026-05-26 10:00:00', NULL, NULL),
+(13, 2, 'Was ist 8 × 9?', NULL, '8 × 9 = 72. Merktrick: 7, 8, 9 → 7 × 8 = 56, 8 × 9 = 72 (die Ziffern 7 und 2 folgen dem Muster der aufsteigenden Reihe).', 1, 1, '2026-05-26 10:00:00', NULL, NULL),
+(14, 2, 'Was ist 4 × 5?', NULL, '4 × 5 = 20. Die Fünferreihe liefert immer Vielfache von 5: 5, 10, 15, 20 – das vierte Glied ist 20.', 1, 1, '2026-05-26 10:00:00', NULL, NULL),
+(15, 2, 'Was ist 7 × 8?', NULL, '7 × 8 = 56. Merkhilfe: „Sieben mal acht – fünf und sechs macht\" (56).', 1, 1, '2026-05-26 10:00:00', NULL, NULL),
+(16, 2, 'Was ist 9 × 6?', NULL, '9 × 6 = 54. In der Neunerreihe sinkt die Zehnerstelle um 1 und steigt die Einerstelle um 1: 9, 18, 27, 36, 45, 54.', 1, 1, '2026-05-26 10:00:00', NULL, NULL),
+(17, 2, 'Was ist 5 × 5?', NULL, '5 × 5 = 25. Jede Quadratzahl der 5 endet auf 25: 5² = 25, 15² = 225, 25² = 625.', 1, 1, '2026-05-26 10:00:00', NULL, NULL),
+(18, 2, 'Was ist 3 × 9?', NULL, '3 × 9 = 27. In der Dreierreihe: 3, 6, 9, 12, 15, 18, 21, 24, 27 – das neunte Glied.', 1, 1, '2026-05-26 10:00:00', NULL, NULL),
+(19, 2, 'Was ist 6 × 6?', NULL, '6 × 6 = 36. Quadratzahlen sind nützlich: 1, 4, 9, 16, 25, 36 – 36 ist das Quadrat von 6.', 1, 1, '2026-05-26 10:00:00', NULL, NULL),
+(20, 2, 'Was ist 7 × 4?', NULL, '7 × 4 = 28. Die Vierreihe: 4, 8, 12, 16, 20, 24, 28 – das siebte Glied ist 28.', 1, 1, '2026-05-26 10:00:00', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -562,7 +824,8 @@ CREATE TABLE `question_pools` (
 --
 
 INSERT INTO `question_pools` (`id`, `name`, `description`, `created_by`, `is_active`, `created_at`, `updated_at`, `updated_by`) VALUES
-(1, 'PCAP Python Grundlagen Testpool', 'Test-Fragenpool mit zehn PCAP-Fragen aus dem Fragenkatalog. Enthält Multiple-Select-Fragen mit exakt vier Antwortmöglichkeiten und deutschen Erklärungen.', 1, 1, '2026-05-18 23:16:07', NULL, NULL);
+(1, 'PCAP Python Grundlagen Testpool', 'Test-Fragenpool mit zehn PCAP-Fragen aus dem Fragenkatalog. Enthält Multiple-Select-Fragen mit exakt vier Antwortmöglichkeiten und deutschen Erklärungen.', 1, 1, '2026-05-18 23:16:07', NULL, NULL),
+(2, 'Das kleine 1x1', 'Testpool mit 10 Multiplikationsaufgaben aus dem kleinen Einmaleins (1–10). Jede Frage hat genau eine richtige Antwort.', 1, 1, '2026-05-26 10:00:00', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -638,7 +901,23 @@ INSERT INTO `quiz_lobbies` (`id`, `join_code`, `host_name`, `question_pool`, `qu
 (25, '6LNH7', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 13:56:31', 1, 1),
 (26, '4AAT2', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-22 13:58:06', 10, 0),
 (27, 'JWZVL', 'test', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-23 08:31:07', 1, 1),
-(28, '6PCJX', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-23 08:37:18', 1, 0);
+(28, '6PCJX', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-23 08:37:18', 1, 0),
+(29, 'H2STG', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-26 06:00:13', 0, 1),
+(30, 'B9AVA', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-26 06:29:18', 0, 0),
+(31, 'KLQR5', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-26 06:30:50', 1, 1),
+(32, '7S3BJ', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-26 07:58:22', 2, 1),
+(33, 'RBAQW', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-26 08:07:07', 3, 1),
+(34, '6A4JU', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-26 08:08:42', 1, 1),
+(35, 'MEAC5', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-26 08:10:23', 4, 1),
+(36, 'VGXUD', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-26 08:19:11', 8, 1),
+(37, 'UTBZS', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-26 08:50:31', 10, 0),
+(38, 'TWGG6', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-26 08:54:41', 0, 0),
+(39, 'VF4HZ', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-26 09:05:49', 0, 0),
+(40, 'TWJEE', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-26 09:05:59', 0, 0),
+(41, 'SHTDB', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 0, '2026-05-26 09:06:46', 0, 0),
+(42, 'TVVUB', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-26 09:09:33', 0, 0),
+(43, 'QJ5RR', 'Gast', 'PCAP Python Grundlagen Testpool', 10, 30, 'partial', 'yes', 1, '2026-05-26 09:12:40', 9, 1),
+(44, 'ZEYZM', 'Gast', 'Das kleine 1x1', 10, 30, 'partial', 'yes', 1, '2026-05-26 09:28:51', 4, 1);
 
 -- --------------------------------------------------------
 
@@ -878,7 +1157,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT für Tabelle `answer_options`
 --
 ALTER TABLE `answer_options`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
 
 --
 -- AUTO_INCREMENT für Tabelle `departments`
@@ -902,13 +1181,13 @@ ALTER TABLE `game_statuses`
 -- AUTO_INCREMENT für Tabelle `lobby_players`
 --
 ALTER TABLE `lobby_players`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=72;
 
 --
 -- AUTO_INCREMENT für Tabelle `lobby_questions`
 --
 ALTER TABLE `lobby_questions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=161;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=271;
 
 --
 -- AUTO_INCREMENT für Tabelle `media_files`
@@ -926,25 +1205,25 @@ ALTER TABLE `participants`
 -- AUTO_INCREMENT für Tabelle `player_answers`
 --
 ALTER TABLE `player_answers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=116;
 
 --
 -- AUTO_INCREMENT für Tabelle `questions`
 --
 ALTER TABLE `questions`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT für Tabelle `question_pools`
 --
 ALTER TABLE `question_pools`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT für Tabelle `quiz_lobbies`
 --
 ALTER TABLE `quiz_lobbies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT für Tabelle `roles`
