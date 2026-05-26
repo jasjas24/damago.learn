@@ -2,10 +2,9 @@
 require_once 'init.php';
 /** @var string $username */
 
-
 /*
-    Test-Code für das Frontend.
-    Später wird dieser Code aus der Datenbank geladen.
+    Legacy-Seite: Teilnahme-Code eingeben (Testversion ohne DB-Validierung).
+    Für den produktiven Einsatz: join_quiz.php verwenden.
 */
 $hostCode = "A7K9";
 $error = "";
@@ -17,7 +16,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $error = "Bitte gib einen Teilnahme-Code ein.";
     } elseif ($enteredCode === $hostCode) {
         $_SESSION["join_code"] = $enteredCode;
-
         header("Location: ../lobby.html");
         exit;
     } else {
@@ -35,52 +33,52 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </head>
 <body class="auth-page">
 
+    <div class="page-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
     <?php include_once 'topbar.php'; ?>
 
     <main class="quiz-code-layout">
-        <section class="quiz-code-info">
-
+        <div class="quiz-code-info">
             <h1>Teilnahme-Code eingeben.</h1>
-
             <p>
                 Gib den Code ein, den du vom Host erhalten hast.
-                Erst danach kannst du der passenden Quiz-Lobby beitreten.
+                Danach wirst du automatisch in die Lobby der Quizrunde weitergeleitet.
             </p>
-
             <div class="quiz-code-hint">
                 Der Teilnahme-Code wird vom Host generiert
             </div>
-        </section>
+        </div>
 
-            <?php if (!empty($error)): ?>
-                <div class="message error">
-                    <?php echo htmlspecialchars($error); ?>
-                </div>
-            <?php endif; ?>
+        <?php if (!empty($error)): ?>
+            <div class="message error"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
 
-            <form class="auth-form" action="quiz_code.php" method="post">
-                <div class="form-group">
-                    <label for="join_code">Teilnahme-Code</label>
-                    <input
-                        type="text"
-                        id="join_code"
-                        name="join_code"
-                        placeholder="z. B. A7K9"
-                        maxlength="6"
-                        required
-                    >
-                </div>
-
-                <button type="submit" class="btn btn-primary">
-                    Lobby betreten
-                </button>
-            </form>
-
-            <div class="quiz-code-back">
-                <p>Du möchtest zurück?</p>
-                <a href="dashboard.php">Zurück zum Dashboard</a>
+        <form class="auth-form" action="quiz_code.php" method="post">
+            <div class="form-group">
+                <label for="join_code">Teilnahme-Code</label>
+                <input
+                    type="text"
+                    id="join_code"
+                    name="join_code"
+                    placeholder="z. B. A7K9"
+                    maxlength="6"
+                    required
+                >
             </div>
-        </section>
+
+            <button type="submit" class="btn btn-primary">
+                Lobby betreten
+            </button>
+        </form>
+
+        <div class="quiz-code-back">
+            <p>Du möchtest zurück?</p>
+            <a href="dashboard.php">Zurück zum Dashboard</a>
+        </div>
     </main>
 
 </body>

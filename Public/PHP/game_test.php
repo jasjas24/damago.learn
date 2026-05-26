@@ -25,11 +25,11 @@ if ($currentIndex >= $totalQuestions) {
 }
 
 $currentQuestion = $allQuestions[$currentIndex];
-$answers = $currentQuestion['answers']; 
+$answers = $currentQuestion['answers'];
 
 $rankingPlayers = [
     [
-        'username' => $_SESSION['username'] ?? 'Gast', 
+        'username' => $_SESSION['username'] ?? 'Gast',
         'score'    => $_SESSION['quiz_score'] ?? 0
     ]
 ];
@@ -46,7 +46,7 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quiz spielen | damago Quizsystem</title>
-<link rel="stylesheet" href="css/style.css"> <!-- Korrekt eingebunden -->
+<link rel="stylesheet" href="../CSS/style.css">
 </head>
 <body class="quiz-play-page">
 
@@ -73,8 +73,8 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
         <form class="millionaire-answers" id="quiz-form" action="<?php echo $showExplanation ? 'go_next.php' : 'next_question.php'; ?>" method="POST">
             <?php foreach ($answers as $letter => $ans): ?>
                 <?php $inlineStyle = ""; ?>
-                <button type="<?php echo $showExplanation ? 'submit' : 'button'; ?>" 
-                        class="millionaire-answer <?php echo $showExplanation ? '' : ''; ?>" 
+                <button type="<?php echo $showExplanation ? 'submit' : 'button'; ?>"
+                        class="millionaire-answer <?php echo $showExplanation ? '' : ''; ?>"
                         data-id="<?php echo $ans['id']; ?>"
                         <?php echo $showExplanation ? 'disabled' : ''; ?>>
                     <span class="answer-text">
@@ -107,8 +107,8 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
             <section class="question-card explanation-card">
                 <div class="question-label">Auflösung & Erklärungen</div>
                 <div>
-                    <strong>Ergebnis:</strong> 
-                    <?php 
+                    <strong>Ergebnis:</strong>
+                    <?php
                         if ($lastResult['status'] === 'correct') echo "<span class='correct-text'>Genial! Alle richtigen Antworten gefunden! (+".$lastResult['points_earned']." Punkte)</span>";
                         elseif ($lastResult['status'] === 'partial') echo "<span class='partial-text'>Teilweise richtig! (+".$lastResult['points_earned']." Punkte)</span>";
                         elseif ($lastResult['status'] === 'timeout') echo "<span class='timeout-text'>Zeit abgelaufen! (0 Punkte)</span>";
@@ -131,33 +131,34 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
     </section>
 
     <aside class="ranking-panel">
-        <section class="auth-card">
-            <div class="auth-header">
-                <span class="eyebrow">Live-Ranking</span>
-                <h2>Punktestand</h2>
-                <p>Die Teilnehmer mit den meisten Punkten stehen oben.</p>
-            </div>
-            <div class="ranking-list">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Pl.</th>
-                            <th>Name</th>
-                            <th>Punkte</th>
+        <div class="ranking-header">
+            <span class="eyebrow">Live-Ranking</span>
+            <h2>Punktestand</h2>
+            <p>Die Teilnehmer mit den meisten Punkten stehen oben.</p>
+        </div>
+        <div class="ranking-list" style="margin-top: 16px;">
+            <table class="ranking-table">
+                <thead>
+                    <tr>
+                        <th>Pl.</th>
+                        <th>Name</th>
+                        <th style="text-align: right;">Punkte</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($rankingPlayers as $index => $player): ?>
+                        <tr<?php echo ($player['username'] === $username) ? ' class="current-player"' : ''; ?>>
+                            <td><?php echo ($index + 1); ?>.</td>
+                            <td>
+                                <?php echo htmlspecialchars($player['username']); ?>
+                                <?php if ($player['username'] === $username) echo '<span class="you-badge">(Du)</span>'; ?>
+                            </td>
+                            <td class="score-cell"><?php echo $player['score']; ?></td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($rankingPlayers as $index => $player): ?>
-                            <tr class="<?php echo ($player['username'] === $username) ? 'current-player' : ''; ?>">
-                                <td><?php echo ($index + 1); ?>.</td>
-                                <td><?php echo htmlspecialchars($player['username']); ?><?php if ($player['username'] === $username) echo ' (Du)'; ?></td>
-                                <td><?php echo $player['score']; ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </aside>
 </main>
 
@@ -190,7 +191,7 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
                 timeoutInput.name = 'timeout';
                 timeoutInput.value = '1';
                 form.appendChild(timeoutInput);
-                form.action = 'next_question.php'; 
+                form.action = 'next_question.php';
                 form.submit();
             }
         }, 1000);

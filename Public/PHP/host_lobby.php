@@ -22,7 +22,7 @@ if (!$code) {
     // Ansicht für den beitretenden Spieler / Gast
     $lobby_id = $_SESSION['player_lobby_id'];
     $is_host = false;
-    
+
     // Code aus der DB holen für die Anzeige
     $stmtCode = $pdo->prepare("SELECT join_code FROM quiz_lobbies WHERE id = ?");
     $stmtCode->execute([$lobby_id]);
@@ -37,10 +37,10 @@ if (!$code) {
 if ($is_host && !isset($_SESSION['quiz_questions'])) {
     $pool  = $setup['pool'];
     $count = $setup['count'];
-    
+
     try {
         $stmt = $pdo->prepare("
-            SELECT 
+            SELECT
                 q.id AS question_id,
                 q.question_text,
                 q.explanation AS general_explanation,
@@ -96,7 +96,7 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
         // Zuerst schauen, ob sie nicht schon drin sind (Dopplungen vermeiden bei Refresh)
         $stmtCheck = $pdo->prepare("SELECT COUNT(*) FROM lobby_questions WHERE lobby_id = ?");
         $stmtCheck->execute([$lobby_id]);
-        
+
         if ((int)$stmtCheck->fetchColumn() === 0) {
             $stmtInsertQ = $pdo->prepare("INSERT INTO lobby_questions (lobby_id, question_id, sort_order) VALUES (?, ?, ?)");
             foreach ($quizQuestions as $index => $q) {
@@ -117,13 +117,14 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lobby | damago Quizsystem</title>
     <link rel="stylesheet" href="../CSS/style.css">
-    <style>
-        .player-list { list-style: none; padding: 0; margin: 20px 0; text-align: left; }
-        .player-item { padding: 10px 15px; background: #f4f6f7; margin-bottom: 8px; border-radius: 4px; border-left: 5px solid #3498db; font-size: 1.1rem; }
-        .status-message { font-style: italic; color: #7f8c8d; margin-top: 15px; }
-    </style>
 </head>
 <body class="auth-page">
+
+    <div class="page-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
 
     <?php include_once 'topbar.php'; ?>
 
@@ -199,8 +200,8 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
     console.log("Start-Button geklickt. Sende Anfrage für Lobby-ID:", lobbyId);
 
     // Sende dem Server das Signal, die Lobby auf 'is_started = 1' zu setzen
-    fetch('start_lobby_action.php?lobby_id=' + lobbyId, { 
-        method: 'POST' 
+    fetch('start_lobby_action.php?lobby_id=' + lobbyId, {
+        method: 'POST'
     })
     .then(response => {
         console.log("Server-Response erhalten:", response);

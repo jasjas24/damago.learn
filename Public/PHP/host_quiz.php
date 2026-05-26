@@ -24,9 +24,16 @@ try {
     <link rel="stylesheet" href="../CSS/quiz_host.css">
 </head>
 <body class="auth-page">
+
+    <div class="page-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
     <?php include_once 'topbar.php'; ?>
 
-    <main class="host-layout" style="padding-top: 76px;"> <!-- HIER: Padding entspricht Topbar-Höhe -->
+    <main class="host-layout">
         <p>
             Wähle die Einstellungen für deine Quizrunde aus.
             Danach erhalten die Teilnehmer einen Teilnahme-Code,
@@ -41,7 +48,7 @@ try {
             </div>
 
             <form id="quizForm" class="auth-form" action="setup_lobby.php" method="POST">
-                <input type="hidden" id="join_code" name="join_code" value="">    
+                <input type="hidden" id="join_code" name="join_code" value="">
                 <div class="form-group">
                     <label for="question_pool">Fragenpool</label>
                     <select id="question_pool" name="question_pool" required>
@@ -89,7 +96,7 @@ try {
                     <label for="host_plays">Host spielt mit</label>
                     <select id="host_plays" name="host_plays" required>
                         <option value="no">Nein</option>
-                        <option value="yes"selected>Ja</option>
+                        <option value="yes" selected>Ja</option>
                     </select>
                 </div>
 
@@ -99,8 +106,7 @@ try {
             </form>
 
             <div class="host-back">
-                <p>Du möchtest zurück?</p>
-                <a href="dashboard.php">Zurück zum Dashboard</a>
+                <a href="dashboard.php" class="back-button">← Zurück zum Dashboard</a>
             </div>
         </section>
     </main>

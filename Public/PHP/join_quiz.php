@@ -14,7 +14,7 @@ $isGuestMode = ($role === 'guest' || (isset($_GET['mode']) && $_GET['mode'] === 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Code vereinheitlichen (Leerzeichen weg und alles in Großbuchstaben)
     $joinCode = strtoupper(trim($_POST['join_code'] ?? ''));
-    
+
     // Name ermitteln: Entweder der eingetippte Gastname oder der des eingeloggten Users
     if ($isGuestMode) {
         $playerName = trim($_POST['guest_name'] ?? '');
@@ -39,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 // 2. Prüfen, ob der Name in dieser Lobby schon existiert (doppelte Namen verhindern)
                 $stmtCheck = $pdo->prepare("SELECT id FROM lobby_players WHERE lobby_id = ? AND player_name = ?");
                 $stmtCheck->execute([$lobby['id'], $playerName]);
-                
+
                 if ($stmtCheck->fetch()) {
                     $error = 'Dieser Name wird in der Lobby bereits verwendet.';
                 } else {
@@ -79,19 +79,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz beitreten | damago Quizsystem</title>
     <link rel="stylesheet" href="../CSS/style.css">
-    <style>
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 12px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            border-left: 5px solid #f5c6cb;
-            font-size: 0.95rem;
-        }
-    </style>
 </head>
 <body class="auth-page">
+
+    <div class="page-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
 
     <?php include_once 'topbar.php'; ?>
 

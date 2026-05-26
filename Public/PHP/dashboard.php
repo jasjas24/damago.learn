@@ -116,6 +116,12 @@ $visibleCards = $rolePermissions[$role] ?? [];
 </head>
 <body class="auth-page">
 
+    <div class="page-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
     <?php include_once 'topbar.php'; ?>
 
     <main class="auth-layout dashboard-auth-layout">
