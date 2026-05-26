@@ -7,7 +7,6 @@ require_once 'init.php';
     <a class="topbar-brand">
         <img src="../damago-logo.png" alt="damago Logo" class="topbar-logo">
     </a>
-    
     <?php if ($username !== 'Gast'): ?>
         <div class="topbar-account">
             <span class="account-name"><?php echo htmlspecialchars($username); ?></span>
