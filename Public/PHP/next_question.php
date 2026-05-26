@@ -27,17 +27,52 @@ if ($lobby_id && $current_question) {
             }
         }
 
-        // 3. BOMBEN-SICHERE PUNKTEBERECHNUNG (Ganz oder gar nicht)
+        // 3. ERWEITERTE PUNKTEBERECHNUNG (Je nach Modus)
         $pointsEarned = 0;
+        $pointMode = $_SESSION['quiz_setup']['point_mode'] ?? 'all_or_nothing';
         
         if (!$isTimeout && !empty($correctIds)) {
-            // Sortieren, damit die Reihenfolge beim Klicken keine Rolle spielt
-            sort($chosenIds);
-            sort($correctIds);
             
-            // Wenn die Arrays exakt übereinstimmen (gleiche IDs, gleiche Länge)
-            if ($chosenIds === $correctIds) {
-                $pointsEarned = 1000;
+            // MODUS: Ganz oder gar nicht
+            if ($pointMode === 'all_or_nothing') {
+                sort($chosenIds);
+                sort($correctIds);
+                if ($chosenIds === $correctIds) {
+                    $pointsEarned = 1000;
+                }
+            } 
+            // MODUS: Teilpunkte (Dein mathematisches Modell)
+            elseif ($pointMode === 'partial') {
+                $falscheGewaehlt = false;
+                $richtigeGewaehltGraf = 0;
+                $anzahlRichtigeAntwortenInsgesamt = count($correctIds);
+
+                foreach ($chosenIds as $id) {
+                    if (in_array($id, $correctIds)) {
+                        $richtigeGewaehltGraf++;
+                    } else {
+                        $falscheGewaehlt = true;
+                    }
+                }
+
+                if ($falscheGewaehlt) {
+                    // Sobald eine falsche Antwort gewählt wurde, gibt es immer 0 Punkte
+                    $pointsEarned = 0;
+                } 
+                elseif ($richtigeGewaehltGraf > 0) {
+                    if ($anzahlRichtigeAntwortenInsgesamt === 1) {
+                        // Wenn es nur eine einzige richtige Antwort gibt, gibt es 1000 Punkte
+                        $pointsEarned = 1000;
+                    } 
+                    elseif ($richtigeGewaehltGraf === $anzahlRichtigeAntwortenInsgesamt) {
+                        // Alle richtigen Antworten aus einer Mehrfachauswahl getroffen
+                        $pointsEarned = 1000;
+                    } 
+                    else {
+                        // Mindestens eine richtige Antwort und keine falsche Antwort gewählt
+                        $pointsEarned = 500;
+                    }
+                }
             }
         }
 
@@ -55,9 +90,19 @@ if ($lobby_id && $current_question) {
         }
         $_SESSION['quiz_score'] += $pointsEarned;
 
-        // 7. Letztes Ergebnis für die Einblendung in der game.php zwischenspeichern
+        // 7. Status für die Einblendung ermitteln (timeout, correct, partial oder wrong)
+        $resultStatus = 'wrong';
+        if ($isTimeout) {
+            $resultStatus = 'timeout';
+        } elseif ($pointsEarned === 1000) {
+            $resultStatus = 'correct';
+        } elseif ($pointsEarned === 500) {
+            $resultStatus = 'partial';
+        }
+
+        // Letztes Ergebnis für die Einblendung in der game.php zwischenspeichern
         $_SESSION['last_result'] = [
-            'status'        => $isTimeout ? 'timeout' : (($pointsEarned === 1000) ? 'correct' : 'wrong'),
+            'status'        => $resultStatus,
             'points_earned' => $pointsEarned,
             'chosen_ids'    => $chosenIds
         ];
