@@ -271,8 +271,6 @@ main.container {
     margin-right: 10px;
 }
 
-/* Variante fuer "nicht moeglich"-Hinweise: rotes X statt blauem Haken.
-   Gleicher Rahmen wie die normalen .info-list-Boxen, nur das Icon ist rot. */
 .info-list div.denied::before {
     content: "✗";
     color: #f87171;
