@@ -170,7 +170,6 @@ foreach ($answers as $ans) {
         <div class="quiz-topline">
             <div>
                 <span class="eyebrow">Frage <?php echo $currentIndex + 1; ?> von <?php echo $totalQuestions; ?></span>
-                <h1>Quizrunde läuft</h1>
             </div>
             <div class="timer-box">
                 <span>Zeit:</span>
@@ -179,7 +178,6 @@ foreach ($answers as $ans) {
         </div>
 
         <section class="question-card">
-            <div class="question-label">Aktuelle Frage</div>
             <h2><?php echo htmlspecialchars($currentQuestion['question_text']); ?></h2>
         </section>
 
@@ -285,7 +283,6 @@ foreach ($answers as $ans) {
         <div class="ranking-header">
             <span class="eyebrow">Live-Ranking</span>
             <h2>Punktestand</h2>
-            <p>Die Teilnehmer mit den meisten Punkten stehen oben.</p>
         </div>
         <div class="ranking-list" style="margin-top: 16px;">
             <table class="ranking-table">
