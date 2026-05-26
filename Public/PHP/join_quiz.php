@@ -7,12 +7,16 @@ require_once 'db.php';
 
 $error = '';
 
+// FIX: Ermitteln, ob der Benutzer EXPLIZIT als Gast beitreten möchte (z. B. über einen URL-Parameter ?mode=guest)
+// Wenn er nicht eingeloggt ist, ist er sowieso Gast.
+$isGuestMode = ($role === 'guest' || (isset($_GET['mode']) && $_GET['mode'] === 'guest'));
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Code vereinheitlichen (Leerzeichen weg und alles in Großbuchstaben)
     $joinCode = strtoupper(trim($_POST['join_code'] ?? ''));
 
     // Name ermitteln: Entweder der eingetippte Gastname oder der des eingeloggten Users
-    if ($role === 'guest') {
+    if ($isGuestMode) {
         $playerName = trim($_POST['guest_name'] ?? '');
     } else {
         $playerName = $username;
@@ -39,16 +43,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 if ($stmtCheck->fetch()) {
                     $error = 'Dieser Name wird in der Lobby bereits verwendet.';
                 } else {
-                    // 3. Spieler in die Tabelle eintragen
+                    // 3. Alte Host- oder Spieler-Sessions gründlich säubern, um Konflikte zu vermeiden
+                    unset($_SESSION['quiz_setup']);
+                    unset($_SESSION['waiting_for_reveal']);
+                    unset($_SESSION['current_question_index']);
+                    unset($_SESSION['quiz_questions']);
+                    unset($_SESSION['quiz_score']);
+                    unset($_SESSION['last_result']);
+
+                    // 4. Spieler in die Tabelle eintragen
                     $stmtJoin = $pdo->prepare("INSERT INTO lobby_players (lobby_id, player_name) VALUES (?, ?)");
                     $stmtJoin->execute([$lobby['id'], $playerName]);
 
-                    // 4. Wichtige Daten für den Spieler in die Session schreiben
-                    $_SESSION['player_lobby_id'] = $lobby['id'];
-                    $_SESSION['player_name']     = $playerName;
+                    // 5. Wichtige Daten für den Spieler in die Session schreiben
+                    $_SESSION['player_lobby_id']   = $lobby['id'];
+                    $_SESSION['player_lobby_code'] = $joinCode;
+                    $_SESSION['player_name']       = $playerName;
 
-                    // Weiterleitung in den Warteraum für Spieler
-                    header("Location: host_lobby.php");
+                    // FIX: Weiterleitung in den Warteraum für SPIELER (nicht für den Host!) MIT dem Code in der URL
+                    header("Location: host_lobby.php?code=" . urlencode($joinCode));
                     exit;
                 }
             }
@@ -101,13 +114,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <div class="alert-error"><?php echo htmlspecialchars($error); ?></div>
             <?php endif; ?>
 
-            <form class="auth-form" action="join_quiz.php" method="POST">
+            <form class="auth-form" action="join_quiz.php<?php echo $isGuestMode ? '?mode=guest' : ''; ?>" method="POST">
                 <div class="form-group">
                     <label for="join_code">Teilnahme-Code</label>
                     <input
                         type="text"
                         id="join_code"
                         name="join_code"
+                        value="<?php echo htmlspecialchars($joinCode ?? ''); ?>"
                         placeholder="z. B. A7K9X"
                         style="text-transform: uppercase; letter-spacing: 2px;"
                         maxlength="6"
@@ -115,7 +129,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     >
                 </div>
 
-                <?php if($role === 'guest'): ?>
+                <?php if($isGuestMode): ?>
                     <div class="form-group">
                         <label for="guest_name">Gastname</label>
                         <input
@@ -137,7 +151,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </button>
             </form>
 
-            <?php if($role === 'guest'): ?>
+            <?php if($isGuestMode && $role === 'guest'): ?>
                 <div class="auth-links">
                     <p>Du hast bereits ein Konto?</p>
                     <a href="../login.html">Zum Login</a>
