@@ -272,7 +272,6 @@ foreach ($answers as $ans) {
             <div class="auth-header">
                 <span class="eyebrow">Live-Ranking</span>
                 <h2>Punktestand</h2>
-                <p>Die Teilnehmer mit den meisten Punkten stehen oben.</p>
             </div>
             <div class="ranking-list" style="margin-top: 20px;">
                 <table style="width: 100%; border-collapse: collapse; text-align: left;">
