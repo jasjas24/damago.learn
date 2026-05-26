@@ -1,49 +1,79 @@
 <?php
-session_start();
+require_once 'init.php';
 
-// Zugriffsschutz: nur registrierte Nutzer
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../login.html");
+$userId = null;
+
+if (isset($_SESSION['user_id'])) {
+    $userId = (int) $_SESSION['user_id'];
+} elseif (isset($_SESSION['user']['id'])) {
+    $userId = (int) $_SESSION['user']['id'];
+}
+
+$currentUsername = $username ?? ($_SESSION['username'] ?? ($_SESSION['user']['username'] ?? 'Benutzer'));
+$currentRole = $role ?? ($_SESSION['role'] ?? ($_SESSION['user']['role'] ?? 'guest'));
+
+if ($userId <= 0 || $currentRole === 'guest') {
+    $loginTarget = file_exists(__DIR__ . '/login.php') ? 'login.php' : '../login.html';
+    header("Location: " . $loginTarget);
     exit;
 }
 
-// Session-Infos
-$username = isset($_SESSION['username']) ? $_SESSION['username'] : "test";
-$bereich = isset($_SESSION['bereich']) ? $_SESSION['bereich'] : ""; // IT oder Pflege
+$statistics = [];
+$databaseNotice = '';
 
-// Platzhalter-Daten (werden später aus DB geladen)
-$statistics = [
-    [
-        "thema" => "IT",
-        "bereich" => "IT",
-        "richtige_fragen" => 8,
-        "endpunktzahl" => 80,
-        "platz" => 2,
-        "teilnehmer" => 15,
-        "datum" => "2026-05-22 10:30"
-    ],
-    [
-        "thema" => "Pflege",
-        "bereich" => "Pflege",
-        "richtige_fragen" => 10,
-        "endpunktzahl" => 100,
-        "platz" => 1,
-        "teilnehmer" => 12,
-        "datum" => "2026-05-21 14:15"
-    ]
-];
+if (isset($pdo) && $pdo instanceof PDO) {
+    try {
+        $stmt = $pdo->prepare("
+            SELECT
+                topic,
+                correct_answers,
+                final_score,
+                reached_place,
+                total_players,
+                played_at
+            FROM game_history
+            WHERE user_id = :user_id
+            ORDER BY played_at DESC
+        ");
 
-// Filter auf den Bereich des Users
-$statistics = array_filter($statistics, function($stat) use ($bereich) {
-    return $stat['bereich'] === $bereich;
-});
+        $stmt->execute([
+            ':user_id' => $userId
+        ]);
+
+        $statistics = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $databaseNotice = 'Die Datenbanktabelle für die Spielhistorie ist noch nicht vollständig eingerichtet.';
+    }
+} else {
+    $databaseNotice = 'Die Datenbankverbindung ist noch nicht aktiv.';
+}
+
+function e($value)
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
+
+function formatDateTime($dateTime)
+{
+    if (empty($dateTime)) {
+        return '-';
+    }
+
+    $timestamp = strtotime($dateTime);
+
+    if ($timestamp === false) {
+        return e($dateTime);
+    }
+
+    return date('d.m.Y H:i', $timestamp);
+}
 ?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lernstatistik</title>
+    <title>Lernfortschritt | damago Quizsystem</title>
     <link rel="stylesheet" href="../CSS/style.css">
 </head>
 <body class="auth-page">
@@ -56,29 +86,94 @@ $statistics = array_filter($statistics, function($stat) use ($bereich) {
 
     <?php include_once 'topbar.php'; ?>
 
-    <main class="container">
-        <h1>Lernfortschritt</h1>
-        <p>Hier siehst du deine persönliche Historie aller Spiele und Quiz.</p>
+    <main class="auth-layout dashboard-auth-layout">
 
-        <!-- Zurück-Button -->
-        <div class="back-button-wrapper">
-            <a href="dashboard.php" class="back-button">← Zurück zum Dashboard</a>
-        </div>
+        <section class="auth-info">
+            <h1>Lernfortschritt</h1>
 
-        <div class="statistics-card">
-            <?php foreach($statistics as $stat): ?>
-            <div class="stat-row">
-                <div class="stat-title"><?php echo htmlspecialchars($stat['thema']); ?></div>
-                <div class="stat-values">
-                    <span>Richtig: <?php echo $stat['richtige_fragen']; ?></span>
-                    <span>Punkte: <?php echo $stat['endpunktzahl']; ?></span>
-                    <span>Platz: <?php echo $stat['platz']; ?></span>
-                    <span>Teilnehmer: <?php echo $stat['teilnehmer']; ?></span>
-                    <span><?php echo $stat['datum']; ?></span>
+            <p>
+                Hier siehst du deine persönliche Historie aller dauerhaft gespeicherten Quizrunden.
+            </p>
+
+            <div class="info-list">
+                <div>
+                    Angemeldet als: <?php echo e($currentUsername); ?>
+                </div>
+                <div>
+                    Sichtbarkeit: Nur deine eigenen Ergebnisse
+                </div>
+                <div>
+                    Gäste: Keine dauerhafte persönliche Historie
                 </div>
             </div>
-            <?php endforeach; ?>
-        </div>
+
+            <div class="dashboard-footer-links">
+                <a href="dashboard.php">← Zurück zum Dashboard</a>
+            </div>
+        </section>
+
+        <section class="dashboard-panel">
+
+            <div class="auth-header">
+                <span class="eyebrow">Historie</span>
+                <h2>Deine gespielten Quizrunden</h2>
+                <p>
+                    Gespeichert werden Thema, richtige Antworten, Punktzahl, Platzierung,
+                    Teilnehmeranzahl und Datum/Uhrzeit.
+                </p>
+            </div>
+
+            <?php if (!empty($databaseNotice)): ?>
+                <div class="statistics-card">
+                    <div class="stat-row">
+                        <div class="stat-title">Hinweis</div>
+                        <div class="stat-values">
+                            <span><?php echo e($databaseNotice); ?></span>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if (empty($statistics)): ?>
+
+                <div class="statistics-card">
+                    <div class="stat-row">
+                        <div class="stat-title">Noch keine Historie vorhanden</div>
+                        <div class="stat-values">
+                            <span>Du hast bisher noch kein dauerhaft gespeichertes Quiz abgeschlossen.</span>
+                        </div>
+                    </div>
+                </div>
+
+            <?php else: ?>
+
+                <div class="statistics-card">
+
+                    <?php foreach ($statistics as $stat): ?>
+
+                        <div class="stat-row">
+                            <div class="stat-title">
+                                <?php echo e($stat['topic']); ?>
+                            </div>
+
+                            <div class="stat-values">
+                                <span>Richtig: <?php echo e($stat['correct_answers']); ?></span>
+                                <span>Punkte: <?php echo e($stat['final_score']); ?></span>
+                                <span>Platz: <?php echo e($stat['reached_place']); ?></span>
+                                <span>Teilnehmer: <?php echo e($stat['total_players']); ?></span>
+                                <span><?php echo formatDateTime($stat['played_at']); ?></span>
+                            </div>
+                        </div>
+
+                    <?php endforeach; ?>
+
+                </div>
+
+            <?php endif; ?>
+
+        </section>
+
     </main>
+
 </body>
 </html>
