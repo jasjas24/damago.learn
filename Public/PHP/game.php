@@ -4,6 +4,18 @@ require_once 'db.php';
 
 /** @var string $username */
 
+if (!isset($_SESSION['quiz_questions'])) {
+    $lobby_id = $_SESSION['player_lobby_id'] ?? null;
+    if ($lobby_id) {
+        $stmtLoad = $pdo->prepare("SELECT quiz_data FROM quiz_lobbies WHERE id = ?");
+        $stmtLoad->execute([$lobby_id]);
+        $json = $stmtLoad->fetchColumn();
+        if ($json) {
+            $_SESSION['quiz_questions'] = json_decode($json, true);
+            $_SESSION['current_question_index'] = 0;
+        }
+    }
+}
 // ==========================================
 // ABSICHERUNG FÜR MITSPIELER (SESSION BEFÜLLEN)
 // ==========================================

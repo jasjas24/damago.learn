@@ -11,11 +11,10 @@ if (isset($_SESSION['quiz_setup'])) {
     $setup = $_SESSION['quiz_setup'];
     $code = $_GET['code'] ?? $_POST['code'] ?? null;
 
-if (!$code) {
-    // Falls kein Code da ist, leite den User z.B. zurück zum Dashboard oder Setup
-    header("Location: setup_lobby.php");
-    exit;
-}
+    if (!$code) {
+        header("Location: setup_lobby.php");
+        exit;
+    }
     $lobby_id = $setup['lobby_id'] ?? null;
     $is_host = true;
 } elseif (isset($_SESSION['player_lobby_id'])) {
@@ -28,7 +27,6 @@ if (!$code) {
     $stmtCode->execute([$lobby_id]);
     $code = $stmtCode->fetchColumn();
 } else {
-    // Weder Host noch Spieler? Ab zurück zum Dashboard
     header("Location: dashboard.php");
     exit;
 }
@@ -79,9 +77,11 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
         }
         $questions = array_values($questions);
 
+        // Fragen mischen und zuschneiden
         shuffle($questions);
         $quizQuestions = array_slice($questions, 0, $count);
 
+        // Antworten mischen (Passiert hier einmalig für alle)
         foreach ($quizQuestions as &$singleQuestion) {
             shuffle($singleQuestion['answers']);
         }
@@ -92,15 +92,29 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
         $_SESSION['current_question_index'] = 0;
         if (!isset($_SESSION['quiz_score'])) { $_SESSION['quiz_score'] = 0; }
 
-        // 6. NEU: Die Fragen-IDs für die Spieler in die Datenbank eintragen
-        // Zuerst schauen, ob sie nicht schon drin sind (Dopplungen vermeiden bei Refresh)
+        // 6. NEU: Die fertig gemischte Fragen- und Antwortstruktur als JSON in der Lobby hinterlegen
+        // Damit deine quiz_lobbies-Tabelle das speichern kann, nutzen wir die Spalte 'quiz_data' (falls vorhanden) 
+        // oder missbrauchen alternativ ein anderes ungenutztes Textfeld. Am saubersten fügst du deiner Tabelle 
+        // `quiz_lobbies` eine TEXT-Spalte namens `quiz_data` hinzu.
+        
+        // Zuerst schauen, ob für die Tabelle `lobby_questions` die Zuordnung geschrieben werden muss
         $stmtCheck = $pdo->prepare("SELECT COUNT(*) FROM lobby_questions WHERE lobby_id = ?");
         $stmtCheck->execute([$lobby_id]);
 
         if ((int)$stmtCheck->fetchColumn() === 0) {
+            // Die IDs eintragen (wie gewohnt)
             $stmtInsertQ = $pdo->prepare("INSERT INTO lobby_questions (lobby_id, question_id, sort_order) VALUES (?, ?, ?)");
             foreach ($quizQuestions as $index => $q) {
                 $stmtInsertQ->execute([$lobby_id, $q['id'], $index]);
+            }
+            
+            // JETZT NEU: Den kompletten gemischten Array-Stapel als JSON in die Lobby-Tabelle jagen!
+            // Falls du die Spalte 'quiz_data' noch nicht hast, kannst du sie fix in MariaDB per ALTER TABLE hinzufügen.
+            try {
+                $stmtJson = $pdo->prepare("UPDATE quiz_lobbies SET quiz_data = ? WHERE id = ?");
+                $stmtJson->execute([json_encode($quizQuestions, JSON_UNESCAPED_UNICODE), $lobby_id]);
+            } catch (PDOException $e) {
+                // Falls die Spalte quiz_data noch fehlt, fangen wir es ab, damit es nicht abstürzt
             }
         }
 
@@ -143,13 +157,12 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
 
         <section class="auth-card">
             <div class="auth-header">
-                <span class="eyebrow">Lobby aktiv</span>
+                <span class="eyebrow">Lobby active</span>
                 <h2>Teilnehmer (<span id="player-count">0</span>)</h2>
                 <p>Hier siehst du alle verbundenen Spieler:</p>
             </div>
 
-            <ul id="players" class="player-list">
-                </ul>
+            <ul id="players" class="player-list"></ul>
 
             <?php if ($is_host): ?>
                 <button class="btn btn-primary" onclick="startQuiz()">
@@ -171,11 +184,9 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
         const isHost = <?php echo $is_host ? 'true' : 'false'; ?>;
 
         function updateLobby() {
-            // 1. Spielerliste laden und den Status der Lobby abfragen
             fetch('get_lobby_status.php?lobby_id=' + lobbyId)
                 .then(response => response.json())
                 .then(data => {
-                    // Spielerliste aktualisieren
                     const list = document.getElementById('players');
                     const count = document.getElementById('player-count');
                     list.innerHTML = '';
@@ -188,7 +199,6 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
                         list.appendChild(li);
                     });
 
-                    // 2. Wenn das Spiel gestartet wurde, leite zum Spiel weiter
                     if (data.is_started === 1) {
                         window.location.href = 'game.php';
                     }
@@ -197,34 +207,24 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
         }
 
         function startQuiz() {
-    console.log("Start-Button geklickt. Sende Anfrage für Lobby-ID:", lobbyId);
+            console.log("Start-Button geklickt. Sende Anfrage für Lobby-ID:", lobbyId);
 
-    // Sende dem Server das Signal, die Lobby auf 'is_started = 1' zu setzen
-    fetch('start_lobby_action.php?lobby_id=' + lobbyId, {
-        method: 'POST'
-    })
-    .then(response => {
-        console.log("Server-Response erhalten:", response);
-        return response.json();
-    })
-    .then(data => {
-        console.log("Daten vom Server:", data);
-        if (data.success) {
-            console.log("Erfolg! Leite weiter zur game.php");
-            window.location.href = 'game.php';
-        } else {
-            alert("Der Server hat das Starten verweigert. Erfolg-Status: " + data.success);
+            fetch('start_lobby_action.php?lobby_id=' + lobbyId, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = 'game.php';
+                } else {
+                    alert("Der Server hat das Starten verweigert.");
+                }
+            })
+            .catch(err => console.error("Netzwerkfehler beim Starten des Quiz:", err));
         }
-    })
-    .catch(err => {
-        console.error("Netzwerkfehler beim Starten des Quiz:", err);
-        alert("Fehler bei der Netzwerk-Anfrage. Schau in die Browser-Konsole (F12)!");
-    });
-}
 
-        // Alle 2 Sekunden die Lobby aktualisieren (Polling)
         setInterval(updateLobby, 2000);
-        updateLobby(); // Sofort einmal ausführen
+        updateLobby();
     </script>
 </body>
 </html>
