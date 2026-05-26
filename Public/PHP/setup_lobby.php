@@ -57,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         // 5. Weiterleitung zur Lobby-Ansicht
-        header("Location: host_lobby.php");
+        header("Location: host_lobby.php?code=" . urlencode($joinCode));
         exit;
 
     } catch (PDOException $e) {

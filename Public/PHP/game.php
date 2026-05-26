@@ -9,6 +9,17 @@ require_once 'db.php';
 // ==========================================
 $lobby_id = $_SESSION['quiz_setup']['lobby_id'] ?? $_SESSION['player_lobby_id'] ?? null;
 
+// ERWEITERUNG: PointMode aus der DB holen, falls noch nicht in der Session vorhanden
+if ($lobby_id && !isset($_SESSION['quiz_setup']['point_mode'])) {
+    try {
+        $stmtMode = $pdo->prepare("SELECT point_mode FROM quiz_lobbies WHERE id = ?");
+        $stmtMode->execute([$lobby_id]);
+        $dbMode = $stmtMode->fetchColumn();
+        $_SESSION['quiz_setup']['point_mode'] = $dbMode ? $dbMode : 'all_or_nothing';
+    } catch (PDOException $e) {}
+}
+$pointMode = $_SESSION['quiz_setup']['point_mode'] ?? 'all_or_nothing';
+
 if ((!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) && $lobby_id) {
     try {
         $stmtLobbyQ = $pdo->prepare("
@@ -62,8 +73,6 @@ if ($lobby_id) {
             $_SESSION['show_explanation'] = (int)$lobbyStatus['show_explanation'] === 1;
             $_SESSION['current_question_index'] = (int)$lobbyStatus['current_question_index'];
             
-            // NEU & ENTSCHEIDEND: Wenn die DB sagt "Auflösung läuft", 
-            // darf der Mitspieler nicht mehr im Wartezustand festsitzen!
             if ($_SESSION['show_explanation']) {
                 unset($_SESSION['waiting_for_reveal']);
             }
@@ -97,9 +106,36 @@ $currentQuestion = $allQuestions[$currentIndex];
 $answers = $currentQuestion['answers']; 
 $currentDisplayName = $_SESSION['player_name'] ?? $username ?? 'Gast';
 
-$rankingPlayers = [[ 'username' => $currentDisplayName, 'score' => $_SESSION['quiz_score'] ?? 0 ]];
+// ERWEITERUNG: Alle Spieler der Lobby für das Live-Ranking aus der DB holen
+$rankingPlayers = [];
+if ($lobby_id) {
+    try {
+        $stmtRank = $pdo->prepare("
+            SELECT player_name AS username, points AS score 
+            FROM lobby_players 
+            WHERE lobby_id = ? 
+            ORDER BY points DESC, player_name ASC
+        ");
+        $stmtRank->execute([$lobby_id]);
+        $rankingPlayers = $stmtRank->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $rankingPlayers = [[ 'username' => $currentDisplayName, 'score' => $_SESSION['quiz_score'] ?? 0 ]];
+    }
+}
+
+if (empty($rankingPlayers)) {
+    $rankingPlayers = [[ 'username' => $currentDisplayName, 'score' => $_SESSION['quiz_score'] ?? 0 ]];
+}
 $timeLimit = $_SESSION['quiz_setup']['time_limit'] ?? 30;
 $isHost = isset($_SESSION['quiz_setup']['lobby_id']);
+
+// ERWEITERUNG: Hole alle IDs der Richtig-Antworten für die JS-Berechnung heraus
+$correctAnswersIds = [];
+foreach ($answers as $ans) {
+    if (intval($ans['is_correct']) === 1) {
+        $correctAnswersIds[] = intval($ans['id']);
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -166,7 +202,7 @@ $isHost = isset($_SESSION['quiz_setup']['lobby_id']);
                             <?php echo $showExplanation ? 'disabled' : ''; ?>>
                         <span class="answer-text"><?php echo htmlspecialchars($ans['text']); ?></span>
                         <?php if (!$showExplanation): ?>
-                            <input type="checkbox" name="selected_answers[]" value="<?php echo $ans['id']; ?>" style="display:none;" id="check-<?php echo $ans['id']; ?>">
+                            <input type="checkbox" class="answer-checkbox" name="selected_answers[]" value="<?php echo $ans['id']; ?>" style="display:none;" id="check-<?php echo $ans['id']; ?>">
                         <?php endif; ?>
                     </button>
                 <?php endforeach; ?>
@@ -267,6 +303,8 @@ $isHost = isset($_SESSION['quiz_setup']['lobby_id']);
     </aside>
 </main>
 
+<script src="functions.js"></script>
+
 <script>
 (function() {
     // 1. ANTWORTEN AUSWÄHLEN (NUR WENN NOCH NICHT ABGEGEBEN)
@@ -284,10 +322,18 @@ $isHost = isset($_SESSION['quiz_setup']['lobby_id']);
             });
         });
 
+        // BEREINIGT: Keine fehlerhafte JS-Vorauswertung mehr beim Absenden!
+        const form = document.getElementById('quiz-form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // Das Formular wird ganz normal abgeschickt. 
+                // Alle angewählten Checkboxen 'selected_answers[]' wandern nativ im POST-Request mit.
+            });
+        }
+
         // COUNTDOWN TIMER
         let timeLeft = <?php echo intval($timeLimit); ?>;
         const display = document.getElementById('timer-display');
-        const form = document.getElementById('quiz-form');
 
         const countdown = setInterval(function() {
             timeLeft--;
@@ -299,6 +345,7 @@ $isHost = isset($_SESSION['quiz_setup']['lobby_id']);
                 timeoutInput.name = 'timeout';
                 timeoutInput.value = '1';
                 form.appendChild(timeoutInput);
+
                 form.action = 'next_question.php'; 
                 form.submit();
             }

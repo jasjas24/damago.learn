@@ -9,7 +9,13 @@ require_once 'db.php';
 if (isset($_SESSION['quiz_setup'])) {
     // Ansicht für den Host
     $setup = $_SESSION['quiz_setup'];
-    $code  = $setup['code'];
+    $code = $_GET['code'] ?? $_POST['code'] ?? null;
+
+if (!$code) {
+    // Falls kein Code da ist, leite den User z.B. zurück zum Dashboard oder Setup
+    header("Location: setup_lobby.php");
+    exit;
+}
     $lobby_id = $setup['lobby_id'] ?? null;
     $is_host = true;
 } elseif (isset($_SESSION['player_lobby_id'])) {
