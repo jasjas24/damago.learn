@@ -7,16 +7,21 @@
     <link rel="stylesheet" href="CSS/style.css">
 </head>
 <body class="auth-page">
-   <header class="topbar">
-    <a href="index.html" class="topbar-brand">
-        <img src="damago-logo.png" alt="damago Logo" class="topbar-logo">
-    </a>
 
-</header>
+    <div class="page-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <header class="topbar">
+        <a href="index.html" class="topbar-brand">
+            <img src="damago-logo.png" alt="damago Logo" class="topbar-logo">
+        </a>
+    </header>
 
     <main class="auth-layout">
         <section class="auth-info">
-
             <h1>Digitales Lernen im Unterricht.</h1>
             <p>
                 Trainiere dein Wissen in interaktiven Quizrunden,
@@ -25,7 +30,9 @@
             </p>
 
             <div class="info-list">
-                <div>Für Unterricht, Prüfungsvorbereitung und eigenständiges Lernen</div>
+                <div>Interaktive Quizrunden in Echtzeit</div>
+                <div>Für Unterricht und Prüfungsvorbereitung</div>
+                <div>Eigenen Lernfortschritt verfolgen</div>
             </div>
         </section>
 
@@ -38,15 +45,15 @@
 
             <form class="auth-form" action="PHP/check_login.php" method="post">
                 <div class="form-group">
-                    <label for="login">E-Mail</label>
-                   <input
+                    <label for="email">E-Mail</label>
+                    <input
                         type="email"
                         id="email"
                         name="email"
                         pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
-                        placeholder="E-Mail Adresse eingeben"
+                        placeholder="E-Mail-Adresse eingeben"
                         required
-                >
+                    >
                 </div>
 
                 <div class="form-group">
@@ -60,7 +67,7 @@
                     >
                 </div>
 
-                <button type="submit" value="Submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary">
                     Einloggen
                 </button>
             </form>

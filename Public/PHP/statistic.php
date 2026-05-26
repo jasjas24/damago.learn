@@ -46,8 +46,15 @@ $statistics = array_filter($statistics, function($stat) use ($bereich) {
     <title>Lernstatistik</title>
     <link rel="stylesheet" href="../CSS/style.css">
 </head>
-<body>
-   <?php include_once 'topbar.php'; ?>
+<body class="auth-page">
+
+    <div class="page-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <?php include_once 'topbar.php'; ?>
 
     <main class="container">
         <h1>Lernfortschritt</h1>

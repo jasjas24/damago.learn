@@ -52,7 +52,7 @@ if ((!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) 
             $_SESSION['quiz_questions'] = $quizQuestions;
             $_SESSION['current_question_index'] = 0;
             $_SESSION['quiz_score'] = 0;
-            
+
             if (!isset($_SESSION['quiz_setup']['time_limit'])) {
                 $stmtTime = $pdo->prepare("SELECT time_limit FROM quiz_lobbies WHERE id = ?");
                 $stmtTime->execute([$lobby_id]);
@@ -72,7 +72,7 @@ if ($lobby_id) {
         if ($lobbyStatus) {
             $_SESSION['show_explanation'] = (int)$lobbyStatus['show_explanation'] === 1;
             $_SESSION['current_question_index'] = (int)$lobbyStatus['current_question_index'];
-            
+
             if ($_SESSION['show_explanation']) {
                 unset($_SESSION['waiting_for_reveal']);
             }
@@ -103,7 +103,7 @@ if ($currentIndex >= $totalQuestions) {
 }
 
 $currentQuestion = $allQuestions[$currentIndex];
-$answers = $currentQuestion['answers']; 
+$answers = $currentQuestion['answers'];
 $currentDisplayName = $_SESSION['player_name'] ?? $username ?? 'Gast';
 
 // ERWEITERUNG: Alle Spieler der Lobby für das Live-Ranking aus der DB holen
@@ -111,9 +111,9 @@ $rankingPlayers = [];
 if ($lobby_id) {
     try {
         $stmtRank = $pdo->prepare("
-            SELECT player_name AS username, points AS score 
-            FROM lobby_players 
-            WHERE lobby_id = ? 
+            SELECT player_name AS username, points AS score
+            FROM lobby_players
+            WHERE lobby_id = ?
             ORDER BY points DESC, player_name ASC
         ");
         $stmtRank->execute([$lobby_id]);
@@ -145,9 +145,7 @@ foreach ($answers as $ans) {
 <title>Quiz spielen | damago Quizsystem</title>
 <link rel="stylesheet" href="../CSS/style.css">
 <style>
-.millionaire-answer.selected { border: 5px solid #dbff0f !important; }
-.confirm-button-wrapper { margin-top: 20px; width: 100% !important; display: flex !important; justify-content: center !important; grid-column: 1 / -1 !important; }
-.confirm-button-wrapper .confirm-button { width: max-content !important; min-width: 280px; margin: 0 auto !important; }
+.millionaire-answer.selected { border: 5px solid #dbff0f; }
 .next-question-form { width: max-content; margin: 0; }
 </style>
 </head>
@@ -175,28 +173,28 @@ foreach ($answers as $ans) {
 
         <?php if ($waitingForReveal && !$showExplanation): ?>
             <div class="confirm-button-wrapper" style="flex-direction: column; align-items: center; gap: 15px; margin-top: 40px;">
-                <div class="loader"></div> 
-                <button type="button" class="millionaire-answer confirm-button" style="background-color: #28a745; color: #fff; cursor: not-allowed;" disabled>
+                <div class="loader"></div>
+                <button type="button" class="millionaire-answer confirm-button submitted" disabled>
                     <span class="answer-text">Antwort abgegeben. Warte auf Mitspieler...</span>
                 </button>
             </div>
         <?php else: ?>
             <form class="millionaire-answers" id="quiz-form" action="<?php echo $showExplanation ? 'go_next.php' : 'next_question.php'; ?>" method="POST">
-                <?php foreach ($answers as $letter => $ans): 
+                <?php foreach ($answers as $letter => $ans):
                     $inlineStyle = "";
                     if ($showExplanation) {
                         $isCorrect = intval($ans['is_correct']) === 1;
                         $wasSelected = $lastResult && isset($lastResult['chosen_ids']) && is_array($lastResult['chosen_ids']) && in_array($ans['id'], $lastResult['chosen_ids']);
                         if ($isCorrect) {
-                            $inlineStyle = "background-color: #d4edda !important; color: #155724 !important; border-color: #c3e6cb !important;";
+                            $inlineStyle = "background: rgba(34,197,94,0.20) !important; color: #86efac !important; border: 1px solid rgba(34,197,94,0.50) !important;";
                         } elseif ($wasSelected && !$isCorrect) {
-                            $inlineStyle = "background-color: #f8d7da !important; color: #721c24 !important; border-color: #f5c6cb !important;";
+                            $inlineStyle = "background: rgba(239,68,68,0.20) !important; color: #fca5a5 !important; border: 1px solid rgba(239,68,68,0.50) !important;";
                         }
-                        if ($wasSelected) { $inlineStyle .= " border: 3px solid #ffc107 !important;"; }
+                        if ($wasSelected && $isCorrect) { $inlineStyle .= " border: 2px solid #fbbf24 !important;"; }
                     }
                 ?>
-                    <button type="<?php echo $showExplanation ? 'submit' : 'button'; ?>" 
-                            class="millionaire-answer" 
+                    <button type="<?php echo $showExplanation ? 'submit' : 'button'; ?>"
+                            class="millionaire-answer"
                             data-id="<?php echo $ans['id']; ?>"
                             style="<?php echo $inlineStyle; ?>"
                             <?php echo $showExplanation ? 'disabled' : ''; ?>>
@@ -226,39 +224,39 @@ foreach ($answers as $ans) {
                         </button>
                     </form>
                 <?php else: ?>
-                    <button type="button" class="millionaire-answer confirm-button" style="background-color: #666; cursor: not-allowed;" disabled>
+                    <button type="button" class="millionaire-answer confirm-button" disabled>
                         <span class="answer-text">Warte auf den Host...</span>
                     </button>
                 <?php endif; ?>
             </div>
 
-            <section class="question-card" style="margin-top: 30px; border-left: 5px solid #007bff; text-align: left;">
-                <div class="question-label" style="color: #007bff;">Auflösung & Erklärungen</div>
-                <div style="margin-top: 10px;">
-                    <strong>Ergebnis:</strong> 
-                    <?php 
+            <section class="question-card" style="margin-top: 28px; border-left: 3px solid rgba(74,133,199,0.70); padding: 18px 20px; text-align: left; background: rgba(255,255,255,0.05); border-radius: var(--radius-md, 14px);">
+                <div class="question-label" style="color: #4a85c7; margin-bottom: 10px;">Auflösung &amp; Erklärungen</div>
+                <div style="margin-top: 6px; font-weight: 600; color: rgba(255,255,255,0.90);">
+                    <strong>Ergebnis:</strong>
+                    <?php
                         if (empty($lastResult) || !isset($lastResult['status'])) {
-                            echo "<span style='color:#555;'>Frage beendet! Schau dir unten die Erklärungen an.</span>";
+                            echo "<span style='color:rgba(255,255,255,0.60);'>Frage beendet! Schau dir unten die Erklärungen an.</span>";
                         } else {
                             if ($lastResult['status'] === 'correct') {
-                                echo "<span style='color:green;'>Genial! Alle richtigen Antworten gefunden! (+".($lastResult['points_earned'] ?? 0)." Punkte)</span>";
+                                echo "<span style='color:#86efac;'>Genial! Alle richtigen Antworten gefunden! (+".($lastResult['points_earned'] ?? 0)." Punkte)</span>";
                             } elseif ($lastResult['status'] === 'partial') {
-                                echo "<span style='color:orange;'>Teilweise richtig! (+".($lastResult['points_earned'] ?? 0)." Punkte)</span>";
+                                echo "<span style='color:#fbbf24;'>Teilweise richtig! (+".($lastResult['points_earned'] ?? 0)." Punkte)</span>";
                             } elseif ($lastResult['status'] === 'timeout') {
-                                echo "<span style='color:red;'>Zeit abgelaufen! (0 Punkte)</span>";
+                                echo "<span style='color:#fca5a5;'>Zeit abgelaufen! (0 Punkte)</span>";
                             } else {
-                                echo "<span style='color:red;'>Leider falsch! (0 Punkte)</span>";
+                                echo "<span style='color:#fca5a5;'>Leider falsch! (0 Punkte)</span>";
                             }
                         }
                     ?>
                 </div>
-                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.12); margin: 14px 0;">
                 <ul style="list-style-type: none; padding-left: 0; display: flex; flex-direction: column; gap: 12px;">
                     <?php foreach ($answers as $ans): ?>
                         <?php if (!empty($ans['explanation'])): ?>
                             <li>
-                                <strong><?php echo intval($ans['is_correct']) === 1 ? '✅' : '❌'; ?> <?php echo htmlspecialchars($ans['text']); ?>:</strong>
-                                <p style="margin: 4px 0 0 24px; color: #555; font-style: italic;"><?php echo htmlspecialchars($ans['explanation']); ?></p>
+                                <strong style="color: rgba(255,255,255,0.90);"><?php echo intval($ans['is_correct']) === 1 ? '✅' : '❌'; ?> <?php echo htmlspecialchars($ans['text']); ?>:</strong>
+                                <p style="margin: 5px 0 0 24px; color: rgba(255,255,255,0.55); font-style: italic; font-size: 14px; line-height: 1.5;"><?php echo htmlspecialchars($ans['explanation']); ?></p>
                             </li>
                         <?php endif; ?>
                     <?php endforeach; ?>
@@ -268,37 +266,34 @@ foreach ($answers as $ans) {
     </section>
 
     <aside class="ranking-panel">
-        <section class="auth-card" style="height: fit-content;">
-            <div class="auth-header">
-                <span class="eyebrow">Live-Ranking</span>
-                <h2>Punktestand</h2>
-            </div>
-            <div class="ranking-list" style="margin-top: 20px;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                    <thead>
-                        <tr style="border-bottom: 2px solid #eee; color: #666; font-size: 0.9rem;">
-                            <th style="padding: 8px;">Pl.</th>
-                            <th style="padding: 8px;">Name</th>
-                            <th style="padding: 8px; text-align: right;">Punkte</th>
+        <div class="ranking-header">
+            <span class="eyebrow">Live-Ranking</span>
+            <h2>Punktestand</h2>
+            <p>Die Teilnehmer mit den meisten Punkten stehen oben.</p>
+        </div>
+        <div class="ranking-list" style="margin-top: 16px;">
+            <table class="ranking-table">
+                <thead>
+                    <tr>
+                        <th>Pl.</th>
+                        <th>Name</th>
+                        <th style="text-align: right;">Punkte</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($rankingPlayers as $index => $player): ?>
+                        <tr<?php echo ($player['username'] === $currentDisplayName) ? ' class="current-player"' : ''; ?>>
+                            <td><?php echo ($index + 1); ?>.</td>
+                            <td>
+                                <?php echo htmlspecialchars($player['username']); ?>
+                                <?php if ($player['username'] === $currentDisplayName) echo '<span class="you-badge">(Du)</span>'; ?>
+                            </td>
+                            <td class="score-cell"><?php echo $player['score']; ?></td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($rankingPlayers as $index => $player): ?>
-                            <tr style="border-bottom: 1px solid #f4f4f4; <?php echo ($player['username'] === $currentDisplayName) ? 'font-weight: bold; background-color: #f9f9f9;' : ''; ?>">
-                                <td style="padding: 10px 8px;"><?php echo ($index + 1); ?>.</td>
-                                <td style="padding: 10px 8px;">
-                                    <?php echo htmlspecialchars($player['username']); ?>
-                                    <?php if ($player['username'] === $currentDisplayName) echo ' (Du)'; ?>
-                                </td>
-                                <td style="padding: 10px 8px; text-align: right; color: #0066cc;">
-                                    <?php echo $player['score']; ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </aside>
 </main>
 
@@ -315,18 +310,22 @@ foreach ($answers as $ans) {
                 const checkbox = document.getElementById('check-' + targetId);
                 if (checkbox) {
                     checkbox.checked = !checkbox.checked;
-                    if (checkbox.checked) { this.classList.add('selected'); } 
+                    if (checkbox.checked) { this.classList.add('selected'); }
                     else { this.classList.remove('selected'); }
                 }
             });
         });
 
-        // BEREINIGT: Keine fehlerhafte JS-Vorauswertung mehr beim Absenden!
+        // Antwort bestätigen: roter Rahmen als visuelle Bestätigung vor dem Absenden
+        const confirmBtn = document.getElementById('confirm-btn');
         const form = document.getElementById('quiz-form');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                // Das Formular wird ganz normal abgeschickt. 
-                // Alle angewählten Checkboxen 'selected_answers[]' wandern nativ im POST-Request mit.
+        if (confirmBtn && form) {
+            confirmBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                this.classList.add('submitted');
+                this.disabled = true;
+                // Kurze Verzögerung, damit der rote Rahmen sichtbar wird
+                setTimeout(() => form.submit(), 350);
             });
         }
 
@@ -345,7 +344,7 @@ foreach ($answers as $ans) {
                 timeoutInput.value = '1';
                 form.appendChild(timeoutInput);
 
-                form.action = 'next_question.php'; 
+                form.action = 'next_question.php';
                 form.submit();
             }
         }, 1000);
@@ -374,7 +373,7 @@ foreach ($answers as $ans) {
 
     <?php if ($showExplanation): ?>
         const timerBox = document.querySelector('.timer-box');
-        if (timerBox) timerBox.style.backgroundColor = '#666';
+        if (timerBox) { timerBox.style.background = 'rgba(84,110,122,0.70)'; timerBox.style.boxShadow = 'none'; }
     <?php endif; ?>
 })();
 </script>
