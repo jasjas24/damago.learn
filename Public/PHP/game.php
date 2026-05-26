@@ -191,7 +191,7 @@ foreach ($answers as $ans) {
                 </button>
             </div>
         <?php else: ?>
-            <form class="millionaire-answers" id="quiz-form" action="<?php echo $showExplanation ? 'go_next.php' : 'next_question.php'; ?>" method="POST">
+            <form class="millionaire-answers" id="quiz-form" action="next_question.php" method="POST">
                 <?php foreach ($answers as $letter => $ans):
                     $inlineStyle = "";
                     if ($showExplanation) {
@@ -205,7 +205,7 @@ foreach ($answers as $ans) {
                         if ($wasSelected && $isCorrect) { $inlineStyle .= " border: 2px solid #fbbf24 !important;"; }
                     }
                 ?>
-                    <button type="<?php echo $showExplanation ? 'submit' : 'button'; ?>"
+                    <button type="button"
                             class="millionaire-answer"
                             data-id="<?php echo $ans['id']; ?>"
                             style="<?php echo $inlineStyle; ?>"
@@ -336,12 +336,11 @@ foreach ($answers as $ans) {
                 e.preventDefault();
                 this.classList.add('submitted');
                 this.disabled = true;
-                // Kurze Verzögerung, damit der rote Rahmen sichtbar wird
                 setTimeout(() => form.submit(), 350);
             });
         }
 
-        // COUNTDOWN TIMER
+        // COUNTDOWN TIMER FIXED: Übergibt jetzt alle ausgewählten Haken sicher per Form-Submit
         let timeLeft = <?php echo intval($timeLimit); ?>;
         const display = document.getElementById('timer-display');
 
@@ -350,13 +349,15 @@ foreach ($answers as $ans) {
             if (display) display.textContent = timeLeft;
             if (timeLeft <= 0) {
                 clearInterval(countdown);
+                
+                // Timeout-Flag hinzufügen, damit PHP den Zeitablauf registriert
                 let timeoutInput = document.createElement('input');
                 timeoutInput.type = 'hidden';
                 timeoutInput.name = 'timeout';
                 timeoutInput.value = '1';
                 form.appendChild(timeoutInput);
 
-                form.action = 'next_question.php';
+                // Formular absenden. Die gesetzten Checkboxen werden automatisch mitgeschickt!
                 form.submit();
             }
         }, 1000);
