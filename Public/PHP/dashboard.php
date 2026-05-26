@@ -105,6 +105,20 @@ $rolePermissions = [
 ];
 
 $visibleCards = $rolePermissions[$role] ?? [];
+
+/*
+    Kategorien fuer das Dashboard: gruppieren die Karten thematisch.
+    - Spielen:    an Quizrunden teilnehmen oder selbst hosten
+    - Auswertung: eigene Ergebnisse und Quiz-Auswertungen ansehen
+    - Verwaltung: Admin-Funktionen (Fragen, Medien, Nutzer, Archive)
+    Angezeigt werden nur Kategorien, die fuer die jeweilige Rolle
+    mindestens eine sichtbare Karte enthalten.
+*/
+$dashboardCategories = [
+    "Spielen"    => ["join_quiz", "create_quiz"],
+    "Auswertung" => ["history", "evaluation"],
+    "Verwaltung" => ["admin", "manage_questions", "manage_media"],
+];
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -141,6 +155,11 @@ $visibleCards = $rolePermissions[$role] ?? [];
                 <div>
                     Angemeldet als: <?php echo htmlspecialchars($displayRole); ?>
                 </div>
+                <?php if ($role === 'guest'): ?>
+                    <div class="denied">
+                        Eigenen Lernfortschritt verfolgen ist als Gast nicht möglich!
+                    </div>
+                <?php endif; ?>
             </div>
         </section>
 
@@ -159,20 +178,37 @@ $visibleCards = $rolePermissions[$role] ?? [];
 
                 <?php else: ?>
 
-                    <?php foreach ($visibleCards as $cardKey): ?>
-                        <?php $card = $dashboardCards[$cardKey]; ?>
+                    <?php foreach ($dashboardCategories as $categoryLabel => $categoryCardKeys): ?>
+                        <?php
+                            // Nur die Karten dieser Kategorie, die der Nutzer sehen darf.
+                            // array_intersect behaelt die Reihenfolge der Kategorie-Definition bei.
+                            $cardsInCategory = array_values(array_intersect($categoryCardKeys, $visibleCards));
+                        ?>
+                        <?php if (!empty($cardsInCategory)): ?>
 
-                        <a href="<?php echo htmlspecialchars($card["href"]); ?>" class="dashboard-action-card">
-                            <div class="dashboard-action-icon">
-                                <?php echo htmlspecialchars($card["icon"]); ?>
+                            <div class="dashboard-category">
+                                <div class="dashboard-category-label"><?php echo htmlspecialchars($categoryLabel); ?></div>
+
+                                <div class="dashboard-category-grid">
+                                    <?php foreach ($cardsInCategory as $cardKey): ?>
+                                        <?php $card = $dashboardCards[$cardKey]; ?>
+
+                                        <a href="<?php echo htmlspecialchars($card["href"]); ?>" class="dashboard-action-card">
+                                            <div class="dashboard-action-icon">
+                                                <?php echo htmlspecialchars($card["icon"]); ?>
+                                            </div>
+
+                                            <div>
+                                                <h3><?php echo htmlspecialchars($card["title"]); ?></h3>
+                                                <p><?php echo htmlspecialchars($card["description"]); ?></p>
+                                            </div>
+                                        </a>
+
+                                    <?php endforeach; ?>
+                                </div>
                             </div>
 
-                            <div>
-                                <h3><?php echo htmlspecialchars($card["title"]); ?></h3>
-                                <p><?php echo htmlspecialchars($card["description"]); ?></p>
-                            </div>
-                        </a>
-
+                        <?php endif; ?>
                     <?php endforeach; ?>
 
                 <?php endif; ?>

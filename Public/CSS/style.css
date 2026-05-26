@@ -271,6 +271,13 @@ main.container {
     margin-right: 10px;
 }
 
+/* Variante fuer "nicht moeglich"-Hinweise: rotes X statt blauem Haken.
+   Gleicher Rahmen wie die normalen .info-list-Boxen, nur das Icon ist rot. */
+.info-list div.denied::before {
+    content: "✗";
+    color: #f87171;
+}
+
 /* Rechte Seite: Auth-Karte */
 .auth-card {
     background: var(--glass-md);
@@ -414,20 +421,10 @@ main.container {
     font-size: 14px;
 }
 
-.auth-links a,
-.secondary-links a {
-    color: var(--primary-light);
-    font-weight: 700;
-    text-decoration: none;
-    font-size: 14px;
-    transition: color 0.2s;
-}
-
-.auth-links a:hover,
-.secondary-links a:hover {
-    color: #fff;
-    text-decoration: underline;
-}
+/* Sekundaer-Links ("Jetzt registrieren", "Als Gast teilnehmen", "Zum Login",
+   "Zurueck zum Dashboard") teilen sich den Stil des .back-button-Buttons,
+   damit alle sekundaeren Navigations-Links im Projekt einheitlich wirken.
+   Die gemeinsame Definition steht weiter unten bei ".back-button". */
 
 .secondary-links {
     display: flex;
@@ -500,6 +497,8 @@ main.container {
     display: flex;
     align-items: center;
     gap: 14px;
+    min-height: 76px;          /* Einheitliche Hoehe -> alle Aktions-Karten gleich gross,
+                                  auch wenn die Beschreibung ein- oder zweizeilig ist */
     padding: 11px 14px;
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.10);
@@ -554,14 +553,9 @@ main.container {
     font-size: 13px;
 }
 
-.dashboard-footer-links a {
-    color: var(--text-muted);
-    font-weight: 600;
-    text-decoration: none;
-    transition: color 0.2s;
-}
-
-.dashboard-footer-links a:hover { color: #fff; }
+/* .dashboard-footer-links a ("Benutzer wechseln", "Zurueck zum Dashboard")
+   teilt sich den .back-button-Stil (siehe unten), damit es wie die anderen
+   Sekundaer-Buttons im Projekt aussieht. */
 
 /* ============================================================
    Lobby
@@ -855,10 +849,12 @@ body.quiz-play-page {
 }
 
 .quiz-topline .eyebrow {
+    /* Gleicher (blauer) Stil wie der "Live-Ranking"-Eyebrow rechts.
+       Groesse (font-size / padding) bleibt unveraendert. */
     font-size: 13px;
-    color: var(--text-muted);
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.14);
+    color: var(--primary-light);
+    background: rgba(47, 102, 163, 0.35);
+    border: 1px solid rgba(74, 133, 199, 0.45);
     padding: 5px 12px;
     border-radius: 999px;
 }
@@ -871,11 +867,12 @@ body.quiz-play-page {
 }
 
 .timer-box {
+    /* Gleicher (blauer) Stil wie der "Live-Ranking"-Eyebrow. Groesse bleibt 80x80. */
     position: absolute;
     top: 0;
     right: 0;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(47, 102, 163, 0.35);
+    border: 1px solid rgba(74, 133, 199, 0.45);
     border-radius: 18px;
     width: 80px;
     height: 80px;
@@ -888,7 +885,7 @@ body.quiz-play-page {
 .timer-box strong {
     font-size: 44px;
     font-weight: 800;
-    color: var(--text-muted);
+    color: var(--primary-light);
     letter-spacing: -1px;
     line-height: 1;
     transition: color 0.3s, font-size 0.3s, font-weight 0.3s;
@@ -945,6 +942,10 @@ body.quiz-play-page {
 .millionaire-answers {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+    /* Beide Antwort-Reihen gleich hoch (1fr 1fr) -> alle 4 Felder passen sich
+       gemeinsam an die laengste Antwort an und bleiben einheitlich gross.
+       Die dritte Reihe (auto) gehoert dem Bestaetigen-Button und waechst nicht mit. */
+    grid-template-rows: 1fr 1fr auto;
     gap: 14px 16px;
     width: 100%;
     max-width: 680px;
@@ -1027,6 +1028,7 @@ body.quiz-play-page {
     display: flex;
     justify-content: center;
     align-items: center;
+    text-align: center;   /* Button-Text mittig (z. B. "Antwort bestaetigen") */
     transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
     transform: none;
 }
@@ -1201,10 +1203,18 @@ h1 + p {
 
 .back-button-wrapper { margin-bottom: 22px; }
 
-.back-button {
+/* Gemeinsamer Stil fuer alle sekundaeren Navigations-Links/Buttons.
+   Genutzt von: host_quiz.php (Zurueck zum Dashboard) sowie den
+   Auth-/Sekundaer-Links (Login, Registrierung, Beitreten, Lobby). */
+.back-button,
+.auth-links a,
+.secondary-links a,
+.dashboard-footer-links a {
     display: inline-flex;
     align-items: center;
+    justify-content: center;   /* Text mittig, da die Buttons jetzt breiter als ihr Inhalt sind */
     gap: 6px;
+    min-width: 200px;          /* Einheitliche Breite -> alle Sekundaer-Buttons gleich gross */
     padding: 9px 18px;
     background: rgba(255,255,255,0.08);
     border: 1px solid rgba(255,255,255,0.18);
@@ -1216,7 +1226,10 @@ h1 + p {
     transition: background 0.2s, color 0.2s;
 }
 
-.back-button:hover {
+.back-button:hover,
+.auth-links a:hover,
+.secondary-links a:hover,
+.dashboard-footer-links a:hover {
     background: rgba(255,255,255,0.14);
     color: #fff;
 }
@@ -1519,6 +1532,14 @@ h1 + p {
     color: rgba(255, 255, 255, 0.88);
 }
 
+/* "(Host)"-Markierung neben dem Hostnamen in der Teilnehmerliste */
+.host-badge {
+    color: var(--primary-light);
+    font-weight: 600;
+    font-size: 12px;
+    margin-left: 6px;
+}
+
 .status-message {
     font-style: italic;
     color: rgba(255, 255, 255, 0.50);
@@ -1532,7 +1553,7 @@ h1 + p {
    ============================================================ */
 @media (max-width: 1024px) {
     .play-layout { flex-direction: column; }
-    .millionaire-answers { grid-template-columns: 1fr; }
+    .millionaire-answers { grid-template-columns: 1fr; grid-template-rows: none; }
     .ranking-panel { flex: 1 1 100%; max-width: 100%; margin-top: 0; }
 }
 

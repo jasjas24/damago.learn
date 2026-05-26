@@ -141,6 +141,15 @@ if (empty($rankingPlayers)) {
 $timeLimit = $_SESSION['quiz_setup']['time_limit'] ?? 30;
 $isHost = isset($_SESSION['quiz_setup']['lobby_id']);
 
+// Anzeige-Wert fuer den Timer:
+// - Laufende Frage: volle Zeit ($timeLimit), der Countdown laeuft per JS herunter.
+// - Beim Aufloesen / Warten: die Restzeit, die beim Beantworten uebrig war,
+//   bleibt stehen (last_remaining_time). Zurueckgesetzt wird erst bei der naechsten Frage.
+$timerDisplay = $timeLimit;
+if (($showExplanation || $waitingForReveal) && isset($_SESSION['last_remaining_time'])) {
+    $timerDisplay = (int) $_SESSION['last_remaining_time'];
+}
+
 // ERWEITERUNG: Hole alle IDs der Richtig-Antworten für die JS-Berechnung heraus
 $correctAnswersIds = [];
 foreach ($answers as $ans) {
@@ -172,8 +181,7 @@ foreach ($answers as $ans) {
                 <span class="eyebrow">Frage <?php echo $currentIndex + 1; ?> von <?php echo $totalQuestions; ?></span>
             </div>
             <div class="timer-box">
-                <span>Zeit:</span>
-                <strong><span id="timer-display"><?php echo $timeLimit; ?></span></strong>
+                <strong id="timer-display"><?php echo $timerDisplay; ?></strong>
             </div>
         </div>
 
@@ -195,9 +203,11 @@ foreach ($answers as $ans) {
                     if ($showExplanation) {
                         $isCorrect = intval($ans['is_correct']) === 1;
                         $wasSelected = $lastResult && isset($lastResult['chosen_ids']) && is_array($lastResult['chosen_ids']) && in_array($ans['id'], $lastResult['chosen_ids']);
+                        // Grundfaerbung bei der Aufloesung: ALLE richtigen Antworten gruen,
+                        // ALLE falschen rot - unabhaengig davon, ob sie gewaehlt wurden.
                         if ($isCorrect) {
                             $inlineStyle = "background: rgba(34,197,94,0.20) !important; color: #86efac !important; border: 1px solid rgba(34,197,94,0.50) !important;";
-                        } elseif ($wasSelected && !$isCorrect) {
+                        } else {
                             $inlineStyle = "background: rgba(239,68,68,0.20) !important; color: #fca5a5 !important; border: 1px solid rgba(239,68,68,0.50) !important;";
                         }
                         if ($wasSelected && $isCorrect) {
@@ -337,6 +347,12 @@ foreach ($answers as $ans) {
                 e.preventDefault();
                 this.classList.add('submitted');
                 this.disabled = true;
+                // Verbleibende Zeit mitsenden, damit sie beim Aufloesen angezeigt werden kann
+                let rt = document.createElement('input');
+                rt.type = 'hidden';
+                rt.name = 'remaining_time';
+                rt.value = Math.max(0, timeLeft);
+                form.appendChild(rt);
                 setTimeout(() => form.submit(), 350);
             });
         }
@@ -344,10 +360,22 @@ foreach ($answers as $ans) {
         // COUNTDOWN TIMER FIXED: Übergibt jetzt alle ausgewählten Haken sicher per Form-Submit
         let timeLeft = <?php echo intval($timeLimit); ?>;
         const display = document.getElementById('timer-display');
+        const timerBox = document.querySelector('.timer-box');
 
         const countdown = setInterval(function() {
             timeLeft--;
             if (display) display.textContent = timeLeft;
+
+            // Ab 10 Sekunden pulsieren, ab 5 Sekunden schneller pulsieren + rot.
+            // Die CSS-Klassen .pulse und .danger sind in style.css definiert.
+            if (timerBox) {
+                if (timeLeft <= 5) {
+                    timerBox.classList.add('pulse', 'danger');
+                } else if (timeLeft <= 10) {
+                    timerBox.classList.add('pulse');
+                }
+            }
+
             if (timeLeft <= 0) {
                 clearInterval(countdown);
                 
@@ -357,6 +385,13 @@ foreach ($answers as $ans) {
                 timeoutInput.name = 'timeout';
                 timeoutInput.value = '1';
                 form.appendChild(timeoutInput);
+
+                // Restzeit = 0 mitsenden (Zeit ist abgelaufen)
+                let rt = document.createElement('input');
+                rt.type = 'hidden';
+                rt.name = 'remaining_time';
+                rt.value = '0';
+                form.appendChild(rt);
 
                 // Formular absenden. Die gesetzten Checkboxen werden automatisch mitgeschickt!
                 form.submit();

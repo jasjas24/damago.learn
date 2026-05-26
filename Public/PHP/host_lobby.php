@@ -31,6 +31,14 @@ if (isset($_SESSION['quiz_setup'])) {
     exit;
 }
 
+// Host-Name dieser Lobby laden, um den Host in der Teilnehmerliste zu markieren
+$hostName = '';
+try {
+    $stmtHost = $pdo->prepare("SELECT host_name FROM quiz_lobbies WHERE id = ?");
+    $stmtHost->execute([$lobby_id]);
+    $hostName = (string)$stmtHost->fetchColumn();
+} catch (PDOException $e) {}
+
 // 2. NUR DER HOST generiert und mischt die Fragen
 if ($is_host && !isset($_SESSION['quiz_questions'])) {
     $pool  = $setup['pool'];
@@ -173,7 +181,6 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
             <?php endif; ?>
 
             <div class="auth-links">
-                <p>Zurück?</p>
                 <a href="dashboard.php">Zurück zum Dashboard</a>
             </div>
         </section>
@@ -182,6 +189,7 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
     <script>
         const lobbyId = <?php echo (int)$lobby_id; ?>;
         const isHost = <?php echo $is_host ? 'true' : 'false'; ?>;
+        const hostName = <?php echo json_encode($hostName); ?>;
 
         function updateLobby() {
             fetch('get_lobby_status.php?lobby_id=' + lobbyId)
@@ -195,7 +203,14 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
                     data.players.forEach(p => {
                         const li = document.createElement('li');
                         li.className = 'player-item';
-                        li.innerText = p.player_name;
+                        li.textContent = p.player_name;
+                        // Den Host in der Teilnehmerliste mit "(Host)" markieren
+                        if (hostName && p.player_name === hostName) {
+                            const badge = document.createElement('small');
+                            badge.className = 'host-badge';
+                            badge.textContent = '(Host)';
+                            li.appendChild(badge);
+                        }
                         list.appendChild(li);
                     });
 

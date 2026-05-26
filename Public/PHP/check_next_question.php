@@ -33,6 +33,7 @@ try {
             $_SESSION['show_explanation'] = false;
             $_SESSION['last_result'] = null;
             unset($_SESSION['waiting_for_reveal']); // Wartezustand löschen
+            unset($_SESSION['last_remaining_time']); // Timer fuer die naechste Frage zuruecksetzen
             echo json_encode(['success' => true, 'action' => 'reload']);
             exit;
         }

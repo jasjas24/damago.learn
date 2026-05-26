@@ -8,6 +8,7 @@ if ($lobby_id) {
     $_SESSION['current_question_index'] = ($_SESSION['current_question_index'] ?? 0) + 1;
     $_SESSION['show_explanation'] = false;
     $_SESSION['last_result'] = null;
+    unset($_SESSION['last_remaining_time']); // Timer fuer die naechste Frage zuruecksetzen
 
     try {
         // Index erhöhen UND show_explanation zurücksetzen!
