@@ -179,7 +179,6 @@ if (is_dir($uploadDir)) {
             </div>
 
             <div class="auth-header">
-                <span class="eyebrow">Übersicht</span>
                 <h2>Hochgeladene Bilder</h2>
                 <p>
                     Diese Bilder befinden sich aktuell im Medienordner.
