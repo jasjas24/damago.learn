@@ -9,5 +9,13 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // 2. Standardwerte für Benutzer und Rollen festlegen
-$username = $_SESSION["user_name"] ?? "Gast";
+// Wir prüfen alle gängigen Keys, damit nichts verloren geht:
+$username = $_SESSION["user_name"] ?? $_SESSION["username"] ?? $_SESSION["player_name"] ?? "Gast";
 $role = $_SESSION["user_role"] ?? "guest";
+
+// Damit alle nachfolgenden Dateien sauber arbeiten, spiegeln wir den gefundenen Namen in die Session zurück
+if ($username !== "Gast") {
+    $_SESSION["user_name"] = $username;
+    $_SESSION["username"] = $username;
+    $_SESSION["player_name"] = $username;
+}

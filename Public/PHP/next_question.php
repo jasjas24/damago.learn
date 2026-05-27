@@ -2,8 +2,11 @@
 require_once 'init.php';
 require_once 'db.php';
 
+/** @var string $username */
+
+
 $lobby_id = $_SESSION['quiz_setup']['lobby_id'] ?? $_SESSION['player_lobby_id'] ?? null;
-$username = $_SESSION['player_name'] ?? $_SESSION['username'] ?? 'Gast';
+#$username = $_SESSION['player_name'] ?? $_SESSION['username'] ?? 'Gast';
 $current_index = $_SESSION['current_question_index'] ?? 0;
 $questions = $_SESSION['quiz_questions'] ?? [];
 $current_question = $questions[$current_index] ?? null;
@@ -81,6 +84,7 @@ if ($lobby_id && $current_question) {
         $stmt->execute([$lobby_id, $current_question['id'], $username]);
 
         // 5. Die erreichten Punkte direkt beim Spieler in der Lobby-Tabelle aufaddieren
+       
         $stmtScore = $pdo->prepare("UPDATE lobby_players SET points = points + ? WHERE lobby_id = ? AND player_name = ?");
         $stmtScore->execute([$pointsEarned, $lobby_id, $username]);
 

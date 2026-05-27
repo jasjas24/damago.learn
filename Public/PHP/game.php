@@ -60,7 +60,7 @@ if (!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) {
                 }
             }
         } catch (PDOException $e) {
-            // Fehler abfangen, um Abstürze zu vermeiden
+            // Fehler abfangen
         }
     }
 }
@@ -93,9 +93,6 @@ if ($lobby_id) {
     } catch (PDOException $e) {}
 }
 
-// =========================================================================
-// INTELLIGENTER PUFFER GEGEN RACE CONDITIONS
-// =========================================================================
 $retryLoading = false;
 if (!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) {
     if ($lobby_id && !$isHost) {
@@ -118,7 +115,6 @@ $currentIndex = $_SESSION['current_question_index'];
 $allQuestions = $_SESSION['quiz_questions'] ?? [];
 $totalQuestions = count($allQuestions);
 
-// Nur umleiten, wenn wir nicht gerade im Puffer-Lademodus sind
 if (!$retryLoading && $totalQuestions > 0 && $currentIndex >= $totalQuestions) {
     header("Location: results.php");
     exit;
@@ -224,6 +220,7 @@ foreach ($answers as $ans) {
                     if ($showExplanation) {
                         $isCorrect = intval($ans['is_correct']) === 1;
                         $wasSelected = $lastResult && isset($lastResult['chosen_ids']) && is_array($lastResult['chosen_ids']) && in_array($ans['id'], $lastResult['chosen_ids']);
+                        
                         if ($isCorrect) {
                             $inlineStyle = "background: rgba(34,197,94,0.20) !important; color: #86efac !important; border: 1px solid rgba(34,197,94,0.50) !important;";
                         } elseif ($wasSelected && !$isCorrect) {
@@ -293,7 +290,12 @@ foreach ($answers as $ans) {
                             } elseif ($lastResult['status'] === 'timeout') {
                                 echo "<span style='color:#fca5a5;'>Zeit abgelaufen! (0 Punkte)</span>";
                             } else {
-                                echo "<span style='color:#fca5a5;'>Leider falsch! (0 Punkte)</span>";
+                                // Greift jetzt dynamisch je nachdem, welcher Modus aktiv ist
+                                if ($pointMode === 'all_or_nothing') {
+                                    echo "<span style='color:#fca5a5;'>Leider falsch oder unvollständig! (0 Punkte im Modus: Ganz oder Gar Nicht)</span>";
+                                } else {
+                                    echo "<span style='color:#fca5a5;'>Leider falsch! (0 Punkte)</span>";
+                                }
                             }
                         }
                     ?>

@@ -33,12 +33,6 @@ try {
     <?php include_once 'topbar.php'; ?>
 
     <main class="host-layout">
-        <p>
-            Wähle die Einstellungen für deine Quizrunde aus.
-            Danach erhalten die Teilnehmer einen Teilnahme-Code,
-            mit dem sie der Lobby beitreten können.
-        </p>
-
         <section class="host-card">
             <div class="auth-header">
                 <span class="eyebrow">Host-Einstellungen</span>
