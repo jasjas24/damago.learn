@@ -5,6 +5,7 @@ header('Content-Type: application/json');
 
 $lobby_id = $_SESSION['quiz_setup']['lobby_id'] ?? $_SESSION['player_lobby_id'] ?? null;
 $current_local_index = $_SESSION['current_question_index'] ?? 0;
+$local_show_explanation = $_SESSION['show_explanation'] ?? false;
 
 if (!$lobby_id) {
     echo json_encode(['success' => false, 'error' => 'Keine Lobby gefunden']);
@@ -33,13 +34,12 @@ try {
             $_SESSION['show_explanation'] = false;
             $_SESSION['last_result'] = null;
             unset($_SESSION['waiting_for_reveal']); // Wartezustand löschen
-            unset($_SESSION['last_remaining_time']); // Timer fuer die naechste Frage zuruecksetzen
             echo json_encode(['success' => true, 'action' => 'reload']);
             exit;
         }
 
-        // Fall 3: Alle haben geantwortet -> AUFLÖSUNG einblenden
-        if ($dbShowExplanation) {
+        // Fall 3: Alle haben geantwortet -> AUFLÖSUNG einblenden (ABER NUR, WENN LOKAL NOCH NICHT AKTIV!)
+        if ($dbShowExplanation && !$local_show_explanation) {
             $_SESSION['show_explanation'] = true;
             unset($_SESSION['waiting_for_reveal']); // Zwingend hier löschen!
             
@@ -47,8 +47,10 @@ try {
             exit;
         }
 
+        // Standard-Rückgabe, wenn sich am Zustand nichts geändert hat (Verhindert das Dauer-Reloading)
         echo json_encode([
             'success' => true,
+            'action' => 'wait',
             'current_index' => $dbIndex,
             'show_explanation' => $dbShowExplanation
         ]);

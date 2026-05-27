@@ -4,24 +4,68 @@ require_once 'db.php';
 
 /** @var string $username */
 
-if (!isset($_SESSION['quiz_questions'])) {
-    $lobby_id = $_SESSION['player_lobby_id'] ?? null;
+// 1. WICHTIG: Lobby-ID und Host-Status direkt konsistent ermitteln
+$isHost = isset($_SESSION['quiz_setup']['lobby_id']);
+$lobby_id = $_SESSION['quiz_setup']['lobby_id'] ?? $_SESSION['player_lobby_id'] ?? null;
+
+// 2. KORREKTUR: Prüfen auf !isset ODER empty, damit leere Arrays neu aus der DB geladen werden
+if (!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) {
     if ($lobby_id) {
-        $stmtLoad = $pdo->prepare("SELECT quiz_data FROM quiz_lobbies WHERE id = ?");
-        $stmtLoad->execute([$lobby_id]);
-        $json = $stmtLoad->fetchColumn();
-        if ($json) {
-            $_SESSION['quiz_questions'] = json_decode($json, true);
-            $_SESSION['current_question_index'] = 0;
+        try {
+            // Variante A: Versuche die Fragen als JSON aus quiz_lobbies zu laden
+            $stmtLoad = $pdo->prepare("SELECT quiz_data FROM quiz_lobbies WHERE id = ?");
+            $stmtLoad->execute([$lobby_id]);
+            $json = $stmtLoad->fetchColumn();
+            
+            if ($json) {
+                $decoded = json_decode($json, true);
+                if (!empty($decoded)) {
+                    $_SESSION['quiz_questions'] = $decoded;
+                    $_SESSION['current_question_index'] = 0;
+                }
+            }
+
+            // Variante B: Falls JSON leer ist, ziehe die Fragen relational aus lobby_questions
+            if (!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) {
+                $stmtLobbyQ = $pdo->prepare("
+                    SELECT q.id AS question_id, q.question_text, q.explanation AS general_explanation
+                    FROM lobby_questions lq
+                    INNER JOIN questions q ON q.id = lq.question_id
+                    WHERE lq.lobby_id = ?
+                    ORDER BY lq.sort_order ASC
+                ");
+                $stmtLobbyQ->execute([$lobby_id]);
+                $questionsRaw = $stmtLobbyQ->fetchAll(PDO::FETCH_ASSOC);
+
+                if (!empty($questionsRaw)) {
+                    $quizQuestions = [];
+                    $stmtAnswers = $pdo->prepare("SELECT id, answer_text AS text, is_correct, explanation FROM answer_options WHERE question_id = ?");
+
+                    foreach ($questionsRaw as $q) {
+                        $stmtAnswers->execute([$q['question_id']]);
+                        $answers = $stmtAnswers->fetchAll(PDO::FETCH_ASSOC);
+                        shuffle($answers);
+
+                        $quizQuestions[] = [
+                            'id'            => $q['question_id'],
+                            'question_text' => $q['question_text'],
+                            'explanation'   => $q['general_explanation'],
+                            'answers'       => $answers
+                        ];
+                    }
+
+                    $_SESSION['quiz_questions'] = $quizQuestions;
+                    $_SESSION['current_question_index'] = 0;
+                    $_SESSION['quiz_score'] = $_SESSION['quiz_score'] ?? 0;
+                }
+            }
+        } catch (PDOException $e) {
+            // Fehler abfangen, um Abstürze zu vermeiden
         }
     }
 }
-// ==========================================
-// ABSICHERUNG FÜR MITSPIELER (SESSION BEFÜLLEN)
-// ==========================================
-$lobby_id = $_SESSION['quiz_setup']['lobby_id'] ?? $_SESSION['player_lobby_id'] ?? null;
 
-// ERWEITERUNG: PointMode aus der DB holen, falls noch nicht in der Session vorhanden
+// 3. PointMode und Einstellungen aus der DB holen/synchronisieren
 if ($lobby_id && !isset($_SESSION['quiz_setup']['point_mode'])) {
     try {
         $stmtMode = $pdo->prepare("SELECT point_mode FROM quiz_lobbies WHERE id = ?");
@@ -31,49 +75,6 @@ if ($lobby_id && !isset($_SESSION['quiz_setup']['point_mode'])) {
     } catch (PDOException $e) {}
 }
 $pointMode = $_SESSION['quiz_setup']['point_mode'] ?? 'all_or_nothing';
-
-if ((!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) && $lobby_id) {
-    try {
-        $stmtLobbyQ = $pdo->prepare("
-            SELECT q.id AS question_id, q.question_text, q.explanation AS general_explanation
-            FROM lobby_questions lq
-            INNER JOIN questions q ON q.id = lq.question_id
-            WHERE lq.lobby_id = ?
-            ORDER BY lq.sort_order ASC
-        ");
-        $stmtLobbyQ->execute([$lobby_id]);
-        $questionsRaw = $stmtLobbyQ->fetchAll(PDO::FETCH_ASSOC);
-
-        if (!empty($questionsRaw)) {
-            $quizQuestions = [];
-            $stmtAnswers = $pdo->prepare("SELECT id, answer_text AS text, is_correct, explanation FROM answer_options WHERE question_id = ?");
-
-            foreach ($questionsRaw as $q) {
-                $stmtAnswers->execute([$q['question_id']]);
-                $answers = $stmtAnswers->fetchAll(PDO::FETCH_ASSOC);
-                shuffle($answers);
-
-                $quizQuestions[] = [
-                    'id'            => $q['question_id'],
-                    'question_text' => $q['question_text'],
-                    'explanation'   => $q['general_explanation'],
-                    'answers'       => $answers
-                ];
-            }
-
-            $_SESSION['quiz_questions'] = $quizQuestions;
-            $_SESSION['current_question_index'] = 0;
-            $_SESSION['quiz_score'] = 0;
-
-            if (!isset($_SESSION['quiz_setup']['time_limit'])) {
-                $stmtTime = $pdo->prepare("SELECT time_limit FROM quiz_lobbies WHERE id = ?");
-                $stmtTime->execute([$lobby_id]);
-                $dbTime = $stmtTime->fetchColumn();
-                $_SESSION['quiz_setup']['time_limit'] = $dbTime ? (int)$dbTime : 30;
-            }
-        }
-    } catch (PDOException $e) {}
-}
 
 // Synchronisiere den show_explanation-Status direkt aus der DB beim Seitenaufruf
 if ($lobby_id) {
@@ -92,9 +93,17 @@ if ($lobby_id) {
     } catch (PDOException $e) {}
 }
 
+// =========================================================================
+// INTELLIGENTER PUFFER GEGEN RACE CONDITIONS
+// =========================================================================
+$retryLoading = false;
 if (!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) {
-    header("Location: setup_lobby.php");
-    exit;
+    if ($lobby_id && !$isHost) {
+        $retryLoading = true;
+    } else {
+        header("Location: dashboard.php");
+        exit;
+    }
 }
 
 $showExplanation = isset($_SESSION['show_explanation']) && $_SESSION['show_explanation'] === true;
@@ -106,19 +115,20 @@ if (!isset($_SESSION['current_question_index'])) {
 }
 
 $currentIndex = $_SESSION['current_question_index'];
-$allQuestions = $_SESSION['quiz_questions'];
+$allQuestions = $_SESSION['quiz_questions'] ?? [];
 $totalQuestions = count($allQuestions);
 
-if ($currentIndex >= $totalQuestions) {
+// Nur umleiten, wenn wir nicht gerade im Puffer-Lademodus sind
+if (!$retryLoading && $totalQuestions > 0 && $currentIndex >= $totalQuestions) {
     header("Location: results.php");
     exit;
 }
 
-$currentQuestion = $allQuestions[$currentIndex];
-$answers = $currentQuestion['answers'];
+$currentQuestion = $allQuestions[$currentIndex] ?? ['question_text' => '', 'answers' => []];
+$answers = $currentQuestion['answers'] ?? [];
 $currentDisplayName = $_SESSION['player_name'] ?? $username ?? 'Gast';
 
-// ERWEITERUNG: Alle Spieler der Lobby für das Live-Ranking aus der DB holen
+// Alle Spieler der Lobby für das Live-Ranking aus der DB holen
 $rankingPlayers = [];
 if ($lobby_id) {
     try {
@@ -138,22 +148,13 @@ if ($lobby_id) {
 if (empty($rankingPlayers)) {
     $rankingPlayers = [[ 'username' => $currentDisplayName, 'score' => $_SESSION['quiz_score'] ?? 0 ]];
 }
-$timeLimit = $_SESSION['quiz_setup']['time_limit'] ?? 30;
-$isHost = isset($_SESSION['quiz_setup']['lobby_id']);
 
-// Anzeige-Wert fuer den Timer:
-// - Laufende Frage: volle Zeit ($timeLimit), der Countdown laeuft per JS herunter.
-// - Beim Aufloesen / Warten: die Restzeit, die beim Beantworten uebrig war,
-//   bleibt stehen (last_remaining_time). Zurueckgesetzt wird erst bei der naechsten Frage.
-$timerDisplay = $timeLimit;
-if (($showExplanation || $waitingForReveal) && isset($_SESSION['last_remaining_time'])) {
-    $timerDisplay = (int) $_SESSION['last_remaining_time'];
-}
+$timeLimit = 15;
+$_SESSION['quiz_setup']['time_limit'] = 15;
 
-// ERWEITERUNG: Hole alle IDs der Richtig-Antworten für die JS-Berechnung heraus
 $correctAnswersIds = [];
 foreach ($answers as $ans) {
-    if (intval($ans['is_correct']) === 1) {
+    if (isset($ans['is_correct']) && intval($ans['is_correct']) === 1) {
         $correctAnswersIds[] = intval($ans['id']);
     }
 }
@@ -174,6 +175,26 @@ foreach ($answers as $ans) {
 
 <?php include_once 'topbar.php'; ?>
 
+<?php if ($retryLoading): ?>
+    <main class="play-layout" style="display: flex; justify-content: center; align-items: center; min-height: 70vh;">
+        <section class="question-card" style="text-align: center; padding: 40px; max-width: 500px; width: 100%;">
+            <div class="loader" style="margin: 0 auto 20px auto;"></div>
+            <h2 style="margin-bottom: 10px;">Das Spiel startet gleich...</h2>
+            <p style="color: rgba(255,255,255,0.60); font-style: italic;">
+                Die Fragen werden im Hintergrund vom Server vorbereitet. Bitte warten...
+            </p>
+        </section>
+    </main>
+    <script>
+        setTimeout(function() {
+            window.location.reload();
+        }, 1500);
+    </script>
+</body>
+</html>
+<?php exit; ?>
+<?php endif; ?>
+
 <main class="play-layout">
     <section class="quiz-main">
         <div class="quiz-topline">
@@ -181,7 +202,7 @@ foreach ($answers as $ans) {
                 <span class="eyebrow">Frage <?php echo $currentIndex + 1; ?> von <?php echo $totalQuestions; ?></span>
             </div>
             <div class="timer-box">
-                <strong id="timer-display"><?php echo $timerDisplay; ?></strong>
+                <strong><span id="timer-display"><?php echo $timeLimit; ?></span></strong>
             </div>
         </div>
 
@@ -203,11 +224,9 @@ foreach ($answers as $ans) {
                     if ($showExplanation) {
                         $isCorrect = intval($ans['is_correct']) === 1;
                         $wasSelected = $lastResult && isset($lastResult['chosen_ids']) && is_array($lastResult['chosen_ids']) && in_array($ans['id'], $lastResult['chosen_ids']);
-                        // Grundfaerbung bei der Aufloesung: ALLE richtigen Antworten gruen,
-                        // ALLE falschen rot - unabhaengig davon, ob sie gewaehlt wurden.
                         if ($isCorrect) {
                             $inlineStyle = "background: rgba(34,197,94,0.20) !important; color: #86efac !important; border: 1px solid rgba(34,197,94,0.50) !important;";
-                        } else {
+                        } elseif ($wasSelected && !$isCorrect) {
                             $inlineStyle = "background: rgba(239,68,68,0.20) !important; color: #fca5a5 !important; border: 1px solid rgba(239,68,68,0.50) !important;";
                         }
                         if ($wasSelected && $isCorrect) {
@@ -222,7 +241,12 @@ foreach ($answers as $ans) {
                             data-id="<?php echo $ans['id']; ?>"
                             style="<?php echo $inlineStyle; ?>"
                             <?php echo $showExplanation ? 'disabled' : ''; ?>>
-                        <span class="answer-text"><?php echo htmlspecialchars($ans['text']); ?></span>
+                        <span class="answer-text">
+                            <?php if ($showExplanation): ?>
+                                <?php echo intval($ans['is_correct']) === 1 ? '✅' : '❌'; ?> 
+                            <?php endif; ?>
+                            <?php echo htmlspecialchars($ans['text']); ?>
+                        </span>
                         <?php if (!$showExplanation): ?>
                             <input type="checkbox" class="answer-checkbox" name="selected_answers[]" value="<?php echo $ans['id']; ?>" style="display:none;" id="check-<?php echo $ans['id']; ?>">
                         <?php endif; ?>
@@ -320,7 +344,7 @@ foreach ($answers as $ans) {
     </aside>
 </main>
 
-<script src="functions.js"></script>
+<script src="/damago/Public/JS/functions.js?v=<?php echo time(); ?>"></script>
 
 <script>
 (function() {
@@ -339,7 +363,6 @@ foreach ($answers as $ans) {
             });
         });
 
-        // Antwort bestätigen: roter Rahmen als visuelle Bestätigung vor dem Absenden
         const confirmBtn = document.getElementById('confirm-btn');
         const form = document.getElementById('quiz-form');
         if (confirmBtn && form) {
@@ -347,53 +370,25 @@ foreach ($answers as $ans) {
                 e.preventDefault();
                 this.classList.add('submitted');
                 this.disabled = true;
-                // Verbleibende Zeit mitsenden, damit sie beim Aufloesen angezeigt werden kann
-                let rt = document.createElement('input');
-                rt.type = 'hidden';
-                rt.name = 'remaining_time';
-                rt.value = Math.max(0, timeLeft);
-                form.appendChild(rt);
                 setTimeout(() => form.submit(), 350);
             });
         }
 
-        // COUNTDOWN TIMER FIXED: Übergibt jetzt alle ausgewählten Haken sicher per Form-Submit
         let timeLeft = <?php echo intval($timeLimit); ?>;
         const display = document.getElementById('timer-display');
-        const timerBox = document.querySelector('.timer-box');
 
         const countdown = setInterval(function() {
             timeLeft--;
             if (display) display.textContent = timeLeft;
-
-            // Ab 10 Sekunden pulsieren, ab 5 Sekunden schneller pulsieren + rot.
-            // Die CSS-Klassen .pulse und .danger sind in style.css definiert.
-            if (timerBox) {
-                if (timeLeft <= 5) {
-                    timerBox.classList.add('pulse', 'danger');
-                } else if (timeLeft <= 10) {
-                    timerBox.classList.add('pulse');
-                }
-            }
-
             if (timeLeft <= 0) {
                 clearInterval(countdown);
                 
-                // Timeout-Flag hinzufügen, damit PHP den Zeitablauf registriert
                 let timeoutInput = document.createElement('input');
                 timeoutInput.type = 'hidden';
                 timeoutInput.name = 'timeout';
                 timeoutInput.value = '1';
                 form.appendChild(timeoutInput);
 
-                // Restzeit = 0 mitsenden (Zeit ist abgelaufen)
-                let rt = document.createElement('input');
-                rt.type = 'hidden';
-                rt.name = 'remaining_time';
-                rt.value = '0';
-                form.appendChild(rt);
-
-                // Formular absenden. Die gesetzten Checkboxen werden automatisch mitgeschickt!
                 form.submit();
             }
         }, 1000);
@@ -420,6 +415,10 @@ foreach ($answers as $ans) {
         }, 1500);
     <?php endif; ?>
 
+    <?php if ($showExplanation): ?>
+        const timerBox = document.querySelector('.timer-box');
+        if (timerBox) { timerBox.style.background = 'rgba(84,110,122,0.70)'; timerBox.style.boxShadow = 'none'; }
+    <?php endif; ?>
 })();
 </script>
 </body>

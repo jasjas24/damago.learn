@@ -17,12 +17,6 @@ if ($lobby_id && $current_question) {
         $chosenIds = isset($_POST['selected_answers']) ? array_map('intval', $_POST['selected_answers']) : [];
         $isTimeout = isset($_POST['timeout']) && $_POST['timeout'] == '1';
 
-        // Verbleibende Zeit beim Beantworten merken (nur fuer die Anzeige beim Aufloesen).
-        // Auf 0..Zeitlimit begrenzen, damit kein manipulierter Wert angezeigt wird.
-        $timeLimitForDisplay = (int)($_SESSION['quiz_setup']['time_limit'] ?? 30);
-        $remainingTime = isset($_POST['remaining_time']) ? (int)$_POST['remaining_time'] : 0;
-        $_SESSION['last_remaining_time'] = max(0, min($timeLimitForDisplay, $remainingTime));
-
         // 2. Die wirklich korrekten IDs aus der Session/Frage sammeln
         $correctIds = [];
         if (isset($current_question['answers'])) {
