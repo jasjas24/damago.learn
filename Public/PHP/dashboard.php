@@ -64,10 +64,7 @@ $rolePermissions = [
         "join_quiz",
         "create_quiz",
         "history",
-        "evaluation",
         "admin",
-        "manage_questions",
-        "manage_media"
     ],
     "teacher" => [
         "join_quiz",

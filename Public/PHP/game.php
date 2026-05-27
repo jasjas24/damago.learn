@@ -419,11 +419,6 @@ foreach ($answers as $ans) {
                 .catch(err => console.error("Fehler beim Abrufen des Spielstatus:", err));
         }, 1500);
     <?php endif; ?>
-
-    <?php if ($showExplanation): ?>
-        const timerBox = document.querySelector('.timer-box');
-        if (timerBox) { timerBox.style.background = 'rgba(84,110,122,0.70)'; timerBox.style.boxShadow = 'none'; }
-    <?php endif; ?>
 })();
 </script>
 </body>
