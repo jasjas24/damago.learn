@@ -46,30 +46,12 @@ $dashboardCards = [
         "title" => "Lernfortschritt",
         "description" => "Eigene Ergebnisse und gespielte Quizrunden ansehen."
     ],
-    "evaluation" => [
-        "href" => "evaluation.php",
-        "icon" => "AW",
-        "title" => "Quiz-evaluation",
-        "description" => "Ergebnisse und Zwischenstände von Quizrunden ansehen."
-    ],
     "admin" => [
         "href" => "admin.php",
         "icon" => "AD",
         "title" => "Adminbereich",
         "description" => "Fragenpools, Fragen, Medien, Nutzer und Archive verwalten."
     ],
-    "manage_questions" => [
-        "href" => "manage_questions.php",
-        "icon" => "FV",
-        "title" => "Fragen verwalten",
-        "description" => "Fragen erstellen, bearbeiten, deaktivieren oder importieren."
-    ],
-    "manage_media" => [
-        "href" => "manage_media.php",
-        "icon" => "MV",
-        "title" => "Medien verwalten",
-        "description" => "Bilder hochladen und Fragen zuordnen."
-    ]
 ];
 
 /*
