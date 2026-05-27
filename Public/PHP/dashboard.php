@@ -53,7 +53,14 @@ $dashboardCards = [
         "title" => "Adminbereich",
         "description" => "Fragenpools, Fragen, Medien, Nutzer und Archive verwalten."
     ],
-    
+
+    "teacher_area" => [
+        "href" => "teacher_area.php",
+        "icon" => "DZ",
+        "title" => "Dozentenbereich",
+        "description" => "Quizrunden, Fragen und Auswertungen fuer Dozenten verwalten."
+    ],
+
 ];
 
 /*
@@ -73,6 +80,7 @@ $rolePermissions = [
         "join_quiz",
         "create_quiz",
         "history",
+        "admin"
 
     ],
     "student" => [
@@ -99,7 +107,7 @@ $visibleCards = $rolePermissions[$role] ?? [];
 $dashboardCategories = [
     "Spielen"    => ["join_quiz", "create_quiz"],
     "Auswertung" => ["history", "evaluation"],
-    "Verwaltung" => ["admin", "manage_questions", "manage_media"],
+    "Verwaltung" => ["admin", "teacher_area", "manage_questions", "manage_media"],
 ];
 ?>
 <!DOCTYPE html>
