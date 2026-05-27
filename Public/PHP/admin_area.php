@@ -12,7 +12,7 @@ if ($role !== 'admin') {
 
 $menuItems = [
     [
-        "href"        => "manage_pools.php",
+        "href"        => "manage_question_pools.php",
         "icon"        => "FP",
         "title"       => "Fragenpools",
         "description" => "Fragenpools erstellen, bearbeiten und verwalten."
