@@ -80,7 +80,8 @@ $rolePermissions = [
         "join_quiz",
         "create_quiz",
         "history",
-        "teacher_area",
+        "admin"
+
     ],
     "student" => [
         "join_quiz",
