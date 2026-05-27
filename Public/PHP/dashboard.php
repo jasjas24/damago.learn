@@ -46,12 +46,14 @@ $dashboardCards = [
         "title" => "Lernfortschritt",
         "description" => "Eigene Ergebnisse und gespielte Quizrunden ansehen."
     ],
+    
     "admin" => [
-        "href" => "admin.php",
+        "href" => "admin_area.php",
         "icon" => "AD",
         "title" => "Adminbereich",
         "description" => "Fragenpools, Fragen, Medien, Nutzer und Archive verwalten."
     ],
+    
 ];
 
 /*
@@ -64,13 +66,14 @@ $rolePermissions = [
         "join_quiz",
         "create_quiz",
         "history",
-        "admin",
+        "admin"
+
     ],
     "teacher" => [
         "join_quiz",
         "create_quiz",
         "history",
-        "evaluation"
+
     ],
     "student" => [
         "join_quiz",
