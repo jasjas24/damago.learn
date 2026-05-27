@@ -419,14 +419,7 @@ foreach ($answers as $ans) {
                 .catch(err => console.error("Fehler beim Abrufen des Spielstatus:", err));
         }, 1500);
     <?php endif; ?>
-<<<<<<< HEAD
-=======
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 25febf771d49d9d317772e683aef309304c7c70d
->>>>>>> 5288ae49438c39952c7a75a254b0e80deec7d7c4
 })();
 </script>
 </body>
