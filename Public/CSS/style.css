@@ -1548,6 +1548,252 @@ h1 + p {
 }
 
 /* ============================================================
+   Fragen-Verwaltung (manage_questions)
+   ============================================================ */
+
+.manage-questions-page .quiz-main {
+    align-items: stretch;
+    padding: 24px 32px;
+}
+
+.manage-questions-page .quiz-topline,
+.manage-questions-page .auth-header {
+    width: 100%;
+}
+
+/* Import-Bereich */
+.import-section {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+}
+
+.import-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.import-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 4px 0 4px;
+}
+
+.import-header p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.import-form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.import-drop-zone {
+    flex: 1;
+    border: 1.5px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.import-drop-zone:hover,
+.import-drop-zone.drag-over {
+    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.import-drop-zone.has-file {
+    border-color: rgba(34, 197, 94, 0.4);
+    background: rgba(34, 197, 94, 0.04);
+}
+
+.import-drop-content {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    pointer-events: none;
+}
+
+.import-drop-icon {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    background: rgba(59, 130, 246, 0.15);
+    color: #93c5fd;
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    border-radius: 8px;
+    padding: 6px 8px;
+    flex-shrink: 0;
+}
+
+.import-drop-content p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.import-browse-link {
+    color: #93c5fd;
+    text-decoration: underline;
+    cursor: pointer;
+    pointer-events: all;
+}
+
+.import-drop-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    opacity: 0.6;
+    display: block;
+    margin-top: 2px;
+}
+
+.import-submit:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.import-download-btn {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #93c5fd;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.import-download-btn:hover {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.5);
+    color: #bfdbfe;
+}
+
+.questions-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.questions-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.questions-form .form-group label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.9px;
+    color: var(--text-muted);
+}
+
+.questions-form .form-group input,
+.questions-form .form-group select {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.questions-form .form-group input:focus,
+.questions-form .form-group select:focus {
+    border-color: rgba(139, 92, 246, 0.5);
+}
+
+.questions-form .form-group select option {
+    background: #1a1a2e;
+}
+
+.answer-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    margin: 2px 0;
+}
+
+.questions-form .lobby-hints {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin: 2px 0;
+}
+
+.questions-form .lobby-hints h3 {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.9px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.questions-form .lobby-hints ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.questions-form .lobby-hints li label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.questions-form .lobby-hints li input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #8b5cf6;
+    cursor: pointer;
+}
+
+.questions-form .btn.btn-primary {
+    width: auto;
+    align-self: flex-end;
+    padding: 12px 28px;
+    margin-top: 6px;
+}
+
+/* ============================================================
    Benutzerverwaltung (manage_users)
    ============================================================ */
 

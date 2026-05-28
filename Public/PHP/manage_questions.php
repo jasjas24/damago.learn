@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../CSS/style.css">
 </head>
 
-<body class="quiz-play-page">
+<body class="manage-questions-page">
 
 <div class="page-orbs">
     <div class="orb orb-1"></div>
@@ -16,46 +16,51 @@
     <div class="orb orb-3"></div>
 </div>
 
-<header class="topbar">
-    <nav class="topbar-nav">
-        <a href="dashboard.php">Dashboard</a>
-        <a href="manage_question_pools.php">Fragenpools</a>
-        <a href="manage_questions.php">Fragen</a>
-    </nav>
-
-    <a href="dashboard.php" class="topbar-brand">
-        <span class="logo-placeholder">dama.go</span>
-    </a>
-
-    <div class="topbar-account">
-        <span class="account-name">Pascal-A.</span>
-        <a href="logout.php" class="logout-button">Abmelden</a>
-    </div>
-</header>
+<?php include_once 'topbar.php'; ?>
 
 <main class="play-layout">
 
     <section class="quiz-main">
 
         <div class="quiz-topline">
-            <span class="eyebrow">Adminbereich</span>
-            <h1>Fragen verwalten</h1>
+            <span class="eyebrow">Fragen-Verwaltung</span>
         </div>
 
-        <div class="back-button-wrapper">
-            <a href="admin_area.php" class="back-button">
-                Zurück zum Adminbereich
-            </a>
+        <div class="import-section">
+            <div class="import-header">
+                <div>
+                    <span class="eyebrow">Import</span>
+                    <h3>Fragen importieren</h3>
+                    <p>XLSX-Datei hochladen und mehrere Fragen auf einmal importieren.</p>
+                </div>
+                <a href="../../Uploads/Vorlagen/fragen_import_vorlage.xlsx" class="btn-icon btn-edit import-download-btn" download>
+                    Vorlage herunterladen
+                </a>
+            </div>
+
+            <form method="POST" action="#" enctype="multipart/form-data" class="import-form">
+                <div class="import-drop-zone" id="importDropZone">
+                    <input type="file" name="import_file" id="importFile" accept=".xlsx" hidden>
+                    <div class="import-drop-content" id="importDropContent">
+                        <div class="import-drop-icon">XLS</div>
+                        <p>XLSX-Datei hierher ziehen oder <span class="import-browse-link" onclick="document.getElementById('importFile').click()">auswählen</span></p>
+                        <span class="import-drop-hint">Pflichtfelder: Fragetext, Antwort A, Richtige Antworten</span>
+                    </div>
+                </div>
+                <button type="submit" class="btn-icon btn-edit import-submit" id="importSubmit" disabled>
+                    Importieren
+                </button>
+            </form>
         </div>
 
-        <div class="host-card">
+        <div class="import-section">
             <div class="auth-header">
                 <span class="eyebrow">Frage erstellen</span>
                 <h2>Neue Frage hinzufügen</h2>
                 <p>Wähle zuerst einen Fragenpool aus und erfasse danach die Frage mit Antworten.</p>
             </div>
 
-            <form method="POST" action="#" class="auth-form">
+            <form method="POST" action="#" class="auth-form questions-form">
 
                 <div class="form-group">
                     <label for="question_pool">Fragenpool auswählen</label>
@@ -78,84 +83,48 @@
                     >
                 </div>
 
-                <div class="form-group">
-                    <label for="answer_a">Antwort A</label>
-                    <input
-                        type="text"
-                        id="answer_a"
-                        name="answer_a"
-                        placeholder="Antwortmöglichkeit A"
-                    >
+                <div class="answer-pair">
+                    <div class="form-group">
+                        <label for="answer_a">Antwort A</label>
+                        <input type="text" id="answer_a" name="answer_a" placeholder="Antwortmöglichkeit A">
+                    </div>
+                    <div class="form-group">
+                        <label for="answer_a_explanation">Erklärung zu Antwort A</label>
+                        <input type="text" id="answer_a_explanation" name="answer_a_explanation" placeholder="Warum ist Antwort A richtig oder falsch?">
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="answer_a_explanation">Erklärung zu Antwort A</label>
-                    <input
-                        type="text"
-                        id="answer_a_explanation"
-                        name="answer_a_explanation"
-                        placeholder="Warum ist Antwort A richtig oder falsch?"
-                    >
+                <div class="answer-pair">
+                    <div class="form-group">
+                        <label for="answer_b">Antwort B</label>
+                        <input type="text" id="answer_b" name="answer_b" placeholder="Antwortmöglichkeit B">
+                    </div>
+                    <div class="form-group">
+                        <label for="answer_b_explanation">Erklärung zu Antwort B</label>
+                        <input type="text" id="answer_b_explanation" name="answer_b_explanation" placeholder="Warum ist Antwort B richtig oder falsch?">
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="answer_b">Antwort B</label>
-                    <input
-                        type="text"
-                        id="answer_b"
-                        name="answer_b"
-                        placeholder="Antwortmöglichkeit B"
-                    >
+                <div class="answer-pair">
+                    <div class="form-group">
+                        <label for="answer_c">Antwort C</label>
+                        <input type="text" id="answer_c" name="answer_c" placeholder="Antwortmöglichkeit C">
+                    </div>
+                    <div class="form-group">
+                        <label for="answer_c_explanation">Erklärung zu Antwort C</label>
+                        <input type="text" id="answer_c_explanation" name="answer_c_explanation" placeholder="Warum ist Antwort C richtig oder falsch?">
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="answer_b_explanation">Erklärung zu Antwort B</label>
-                    <input
-                        type="text"
-                        id="answer_b_explanation"
-                        name="answer_b_explanation"
-                        placeholder="Warum ist Antwort B richtig oder falsch?"
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="answer_c">Antwort C</label>
-                    <input
-                        type="text"
-                        id="answer_c"
-                        name="answer_c"
-                        placeholder="Antwortmöglichkeit C"
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="answer_c_explanation">Erklärung zu Antwort C</label>
-                    <input
-                        type="text"
-                        id="answer_c_explanation"
-                        name="answer_c_explanation"
-                        placeholder="Warum ist Antwort C richtig oder falsch?"
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="answer_d">Antwort D</label>
-                    <input
-                        type="text"
-                        id="answer_d"
-                        name="answer_d"
-                        placeholder="Antwortmöglichkeit D"
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="answer_d_explanation">Erklärung zu Antwort D</label>
-                    <input
-                        type="text"
-                        id="answer_d_explanation"
-                        name="answer_d_explanation"
-                        placeholder="Warum ist Antwort D richtig oder falsch?"
-                    >
+                <div class="answer-pair">
+                    <div class="form-group">
+                        <label for="answer_d">Antwort D</label>
+                        <input type="text" id="answer_d" name="answer_d" placeholder="Antwortmöglichkeit D">
+                    </div>
+                    <div class="form-group">
+                        <label for="answer_d_explanation">Erklärung zu Antwort D</label>
+                        <input type="text" id="answer_d_explanation" name="answer_d_explanation" placeholder="Warum ist Antwort D richtig oder falsch?">
+                    </div>
                 </div>
 
                 <div class="lobby-hints">
@@ -407,6 +376,42 @@
     </aside>
 
 </main>
+
+<script>
+    const dropZone   = document.getElementById('importDropZone');
+    const fileInput  = document.getElementById('importFile');
+    const dropContent = document.getElementById('importDropContent');
+    const submitBtn  = document.getElementById('importSubmit');
+
+    function setFile(file) {
+        if (!file) return;
+        dropContent.innerHTML = `
+            <div class="import-drop-icon">XLS</div>
+            <p><strong>${file.name}</strong></p>
+            <span class="import-drop-hint">${(file.size / 1024).toFixed(1)} KB — bereit zum Import</span>
+        `;
+        submitBtn.disabled = false;
+        dropZone.classList.add('has-file');
+    }
+
+    fileInput.addEventListener('change', () => setFile(fileInput.files[0]));
+
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file && file.name.endsWith('.xlsx')) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+            setFile(file);
+        }
+    });
+
+    dropZone.addEventListener('click', () => fileInput.click());
+</script>
 
 </body>
 </html>
