@@ -8,7 +8,7 @@ function e($value)
 
 $currentRole = $role ?? ($_SESSION['role'] ?? ($_SESSION['user']['role'] ?? 'guest'));
 
-if ($currentRole !== 'admin') {
+if (!in_array($currentRole, ['admin', 'teacher'])) {
     header("Location: dashboard.php");
     exit;
 }

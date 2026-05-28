@@ -54,11 +54,11 @@ $dashboardCards = [
         "description" => "Fragenpools, Fragen, Medien, Nutzer und Archive verwalten."
     ],
 
-    "teacher_area" => [
+    "teacher" => [
         "href" => "teacher_area.php",
-        "icon" => "DZ",
-        "title" => "Dozentenbereich",
-        "description" => "Quizrunden, Fragen und Auswertungen fuer Dozenten verwalten."
+        "icon" => "DB",
+        "title" => "Verwaltungsbereich",
+        "description" => "Fragenpools, Fragen, Medien und Archive verwalten."
     ],
 
 ];
@@ -80,8 +80,7 @@ $rolePermissions = [
         "join_quiz",
         "create_quiz",
         "history",
-        "admin"
-
+        "teacher"
     ],
     "student" => [
         "join_quiz",
@@ -97,17 +96,12 @@ $rolePermissions = [
 $visibleCards = $rolePermissions[$role] ?? [];
 
 /*
-    Kategorien fuer das Dashboard: gruppieren die Karten thematisch.
-    - Spielen:    an Quizrunden teilnehmen oder selbst hosten
-    - Auswertung: eigene Ergebnisse und Quiz-Auswertungen ansehen
-    - Verwaltung: Admin-Funktionen (Fragen, Medien, Nutzer, Archive)
-    Angezeigt werden nur Kategorien, die fuer die jeweilige Rolle
-    mindestens eine sichtbare Karte enthalten.
+    Kategorien für das Dashboard, um die Karten zu gruppieren.
 */
 $dashboardCategories = [
     "Spielen"    => ["join_quiz", "create_quiz"],
     "Auswertung" => ["history", "evaluation"],
-    "Verwaltung" => ["admin", "teacher_area", "manage_questions", "manage_media"],
+    "Verwaltung" => ["admin", "teacher", "manage_questions", "manage_media"],
 ];
 ?>
 <!DOCTYPE html>

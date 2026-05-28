@@ -32,13 +32,13 @@ $menuItems = [
     [
         "href"        => "manage_users.php",
         "icon"        => "NV",
-        "title"       => "Benutzer",
+        "title"       => "Nutzer",
         "description" => "Benutzerkonten einsehen, Rollen vergeben und verwalten."
     ],
     [
         "href"        => "manage_archives.php",
         "icon"        => "AR",
-        "title"       => "Archiv",
+        "title"       => "Archive",
         "description" => "Abgeschlossene Quizrunden und Ergebnisse einsehen."
     ],
 ];
