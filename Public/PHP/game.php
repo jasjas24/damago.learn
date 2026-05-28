@@ -382,17 +382,18 @@ foreach ($answers as $ans) {
         const countdown = setInterval(function() {
             timeLeft--;
             if (display) display.textContent = timeLeft;
-            if (timeLeft <= 0) {
-                clearInterval(countdown);
+                if (timeLeft <= 0) {
+                    console.log("Die Zeit ist abgelaufen! Führe jetzt den Klick aus...");
+                    clearInterval(countdown);
                 
-                let timeoutInput = document.createElement('input');
-                timeoutInput.type = 'hidden';
-                timeoutInput.name = 'timeout';
-                timeoutInput.value = '1';
-                form.appendChild(timeoutInput);
+                    let timeoutInput = document.createElement('input');
+                    timeoutInput.type = 'hidden';
+                    timeoutInput.name = 'timeout';
+                    timeoutInput.value = '1';
+                    form.appendChild(timeoutInput);
 
-                form.submit();
-            }
+                    form.submit();
+                }
         }, 1000);
     <?php endif; ?>
 
