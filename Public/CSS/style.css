@@ -1550,13 +1550,13 @@ h1 + p {
    Fragen-Verwaltung (manage_questions)
    ============================================================ */
 
-.quiz-play-page .quiz-main {
+.manage-questions-page .quiz-main {
     align-items: stretch;
     padding: 24px 32px;
 }
 
-.quiz-play-page .quiz-topline,
-.quiz-play-page .auth-header {
+.manage-questions-page .quiz-topline,
+.manage-questions-page .auth-header {
     width: 100%;
 }
 
