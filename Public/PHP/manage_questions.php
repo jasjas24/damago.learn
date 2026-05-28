@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../CSS/style.css">
 </head>
 
-<body class="quiz-play-page">
+<body class="manage-questions-page">
 
 <div class="page-orbs">
     <div class="orb orb-1"></div>
