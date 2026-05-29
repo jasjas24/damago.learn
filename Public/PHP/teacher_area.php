@@ -29,7 +29,7 @@ $menuItems = [
         "description" => "Bilder hochladen und Fragen zuordnen."
     ],
     [
-        "href"        => "manage_archives.php",
+        "href"        => "archive.php",
         "icon"        => "AR",
         "title"       => "Archiv",
         "description" => "Abgeschlossene Quizrunden und Ergebnisse einsehen."
