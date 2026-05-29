@@ -194,70 +194,6 @@ foreach ($answers as $ans) {
     </script>
 <?php else: ?>
 
-<<<<<<< HEAD
-<main class="play-layout">
-    <section class="quiz-main">
-        <div class="quiz-topline">
-            <div>
-                <span class="eyebrow">Frage <?php echo $currentIndex + 1; ?> von <?php echo $totalQuestions; ?></span>
-            </div>
-            <div class="timer-box">
-                <strong><span id="timer-display"><?php echo $timeLimit; ?></span></strong>
-            </div>
-        </div>
-
-        <section class="question-card">
-            <h2><?php echo htmlspecialchars($currentQuestion['question_text']); ?></h2>
-        </section>
-
-        <?php if ($waitingForReveal && !$showExplanation): ?>
-            <div class="confirm-button-wrapper" style="flex-direction: column; align-items: center; gap: 15px; margin-top: 40px;">
-                <div class="loader"></div>
-                <button type="button" class="millionaire-answer confirm-button submitted" disabled>
-                    <span class="answer-text">Antwort abgegeben. Warte auf Mitspieler...</span>
-                </button>
-            </div>
-        <?php else: ?>
-    <form class="millionaire-answers" id="quiz-form" action="next_question.php" method="POST">
-        <?php foreach ($answers as $letter => $ans):
-            $inlineStyle = "";
-            if ($showExplanation) {
-                $isCorrect = intval($ans['is_correct']) === 1;
-                $wasSelected = $lastResult && isset($lastResult['chosen_ids']) && is_array($lastResult['chosen_ids']) && in_array($ans['id'], $lastResult['chosen_ids']);
-
-                if ($isCorrect) {
-                    $inlineStyle = "background: rgba(34,197,94,0.20) !important; color: #86efac !important; border: 1px solid rgba(34,197,94,0.50) !important;";
-                } else {
-                    $inlineStyle = "background: rgba(239,68,68,0.20) !important; color: #fca5a5 !important; border: 1px solid rgba(239,68,68,0.50) !important;";
-                }
-                if ($wasSelected && $isCorrect) {
-                    $inlineStyle .= " border: 4px solid #86efac !important; box-shadow: 0 0 0 5px rgba(34,197,94,0.45) !important;";
-                } elseif ($wasSelected && !$isCorrect) {
-                    $inlineStyle .= " border: 4px solid #fca5a5 !important; box-shadow: 0 0 0 5px rgba(239,68,68,0.45) !important;";
-                }
-            }
-        ?>
-            <button type="button"
-                    class="millionaire-answer"
-                    data-id="<?php echo $ans['id']; ?>"
-                    style="<?php echo $inlineStyle; ?>"
-                    <?php echo $showExplanation ? 'disabled' : ''; ?>>
-                <span class="answer-text">
-                    <?php echo htmlspecialchars($ans['text']); ?>
-                </span>
-                <?php if (!$showExplanation): ?>
-                    <input type="checkbox" class="answer-checkbox" name="selected_answers[]" value="<?php echo $ans['id']; ?>" style="display:none;" id="check-<?php echo $ans['id']; ?>">
-                <?php endif; ?>
-            </button>
-        <?php endforeach; ?>
-
-                <div class="confirm-button-wrapper">
-                    <?php if (!$showExplanation): ?>
-                        <button type="submit" id="confirm-btn" class="millionaire-answer confirm-button btn-blue">
-                            <span class="answer-text">Antwort bestätigen</span>
-                        </button>
-                    <?php endif; ?>
-=======
     <main class="play-layout">
         <section class="quiz-main">
             <div class="quiz-topline">
@@ -266,7 +202,6 @@ foreach ($answers as $ans) {
                 </div>
                 <div class="timer-box">
                     <strong><span id="timer-display"><?php echo $timeLimit; ?></span></strong>
->>>>>>> 38eae1a91c9c705a4268b13332e032d4ac431989
                 </div>
             </div>
 
