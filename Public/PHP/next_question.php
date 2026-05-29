@@ -3,10 +3,10 @@ require_once 'init.php';
 require_once 'db.php';
 
 /** @var string $username */
-
+// SICHERHEITSMASSNAHME: Username flexibel aus der Session ziehen, falls init.php ihn nicht setzt
+$username = $_SESSION['player_name'] ?? $username ?? $_SESSION['username'] ?? 'Gast';
 
 $lobby_id = $_SESSION['quiz_setup']['lobby_id'] ?? $_SESSION['player_lobby_id'] ?? null;
-#$username = $_SESSION['player_name'] ?? $_SESSION['username'] ?? 'Gast';
 $current_index = $_SESSION['current_question_index'] ?? 0;
 $questions = $_SESSION['quiz_questions'] ?? [];
 $current_question = $questions[$current_index] ?? null;
@@ -32,7 +32,23 @@ if ($lobby_id && $current_question) {
 
         // 3. ERWEITERTE PUNKTEBERECHNUNG (Je nach Modus)
         $pointsEarned = 0;
-        $pointMode = $_SESSION['quiz_setup']['point_mode'] ?? 'all_or_nothing';
+        $pointMode = $_SESSION['quiz_setup']['point_mode'] ?? null;
+        
+        // NEU: Für Mitspieler den Punktemodus live aus der DB holen, da sie keine Host-Session haben
+        if (empty($pointMode) && $lobby_id) {
+            $stmtMode = $pdo->prepare("SELECT point_mode FROM quiz_lobbies WHERE id = ?");
+            $stmtMode->execute([$lobby_id]);
+            $dbMode = $stmtMode->fetchColumn();
+            if ($dbMode) {
+                $pointMode = $dbMode;
+                $_SESSION['quiz_setup']['point_mode'] = $dbMode; // In Session merken
+            }
+        }
+
+        // Fallback, falls absolut nichts gefunden wurde
+        if (empty($pointMode)) {
+            $pointMode = 'all_or_nothing';
+        }
         
         if (!$isTimeout && !empty($correctIds)) {
             
@@ -44,7 +60,7 @@ if ($lobby_id && $current_question) {
                     $pointsEarned = 1000;
                 }
             } 
-            // MODUS: Teilpunkte (Dein mathematisches Modell)
+            // MODUS: Teilpunkte
             elseif ($pointMode === 'partial') {
                 $falscheGewaehlt = false;
                 $richtigeGewaehltGraf = 0;
@@ -84,7 +100,6 @@ if ($lobby_id && $current_question) {
         $stmt->execute([$lobby_id, $current_question['id'], $username]);
 
         // 5. Die erreichten Punkte direkt beim Spieler in der Lobby-Tabelle aufaddieren
-       
         $stmtScore = $pdo->prepare("UPDATE lobby_players SET points = points + ? WHERE lobby_id = ? AND player_name = ?");
         $stmtScore->execute([$pointsEarned, $lobby_id, $username]);
 
