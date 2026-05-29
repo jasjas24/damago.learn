@@ -661,7 +661,11 @@ body.lobby-page { overflow: hidden; }
     max-height: 720px;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
 }
+
+.lobby-panel::-webkit-scrollbar { width: 6px; }
+.lobby-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
 
 .lobby-panel .auth-header { margin-bottom: 18px; }
 .lobby-panel .auth-header h2 { margin-bottom: 4px; }
