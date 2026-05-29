@@ -36,7 +36,7 @@ $menuItems = [
         "description" => "Benutzerkonten einsehen, Rollen vergeben und verwalten."
     ],
     [
-        "href"        => "manage_archives.php",
+        "href"        => "archive.php",
         "icon"        => "AR",
         "title"       => "Archive",
         "description" => "Abgeschlossene Quizrunden und Ergebnisse einsehen."
