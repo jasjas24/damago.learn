@@ -223,11 +223,11 @@ foreach ($answers as $ans) {
                         if ($showExplanation) {
                             $isCorrect = intval($ans['is_correct']) === 1;
                             $wasSelected = $lastResult && isset($lastResult['chosen_ids']) && is_array($lastResult['chosen_ids']) && in_array($ans['id'], $lastResult['chosen_ids']);
-                            
+
                             if ($isCorrect) {
                                 $inlineStyle = "background: rgba(34,197,94,0.20) !important; color: #86efac !important; border: 1px solid rgba(34,197,94,0.50) !important;";
-                            } elseif ($wasSelected && !$isCorrect) {
-                                    $inlineStyle = "background: rgba(239,68,68,0.20) !important; color: #fca5a5 !important; border: 1px solid rgba(239,68,68,0.50) !important;";
+                            } else {
+                                $inlineStyle = "background: rgba(239,68,68,0.20) !important; color: #fca5a5 !important; border: 1px solid rgba(239,68,68,0.50) !important;";
                             }
                             if ($wasSelected && $isCorrect) {
                                 $inlineStyle .= " border: 4px solid #86efac !important; box-shadow: 0 0 0 5px rgba(34,197,94,0.45) !important;";
@@ -242,9 +242,6 @@ foreach ($answers as $ans) {
                                 style="<?php echo $inlineStyle; ?>"
                                 <?php echo $showExplanation ? 'disabled' : ''; ?>>
                             <span class="answer-text">
-                                <?php if ($showExplanation): ?>
-                                    <?php echo intval($ans['is_correct']) === 1 ? '✅' : '❌'; ?> 
-                                <?php endif; ?>
                                 <?php echo htmlspecialchars($ans['text']); ?>
                             </span>
                             <?php if (!$showExplanation): ?>
@@ -306,9 +303,21 @@ foreach ($answers as $ans) {
                     <ul style="list-style-type: none; padding-left: 0; display: flex; flex-direction: column; gap: 12px;">
                         <?php foreach ($answers as $ans): ?>
                             <?php if (!empty($ans['explanation'])): ?>
-                                <li>
-                                    <strong style="color: rgba(255,255,255,0.90);"><?php echo intval($ans['is_correct']) === 1 ? '✅' : '❌'; ?> <?php echo htmlspecialchars($ans['text']); ?>:</strong>
-                                    <p style="margin: 5px 0 0 24px; color: rgba(255,255,255,0.55); font-style: italic; font-size: 14px; line-height: 1.5;"><?php echo htmlspecialchars($ans['explanation']); ?></p>
+                                <?php
+                                    $exCorrect  = intval($ans['is_correct']) === 1;
+                                    $exSelected = $lastResult && isset($lastResult['chosen_ids']) && is_array($lastResult['chosen_ids']) && in_array($ans['id'], $lastResult['chosen_ids']);
+                                    $exStyle = $exCorrect
+                                        ? "background: rgba(34,197,94,0.20); border: 1px solid rgba(34,197,94,0.50);"
+                                        : "background: rgba(239,68,68,0.20); border: 1px solid rgba(239,68,68,0.50);";
+                                    if ($exSelected && $exCorrect) {
+                                        $exStyle .= " border: box-shadow: 0 0 0 5px rgba(34,197,94,0.45);";
+                                    } elseif ($exSelected && !$exCorrect) {
+                                        $exStyle .= " border: box-shadow: 0 0 0 5px rgba(239,68,68,0.45);";
+                                    }
+                                ?>
+                                <li style="<?php echo $exStyle; ?> padding: 12px 16px; border-radius: 12px;">
+                                    <strong style="color: rgba(255,255,255,0.90);"><?php echo htmlspecialchars($ans['text']); ?>:</strong>
+                                    <p style="margin: 5px 0 0 0; color: rgba(255,255,255,0.75); font-style: italic; font-size: 14px; line-height: 1.5;"><?php echo htmlspecialchars($ans['explanation']); ?></p>
                                 </li>
                             <?php endif; ?>
                         <?php endforeach; ?>
