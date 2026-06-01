@@ -2725,6 +2725,23 @@ h1 + p {
 }
 
 /* ============================================================
+   Medienverwaltung – zwei mittige Boxen
+   Betrifft nur manage_media.php mit body.media-page
+   ============================================================ */
+
+.media-page .play-layout {
+    justify-content: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: 24px;
+}
+
+.media-page .ranking-panel {
+    flex: 0 0 48%;
+    max-width: 48%;
+}
+
+/* ============================================================
    Ausgelagerte Inline-Styles (1:1 aus den PHP-Dateien extrahiert)
    Hier wurden ausschliesslich vorhandene Inline-/<style>-/JS-Stile
    gebuendelt; Werte und Wirkung bleiben unveraendert.
