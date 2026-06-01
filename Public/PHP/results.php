@@ -11,7 +11,7 @@ if (!$lobby_id) {
     exit;
 }
 
-$currentDisplayName = $_SESSION['username'] ?? $username ?? 'Gast';
+$currentDisplayName = $_SESSION['player_name'] ?? $_SESSION['username'] ?? $username ?? 'Gast';
 
 $rankingPlayers = [];
 $totalPlayers = 0;

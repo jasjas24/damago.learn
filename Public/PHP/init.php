@@ -15,7 +15,7 @@ $role = $_SESSION["user_role"] ?? "guest";
 
 // Damit alle nachfolgenden Dateien sauber arbeiten, spiegeln wir den gefundenen Namen in die Session zurück
 if ($username !== "Gast") {
-   # $_SESSION["user_name"] = $username;
+    $_SESSION["user_name"] = $username;
     $_SESSION["username"] = $username;
-   # $_SESSION["player_name"] = $username;
+    $_SESSION["player_name"] = $username;
 }

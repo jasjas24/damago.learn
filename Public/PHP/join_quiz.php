@@ -60,7 +60,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $_SESSION['player_lobby_code'] = $joinCode;
                     $_SESSION['player_name']       = $playerName;
 
-                    // FIX: Weiterleitung in den Warteraum für SPIELER (nicht für den Host!) MIT dem Code in der URL
                     header("Location: host_lobby.php?code=" . urlencode($joinCode));
                     exit;
                 }
