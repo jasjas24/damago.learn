@@ -1,6 +1,7 @@
 <?php
 require_once 'init.php';
 require_once 'db.php';
+require_once 'helpers.php';
 
 /** @var string $username */
 
@@ -186,6 +187,7 @@ if (empty($rankingPlayers)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz spielen | damago Quizsystem</title>
     <link rel="stylesheet" href="../CSS/style.css">
+    <link rel="stylesheet" href="../JS/vendor/highlight-theme.min.css">
 </head>
 <body class="quiz-play-page game-live">
 
@@ -216,7 +218,7 @@ if (empty($rankingPlayers)) {
             </div>
 
             <section class="question-card">
-                <h2><?php echo htmlspecialchars($currentQuestion['question_text']); ?></h2>
+                <div class="question-title"><?php echo render_rich_text($currentQuestion['question_text']); ?></div>
             </section>
 
             <?php if ($waitingForReveal && !$showExplanation): ?>
@@ -251,7 +253,7 @@ if (empty($rankingPlayers)) {
                                 class="millionaire-answer <?php echo $revealClass; ?>"
                                 data-id="<?php echo $ans['id']; ?>"
                                 <?php echo $showExplanation ? 'disabled' : ''; ?>>
-                            <span class="answer-text"><?php echo htmlspecialchars($ans['text']); ?></span>
+                            <span class="answer-text"><?php echo render_inline_text($ans['text']); ?></span>
                             <?php if (!$showExplanation): ?>
                                 <input type="checkbox" class="answer-checkbox" name="selected_answers[]" value="<?php echo $ans['id']; ?>" id="check-<?php echo $ans['id']; ?>">
                             <?php endif; ?>
@@ -314,8 +316,8 @@ if (empty($rankingPlayers)) {
                                     if ($exSelected) { $exClass .= $exCorrect ? " reveal-exp-chosen-correct" : " reveal-exp-chosen-wrong"; }
                                 ?>
                                 <li class="reveal-exp-item <?php echo $exClass; ?>">
-                                    <strong class="reveal-exp-strong"><?php echo htmlspecialchars($ans['text']); ?>:</strong>
-                                    <p class="reveal-exp-text"><?php echo htmlspecialchars($ans['explanation']); ?></p>
+                                    <strong class="reveal-exp-strong"><?php echo render_inline_text($ans['text']); ?>:</strong>
+                                    <div class="reveal-exp-text"><?php echo render_rich_text($ans['explanation']); ?></div>
                                 </li>
                             <?php endif; ?>
                         <?php endforeach; ?>
@@ -356,6 +358,11 @@ if (empty($rankingPlayers)) {
     </main>
 
     <script src="/damago/Public/JS/functions.js?v=<?php echo time(); ?>"></script>
+
+    <script src="../JS/vendor/highlight.min.js"></script>
+    <script>
+        if (window.hljs) { hljs.highlightAll(); }
+    </script>
 
     <script>
     (function() {

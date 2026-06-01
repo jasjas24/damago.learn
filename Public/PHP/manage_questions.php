@@ -621,8 +621,12 @@ if (!empty($questions)) {
 
             <div class="modal-field">
                 <label>Fragetext</label>
-                <input type="text" name="question_text" id="createQuestionText"
-                    placeholder="z. B. Was macht die Funktion htmlspecialchars()?" required>
+                <textarea name="question_text" id="createQuestionText" class="modal-textarea" rows="4"
+                    placeholder="z. B. Was macht die Funktion htmlspecialchars()?" required></textarea>
+                <span class="modal-hint">
+                    Code als Block zwischen <code>```sprache</code> und <code>```</code> (eigene Zeilen),
+                    z.&nbsp;B. <code>```python</code>. Inline-Code mit einfachen Backticks: <code>`math.sqrt()`</code>.
+                </span>
             </div>
 
             <div class="modal-field-pair">
@@ -681,7 +685,7 @@ if (!empty($questions)) {
 
             <div class="modal-field">
                 <label>Allgemeine Erklärung</label>
-                <input type="text" name="explanation" placeholder="Optionale allgemeine Erklärung zur gesamten Frage">
+                <textarea name="explanation" class="modal-textarea" rows="3" placeholder="Optionale allgemeine Erklärung zur gesamten Frage"></textarea>
             </div>
 
             <div class="modal-field">
@@ -772,7 +776,11 @@ if (!empty($questions)) {
 
             <div class="modal-field">
                 <label>Fragetext</label>
-                <input type="text" name="question_text" id="editQuestionText" required>
+                <textarea name="question_text" id="editQuestionText" class="modal-textarea" rows="4" required></textarea>
+                <span class="modal-hint">
+                    Code als Block zwischen <code>```sprache</code> und <code>```</code> (eigene Zeilen),
+                    z.&nbsp;B. <code>```python</code>. Inline-Code mit einfachen Backticks: <code>`math.sqrt()`</code>.
+                </span>
             </div>
 
             <div class="modal-field-pair">
@@ -831,7 +839,7 @@ if (!empty($questions)) {
 
             <div class="modal-field">
                 <label>Allgemeine Erklärung</label>
-                <input type="text" name="explanation" id="editExplanation" placeholder="Optionale allgemeine Erklärung">
+                <textarea name="explanation" id="editExplanation" class="modal-textarea" rows="3" placeholder="Optionale allgemeine Erklärung"></textarea>
             </div>
 
             <div class="modal-field">
