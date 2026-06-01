@@ -81,7 +81,7 @@ if ($lobby_id) {
             // Point-Mode synchronisieren
             $_SESSION['quiz_setup']['point_mode'] = $lobbyStatus['point_mode'] ? $lobbyStatus['point_mode'] : 'all_or_nothing';
             
-            // NEU: Zeitlimit live aus der DB holen!
+            // Zeitlimit live aus der DB holen
             if (!empty($lobbyStatus['time_limit'])) {
                 $timeLimit = (int)$lobbyStatus['time_limit'];
                 $_SESSION['quiz_setup']['time_limit'] = $timeLimit;
@@ -97,7 +97,7 @@ if ($lobby_id) {
 // Fallback für den Point-Mode, falls DB-Abfrage fehlschlug
 $pointMode = $_SESSION['quiz_setup']['point_mode'] ?? 'all_or_nothing';
 
-// HOST PLAYS STATUS ABFRAGEN (NEU)
+// Host Plays Status abfragen
 $hostPlays = $_SESSION['quiz_setup']['host_plays'] ?? 'yes';
 
 // Falls der Host die Variable noch in der Session hat, nutzen wir die als primäre Quelle
@@ -144,10 +144,32 @@ if ($lobby_id) {
             SELECT player_name AS username, points AS score
             FROM lobby_players
             WHERE lobby_id = ?
-            ORDER BY points DESC, player_name ASC
         ");
         $stmtRank->execute([$lobby_id]);
-        $rankingPlayers = $stmtRank->fetchAll(PDO::FETCH_ASSOC);
+        $rawPlayers = $stmtRank->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($rawPlayers as $player) {
+            $score = (int)$player['score'];
+            
+            // Wenn auf den Reveal gewartet wird, die vorab berechneten Punkte abziehen
+            if ($player['username'] === $currentDisplayName && $waitingForReveal && !$showExplanation && isset($lastResult['points_earned'])) {
+                $score -= (int)$lastResult['points_earned'];
+            }
+            
+            $rankingPlayers[] = [
+                'username' => $player['username'],
+                'score' => $score
+            ];
+        }
+
+        // Sortierung nach Punkten (absteigend)
+        usort($rankingPlayers, function($a, $b) {
+            if ($a['score'] === $b['score']) {
+                return strcasecmp($a['username'], $b['username']);
+            }
+            return ($a['score'] < $b['score']) ? 1 : -1;
+        });
+
     } catch (PDOException $e) {
         $rankingPlayers = [[ 'username' => $currentDisplayName, 'score' => $_SESSION['quiz_score'] ?? 0 ]];
     }
@@ -155,13 +177,6 @@ if ($lobby_id) {
 
 if (empty($rankingPlayers)) {
     $rankingPlayers = [[ 'username' => $currentDisplayName, 'score' => $_SESSION['quiz_score'] ?? 0 ]];
-}
-
-$correctAnswersIds = [];
-foreach ($answers as $ans) {
-    if (isset($ans['is_correct']) && intval($ans['is_correct']) === 1) {
-        $correctAnswersIds[] = intval($ans['id']);
-    }
 }
 ?>
 <!DOCTYPE html>
@@ -181,15 +196,11 @@ foreach ($answers as $ans) {
         <section class="question-card question-card-loading">
             <div class="loader loader-centered"></div>
             <h2 class="loading-title">Das Spiel startet gleich...</h2>
-            <p class="loading-text">
-                Die Fragen werden im Hintergrund vom Server vorbereitet. Bitte warten...
-            </p>
+            <p class="loading-text">Die Fragen werden im Hintergrund vom Server vorbereitet. Bitte warten...</p>
         </section>
     </main>
     <script>
-        setTimeout(function() {
-            window.location.reload();
-        }, 1500);
+        setTimeout(function() { window.location.reload(); }, 1500);
     </script>
 <?php else: ?>
 
@@ -230,25 +241,17 @@ foreach ($answers as $ans) {
                             $isCorrect = intval($ans['is_correct']) === 1;
                             $wasSelected = $lastResult && isset($lastResult['chosen_ids']) && is_array($lastResult['chosen_ids']) && in_array($ans['id'], $lastResult['chosen_ids']);
 
-                            if ($isCorrect) {
-                                $revealClass = "answer-reveal-correct";
-                            } else {
-                                $revealClass = "answer-reveal-wrong";
-                            }
-                            if ($wasSelected && $isCorrect) {
-                                $revealClass .= " answer-reveal-chosen";
-                            } elseif ($wasSelected && !$isCorrect) {
-                                $revealClass .= " answer-reveal-chosen";
-                            }
+                            if ($isCorrect) { $revealClass = "answer-reveal-correct"; } 
+                            else { $revealClass = "answer-reveal-wrong"; }
+                            
+                            if ($wasSelected) { $revealClass .= " answer-reveal-chosen"; }
                         }
                     ?>
                         <button type="button"
                                 class="millionaire-answer <?php echo $revealClass; ?>"
                                 data-id="<?php echo $ans['id']; ?>"
                                 <?php echo $showExplanation ? 'disabled' : ''; ?>>
-                            <span class="answer-text">
-                                <?php echo htmlspecialchars($ans['text']); ?>
-                            </span>
+                            <span class="answer-text"><?php echo htmlspecialchars($ans['text']); ?></span>
                             <?php if (!$showExplanation): ?>
                                 <input type="checkbox" class="answer-checkbox" name="selected_answers[]" value="<?php echo $ans['id']; ?>" id="check-<?php echo $ans['id']; ?>">
                             <?php endif; ?>
@@ -295,11 +298,7 @@ foreach ($answers as $ans) {
                                 } elseif ($lastResult['status'] === 'timeout') {
                                     echo "<span class='reveal-result-wrong'>Zeit abgelaufen! (0 Punkte)</span>";
                                 } else {
-                                    if ($pointMode === 'all_or_nothing') {
-                                        echo "<span class='reveal-result-wrong'>Leider falsch oder unvollständig! (0 Punkte im Modus: Ganz oder Gar Nicht)</span>";
-                                    } else {
-                                        echo "<span class='reveal-result-wrong'>Leider falsch! (0 Punkte)</span>";
-                                    }
+                                    echo "<span class='reveal-result-wrong'>Leider falsch! (0 Punkte)</span>";
                                 }
                             }
                         ?>
@@ -311,14 +310,8 @@ foreach ($answers as $ans) {
                                 <?php
                                     $exCorrect  = intval($ans['is_correct']) === 1;
                                     $exSelected = $lastResult && isset($lastResult['chosen_ids']) && is_array($lastResult['chosen_ids']) && in_array($ans['id'], $lastResult['chosen_ids']);
-                                    $exClass = $exCorrect
-                                        ? "reveal-exp-correct"
-                                        : "reveal-exp-wrong";
-                                    if ($exSelected && $exCorrect) {
-                                        $exClass .= " reveal-exp-chosen-correct";
-                                    } elseif ($exSelected && !$exCorrect) {
-                                        $exClass .= " reveal-exp-chosen-wrong";
-                                    }
+                                    $exClass = $exCorrect ? "reveal-exp-correct" : "reveal-exp-wrong";
+                                    if ($exSelected) { $exClass .= $exCorrect ? " reveal-exp-chosen-correct" : " reveal-exp-chosen-wrong"; }
                                 ?>
                                 <li class="reveal-exp-item <?php echo $exClass; ?>">
                                     <strong class="reveal-exp-strong"><?php echo htmlspecialchars($ans['text']); ?>:</strong>
@@ -339,23 +332,23 @@ foreach ($answers as $ans) {
             <div class="ranking-list ranking-list-top-gap">
                 <table class="ranking-table">
                     <thead>
-                        <tr>
-                            <th>Pl.</th>
-                            <th>Name</th>
-                            <th class="score-head">Punkte</th>
-                        </tr>
+                        <tr><th>Pl.</th><th>Name</th><th class="score-head">Punkte</th></tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($rankingPlayers as $index => $player): ?>
+                        <?php 
+                        $actualRank = 1; $lastScore = null;
+                        foreach ($rankingPlayers as $index => $player): 
+                            if ($lastScore !== null && $player['score'] < $lastScore) { $actualRank = $index + 1; }
+                        ?>
                             <tr<?php echo ($player['username'] === $currentDisplayName) ? ' class="current-player"' : ''; ?>>
-                                <td><?php echo ($index + 1); ?>.</td>
+                                <td><?php echo $actualRank; ?>.</td>
                                 <td>
                                     <?php echo htmlspecialchars($player['username']); ?>
                                     <?php if ($player['username'] === $currentDisplayName) echo '<span class="you-badge">(Du)</span>'; ?>
                                 </td>
                                 <td class="score-cell"><?php echo $player['score']; ?></td>
                             </tr>
-                        <?php endforeach; ?>
+                        <?php $lastScore = $player['score']; endforeach; ?>
                     </tbody>
                 </table>
             </div>
@@ -366,7 +359,7 @@ foreach ($answers as $ans) {
 
     <script>
     (function() {
-        // 1. ANTWORTEN AUSWÄHLEN (NUR WENN NOCH NICHT ABGEGEBEN)
+        // 1. ANTWORTEN AUSWÄHLEN
         <?php if (!$showExplanation && !$waitingForReveal && !($isHost && $hostPlays === 'no')): ?>
             const answerButtons = document.querySelectorAll('.millionaire-answer:not(.confirm-button)');
             answerButtons.forEach(button => {
@@ -393,7 +386,7 @@ foreach ($answers as $ans) {
             }
         <?php endif; ?>
 
-        // 2. GEMEINSAMER TIMER FÜR SPIELER UND MODERATOR (Sauber deklariert)
+        // 2. TIMEOUT LOGIK (GEÄNDERT: LÖST NUN DIREKT DEN CONFIRM-KLICK AUS)
         <?php if (!$showExplanation): ?>
             let timeLeft = <?php echo intval($timeLimit); ?>;
             const display = document.getElementById('timer-display');
@@ -406,23 +399,16 @@ foreach ($answers as $ans) {
                     if (timeLeft <= 0) {
                         clearInterval(countdown);
                         
-                        // Das automatische Formular-Submit wird NUR beim aktiven Mitspieler ausgelöst
                         <?php if (!($isHost && $hostPlays === 'no')): ?>
-                            console.log("Die Zeit ist abgelaufen! Führe jetzt den Klick aus...");
+                            console.log("Zeit abgelaufen. Sende ausgewählte Antworten zur Auswertung...");
                             const form = document.getElementById('quiz-form');
-                            if (form) {
-                                let timeoutInput = document.createElement('input');
-                                timeoutInput.type = 'hidden';
-                                timeoutInput.name = 'timeout';
-                                timeoutInput.value = '1';
-                                form.appendChild(timeoutInput);
-
-                                const confirmBtn = document.getElementById('confirm-btn');
-                                if (confirmBtn) {
-                                    confirmBtn.click();
-                                } else {
-                                    form.submit();
-                                }
+                            const confirmBtn = document.getElementById('confirm-btn');
+                            
+                            if (confirmBtn) {
+                                // Simuliert exakt den echten Klick des Spielers inklusive Animation
+                                confirmBtn.click();
+                            } else if (form) {
+                                form.submit();
                             }
                         <?php endif; ?>
                     }
