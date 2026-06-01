@@ -1897,7 +1897,7 @@ h1 + p {
 .import-download-btn:hover {
     background: rgba(59, 130, 246, 0.15);
     border-color: rgba(59, 130, 246, 0.5);
-    color: #bfdbfe;
+    color: #bfdbfe; 
 }
 
 .questions-form {
