@@ -168,21 +168,17 @@ foreach ($answers as $ans) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz spielen | damago Quizsystem</title>
     <link rel="stylesheet" href="../CSS/style.css">
-    <style>
-        .millionaire-answer.selected { border: 5px solid #dbff0f; }
-        .next-question-form { width: max-content; margin: 0; }
-    </style>
 </head>
-<body class="quiz-play-page">
+<body class="quiz-play-page game-live">
 
 <?php include_once 'topbar.php'; ?>
 
 <?php if ($retryLoading): ?>
-    <main class="play-layout" style="display: flex; justify-content: center; align-items: center; min-height: 70vh;">
-        <section class="question-card" style="text-align: center; padding: 40px; max-width: 500px; width: 100%;">
-            <div class="loader" style="margin: 0 auto 20px auto;"></div>
-            <h2 style="margin-bottom: 10px;">Das Spiel startet gleich...</h2>
-            <p style="color: rgba(255,255,255,0.60); font-style: italic;">
+    <main class="play-layout play-layout-loading">
+        <section class="question-card question-card-loading">
+            <div class="loader loader-centered"></div>
+            <h2 class="loading-title">Das Spiel startet gleich...</h2>
+            <p class="loading-text">
                 Die Fragen werden im Hintergrund vom Server vorbereitet. Bitte warten...
             </p>
         </section>
@@ -210,7 +206,7 @@ foreach ($answers as $ans) {
             </section>
 
             <?php if ($waitingForReveal && !$showExplanation): ?>
-                <div class="confirm-button-wrapper" style="flex-direction: column; align-items: center; gap: 15px; margin-top: 40px;">
+                <div class="confirm-button-wrapper confirm-button-wrapper-waiting">
                     <div class="loader"></div>
                     <button type="button" class="millionaire-answer confirm-button submitted" disabled>
                         <span class="answer-text">Antwort abgegeben. Warte auf Mitspieler...</span>
@@ -219,33 +215,32 @@ foreach ($answers as $ans) {
             <?php else: ?>
                 <form class="millionaire-answers" id="quiz-form" action="next_question.php" method="POST">
                     <?php foreach ($answers as $letter => $ans):
-                        $inlineStyle = "";
+                        $revealClass = "";
                         if ($showExplanation) {
                             $isCorrect = intval($ans['is_correct']) === 1;
                             $wasSelected = $lastResult && isset($lastResult['chosen_ids']) && is_array($lastResult['chosen_ids']) && in_array($ans['id'], $lastResult['chosen_ids']);
 
                             if ($isCorrect) {
-                                $inlineStyle = "background: rgba(34,197,94,0.20) !important; color: #86efac !important; border: 1px solid rgba(34,197,94,0.50) !important;";
+                                $revealClass = "answer-reveal-correct";
                             } else {
-                                $inlineStyle = "background: rgba(239,68,68,0.20) !important; color: #fca5a5 !important; border: 1px solid rgba(239,68,68,0.50) !important;";
+                                $revealClass = "answer-reveal-wrong";
                             }
                             if ($wasSelected && $isCorrect) {
-                                $inlineStyle .= " border: 4px solid #86efac !important; box-shadow: 0 0 0 5px rgba(34,197,94,0.45) !important;";
+                                $revealClass .= " answer-reveal-chosen";
                             } elseif ($wasSelected && !$isCorrect) {
-                                $inlineStyle .= " border: 4px solid #fca5a5 !important; box-shadow: 0 0 0 5px rgba(239,68,68,0.45) !important;";
+                                $revealClass .= " answer-reveal-chosen";
                             }
                         }
                     ?>
                         <button type="button"
-                                class="millionaire-answer"
+                                class="millionaire-answer <?php echo $revealClass; ?>"
                                 data-id="<?php echo $ans['id']; ?>"
-                                style="<?php echo $inlineStyle; ?>"
                                 <?php echo $showExplanation ? 'disabled' : ''; ?>>
                             <span class="answer-text">
                                 <?php echo htmlspecialchars($ans['text']); ?>
                             </span>
                             <?php if (!$showExplanation): ?>
-                                <input type="checkbox" class="answer-checkbox" name="selected_answers[]" value="<?php echo $ans['id']; ?>" style="display:none;" id="check-<?php echo $ans['id']; ?>">
+                                <input type="checkbox" class="answer-checkbox" name="selected_answers[]" value="<?php echo $ans['id']; ?>" id="check-<?php echo $ans['id']; ?>">
                             <?php endif; ?>
                         </button>
                     <?php endforeach; ?>
@@ -275,49 +270,49 @@ foreach ($answers as $ans) {
                     <?php endif; ?>
                 </div>
 
-                <section class="question-card" style="margin-top: 28px; border-left: 3px solid rgba(74,133,199,0.70); padding: 18px 20px; text-align: left; background: rgba(255,255,255,0.05); border-radius: var(--radius-md, 14px);">
-                    <div class="question-label" style="color: #4a85c7; margin-bottom: 10px;">Auflösung &amp; Erklärungen</div>
-                    <div style="margin-top: 6px; font-weight: 600; color: rgba(255,255,255,0.90);">
+                <section class="question-card reveal-card">
+                    <div class="question-label">Auflösung &amp; Erklärungen</div>
+                    <div class="reveal-result">
                         <strong>Ergebnis:</strong>
                         <?php
                             if (empty($lastResult) || !isset($lastResult['status'])) {
-                                echo "<span style='color:rgba(255,255,255,0.60);'>Frage beendet! Schau dir unten die Erklärungen an.</span>";
+                                echo "<span class='reveal-result-neutral'>Frage beendet! Schau dir unten die Erklärungen an.</span>";
                             } else {
                                 if ($lastResult['status'] === 'correct') {
-                                    echo "<span style='color:#86efac;'>Genial! Alle richtigen Antworten gefunden! (+".($lastResult['points_earned'] ?? 0)." Punkte)</span>";
+                                    echo "<span class='reveal-result-correct'>Genial! Alle richtigen Antworten gefunden! (+".($lastResult['points_earned'] ?? 0)." Punkte)</span>";
                                 } elseif ($lastResult['status'] === 'partial') {
-                                    echo "<span style='color:#fbbf24;'>Teilweise richtig! (+".($lastResult['points_earned'] ?? 0)." Punkte)</span>";
+                                    echo "<span class='reveal-result-partial'>Teilweise richtig! (+".($lastResult['points_earned'] ?? 0)." Punkte)</span>";
                                 } elseif ($lastResult['status'] === 'timeout') {
-                                    echo "<span style='color:#fca5a5;'>Zeit abgelaufen! (0 Punkte)</span>";
+                                    echo "<span class='reveal-result-wrong'>Zeit abgelaufen! (0 Punkte)</span>";
                                 } else {
                                     if ($pointMode === 'all_or_nothing') {
-                                        echo "<span style='color:#fca5a5;'>Leider falsch oder unvollständig! (0 Punkte im Modus: Ganz oder Gar Nicht)</span>";
+                                        echo "<span class='reveal-result-wrong'>Leider falsch oder unvollständig! (0 Punkte im Modus: Ganz oder Gar Nicht)</span>";
                                     } else {
-                                        echo "<span style='color:#fca5a5;'>Leider falsch! (0 Punkte)</span>";
+                                        echo "<span class='reveal-result-wrong'>Leider falsch! (0 Punkte)</span>";
                                     }
                                 }
                             }
                         ?>
                     </div>
-                    <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.12); margin: 14px 0;">
-                    <ul style="list-style-type: none; padding-left: 0; display: flex; flex-direction: column; gap: 12px;">
+                    <hr class="reveal-divider">
+                    <ul class="reveal-explanation-list">
                         <?php foreach ($answers as $ans): ?>
                             <?php if (!empty($ans['explanation'])): ?>
                                 <?php
                                     $exCorrect  = intval($ans['is_correct']) === 1;
                                     $exSelected = $lastResult && isset($lastResult['chosen_ids']) && is_array($lastResult['chosen_ids']) && in_array($ans['id'], $lastResult['chosen_ids']);
-                                    $exStyle = $exCorrect
-                                        ? "background: rgba(34,197,94,0.20); border: 1px solid rgba(34,197,94,0.50);"
-                                        : "background: rgba(239,68,68,0.20); border: 1px solid rgba(239,68,68,0.50);";
+                                    $exClass = $exCorrect
+                                        ? "reveal-exp-correct"
+                                        : "reveal-exp-wrong";
                                     if ($exSelected && $exCorrect) {
-                                        $exStyle .= " border: box-shadow: 0 0 0 5px rgba(34,197,94,0.45);";
+                                        $exClass .= " reveal-exp-chosen-correct";
                                     } elseif ($exSelected && !$exCorrect) {
-                                        $exStyle .= " border: box-shadow: 0 0 0 5px rgba(239,68,68,0.45);";
+                                        $exClass .= " reveal-exp-chosen-wrong";
                                     }
                                 ?>
-                                <li style="<?php echo $exStyle; ?> padding: 12px 16px; border-radius: 12px;">
-                                    <strong style="color: rgba(255,255,255,0.90);"><?php echo htmlspecialchars($ans['text']); ?>:</strong>
-                                    <p style="margin: 5px 0 0 0; color: rgba(255,255,255,0.75); font-style: italic; font-size: 14px; line-height: 1.5;"><?php echo htmlspecialchars($ans['explanation']); ?></p>
+                                <li class="reveal-exp-item <?php echo $exClass; ?>">
+                                    <strong class="reveal-exp-strong"><?php echo htmlspecialchars($ans['text']); ?>:</strong>
+                                    <p class="reveal-exp-text"><?php echo htmlspecialchars($ans['explanation']); ?></p>
                                 </li>
                             <?php endif; ?>
                         <?php endforeach; ?>
@@ -331,13 +326,13 @@ foreach ($answers as $ans) {
                 <span class="eyebrow">Live-Ranking</span>
                 <h2>Punktestand</h2>
             </div>
-            <div class="ranking-list" style="margin-top: 16px;">
+            <div class="ranking-list ranking-list-top-gap">
                 <table class="ranking-table">
                     <thead>
                         <tr>
                             <th>Pl.</th>
                             <th>Name</th>
-                            <th style="text-align: right;">Punkte</th>
+                            <th class="score-head">Punkte</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -431,7 +426,7 @@ foreach ($answers as $ans) {
 
         <?php if ($showExplanation): ?>
             const timerBox = document.querySelector('.timer-box');
-            if (timerBox) { timerBox.style.background = 'rgba(84,110,122,0.70)'; timerBox.style.boxShadow = 'none'; }
+            if (timerBox) { timerBox.classList.add('timer-box-revealed'); }
         <?php endif; ?>
     })();
     </script>

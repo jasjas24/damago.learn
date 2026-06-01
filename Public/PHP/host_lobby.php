@@ -159,7 +159,7 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
             </p>
 
             <div class="info-list">
-                <div style="font-size: 1.3rem; font-weight: bold;">Teilnahme-Code: <?php echo htmlspecialchars($code); ?></div>
+                <div class="info-list-code">Teilnahme-Code: <?php echo htmlspecialchars($code); ?></div>
             </div>
         </section>
 

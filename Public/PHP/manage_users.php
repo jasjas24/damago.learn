@@ -207,7 +207,7 @@ $roles = $rolesStmt->fetchAll();
 
             <div class="user-list">
                 <?php if (empty($users)): ?>
-                    <div class="dashboard-action-card" style="opacity: 0.5; cursor: default;">
+                    <div class="dashboard-action-card dashboard-action-card-empty">
                         <div class="dashboard-action-icon">NV</div>
                         <div>
                             <h3>Keine Benutzer gefunden</h3>
@@ -236,7 +236,7 @@ $roles = $rolesStmt->fetchAll();
 
                             <div class="col-aktion">
                                 <!-- Status umschalten -->
-                                <form method="POST" style="margin: 0;">
+                                <form method="POST" class="inline-form">
                                     <input type="hidden" name="action" value="toggle_status">
                                     <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
                                     <button type="submit"

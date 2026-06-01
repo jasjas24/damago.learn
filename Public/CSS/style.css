@@ -1559,8 +1559,10 @@ h1 + p {
 }
 
 .manage-questions-page .quiz-main {
-    flex: 0 0 calc(60% - 10px);
-    max-width: calc(60% - 10px);
+    flex: 0 0 auto;
+    width: 50%;
+    max-width: 50%;
+    margin: 0 auto;
     align-items: stretch;
     padding: 24px 32px;
 }
@@ -1571,6 +1573,198 @@ h1 + p {
     max-height: none;
     height: auto;
     align-self: stretch;
+}
+
+/* Topbar des Panels: Titel links, Aktionen rechts */
+.mq-topbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.mq-topbar-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mq-topbar-info h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.mq-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.manage-questions-page .btn-icon.mq-action-btn {
+    padding: 9px 16px;
+    font-size: 13px;
+}
+
+.manage-questions-page .btn-icon.btn-add {
+    color: #fff;
+    background: linear-gradient(135deg, #2f66a3, #1e4d80);
+    border: 1px solid rgba(74, 133, 199, 0.45);
+    box-shadow: 0 4px 14px rgba(30, 77, 128, 0.45);
+}
+
+.manage-questions-page .btn-icon.btn-add:hover {
+    background: linear-gradient(135deg, #3d7cbd, #2f66a3);
+    color: #fff;
+}
+
+/* Toolbar: Pool-Filter links, Meta-Kacheln rechts */
+.mq-toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin: 4px 0 4px;
+}
+
+.mq-toolbar .mq-filter {
+    margin-bottom: 0;
+    flex: 1 1 240px;
+    min-width: 220px;
+    max-width: 340px;
+}
+
+.mq-toolbar .mq-meta {
+    display: flex;
+    margin: 0;
+    gap: 10px;
+}
+
+.mq-toolbar .mq-meta div {
+    min-height: 0;
+    min-width: 120px;
+    padding: 10px 18px;
+}
+
+/* Pagination-Leiste */
+.mq-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.mq-pagination-info {
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+.mq-pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.mq-perpage {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.mq-perpage select {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    outline: none;
+}
+
+.mq-perpage select option {
+    background: #1a1a2e;
+}
+
+.mq-pager {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mq-pager-pages {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.manage-questions-page .btn-icon.mq-pager-btn {
+    min-width: 32px;
+    padding: 6px 10px;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.manage-questions-page .btn-icon.mq-pager-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.manage-questions-page .btn-icon.mq-pager-btn:disabled:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--text-secondary);
+}
+
+.manage-questions-page .btn-icon.mq-page-num.is-active {
+    background: rgba(59, 130, 246, 0.18);
+    color: #93c5fd;
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+.mq-pager-ellipsis {
+    padding: 0 2px;
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+/* Bild-Vorschau im Create-/Edit-Modal */
+.mq-image-preview {
+    display: none;
+    margin-top: 10px;
+}
+
+.mq-image-preview.has-image {
+    display: block;
+}
+
+.mq-image-preview img {
+    max-width: 100%;
+    max-height: 180px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: block;
+}
+
+.modal-field .modal-hint a {
+    color: #93c5fd;
+    text-decoration: underline;
 }
 
 .manage-questions-page .quiz-topline,
@@ -2142,7 +2336,7 @@ h1 + p {
 .manage-questions-page .question-list-header,
 .manage-questions-page .question-row {
     display: grid;
-    grid-template-columns: 1fr 70px 170px;
+    grid-template-columns: 1fr 210px;
     align-items: center;
     gap: 0;
 }
@@ -2188,6 +2382,71 @@ h1 + p {
 
 .manage-questions-page .col-frage {
     min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.manage-questions-page .mq-frage-texts {
+    min-width: 0;
+}
+
+.manage-questions-page .mq-row-thumb {
+    width: 34px;
+    height: 34px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    flex-shrink: 0;
+}
+
+/* Fachbereich-Tags in der Pool-Liste */
+.manage-questions-page .mq-dept-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.manage-questions-page .mq-dept-tag {
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.14);
+    color: #93c5fd;
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    white-space: nowrap;
+}
+
+.manage-questions-page .mq-dept-tag.is-empty {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Fachbereich-Auswahl als Baumstruktur (Create-/Edit-Modal) */
+.mq-dept-tree {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 0 4px;
+}
+
+.mq-dept-node {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mq-dept-children {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    margin-left: 9px;
+    padding-left: 14px;
+    border-left: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .manage-questions-page .question-text {
@@ -2312,6 +2571,38 @@ h1 + p {
     background: rgba(59, 130, 246, 0.12);
 }
 
+.manage-questions-page .btn-icon.btn-delete {
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.3);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 7px;
+}
+
+.manage-questions-page .btn-icon.btn-delete:hover {
+    background: rgba(239, 68, 68, 0.12);
+    color: #fecaca;
+}
+
+/* Lösch-Bestätigung: Aktionsbutton */
+.modal .btn-danger {
+    padding: 10px 16px;
+    background: rgba(239, 68, 68, 0.85);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex: 1;
+}
+
+.modal .btn-danger:hover {
+    background: rgba(239, 68, 68, 1);
+}
+
 /* Erweitertes Modal für Fragen (scrollbar, breiter) */
 .modal.modal-large {
     max-width: 680px;
@@ -2432,3 +2723,114 @@ h1 + p {
     .auth-card { padding: 24px 20px; border-radius: var(--radius-lg); }
     .secondary-links { flex-direction: column; gap: 8px; }
 }
+
+/* ============================================================
+   Ausgelagerte Inline-Styles (1:1 aus den PHP-Dateien extrahiert)
+   Hier wurden ausschliesslich vorhandene Inline-/<style>-/JS-Stile
+   gebuendelt; Werte und Wirkung bleiben unveraendert.
+   ============================================================ */
+
+/* --- topbar.php --- */
+/* Frueher Inline-`gap: 15px`, das auch die Media-Query (gap: 8px) ueberschrieb.
+   Bewusst ans Dateiende gesetzt, damit es wie zuvor bei allen Breiten greift. */
+.topbar-account-spaced { gap: 15px; }
+.logout-button-kill { background-color: #e11d48; border-color: #be123c; color: #ffffff; }
+
+/* --- game.php / game_test.php: ausgeblendete Antwort-Checkbox --- */
+.answer-checkbox { display: none; }
+
+/* --- game.php: seitenspezifische Overrides (frueher <style> im <head>) --- */
+.game-live .millionaire-answer.selected { border: 5px solid #dbff0f; }
+.game-live .next-question-form { width: max-content; margin: 0; }
+
+/* --- game.php: Ladeansicht (retry) --- */
+.play-layout-loading { display: flex; justify-content: center; align-items: center; min-height: 70vh; }
+.question-card-loading { text-align: center; padding: 40px; max-width: 500px; width: 100%; }
+.loader-centered { margin: 0 auto 20px auto; }
+.loading-title { margin-bottom: 10px; }
+.loading-text { color: rgba(255,255,255,0.60); font-style: italic; }
+
+/* --- game.php: Wrapper "Antwort abgegeben" --- */
+.confirm-button-wrapper-waiting { flex-direction: column; align-items: center; gap: 15px; margin-top: 40px; }
+
+/* --- game.php: Antwort-Buttons im Auflösungs-Modus --- */
+.millionaire-answer.answer-reveal-correct {
+    background: rgba(34,197,94,0.20);
+    color: #86efac;
+    border: 1px solid rgba(34,197,94,0.50);
+}
+.millionaire-answer.answer-reveal-wrong {
+    background: rgba(239,68,68,0.20);
+    color: #fca5a5;
+    border: 1px solid rgba(239,68,68,0.50);
+}
+.millionaire-answer.answer-reveal-correct.answer-reveal-chosen {
+    border: 4px solid #86efac;
+    box-shadow: 0 0 0 5px rgba(34,197,94,0.45);
+}
+.millionaire-answer.answer-reveal-wrong.answer-reveal-chosen {
+    border: 4px solid #fca5a5;
+    box-shadow: 0 0 0 5px rgba(239,68,68,0.45);
+}
+
+/* --- game.php: Auflösungs-/Erklärungs-Karte --- */
+.reveal-card {
+    margin-top: 28px;
+    border-left: 3px solid rgba(74,133,199,0.70);
+    padding: 18px 20px;
+    text-align: left;
+    background: rgba(255,255,255,0.05);
+    border-radius: var(--radius-md, 14px);
+}
+.reveal-card .question-label { color: #4a85c7; margin-bottom: 10px; }
+.reveal-result { margin-top: 6px; font-weight: 600; color: rgba(255,255,255,0.90); }
+.reveal-result-neutral { color: rgba(255,255,255,0.60); }
+.reveal-result-correct { color: #86efac; }
+.reveal-result-partial { color: #fbbf24; }
+.reveal-result-wrong { color: #fca5a5; }
+.reveal-divider { border: 0; border-top: 1px solid rgba(255,255,255,0.12); margin: 14px 0; }
+.reveal-explanation-list { list-style-type: none; padding-left: 0; display: flex; flex-direction: column; gap: 12px; }
+.reveal-exp-item { padding: 12px 16px; border-radius: 12px; }
+.reveal-exp-correct { background: rgba(34,197,94,0.20); border: 1px solid rgba(34,197,94,0.50); }
+.reveal-exp-wrong { background: rgba(239,68,68,0.20); border: 1px solid rgba(239,68,68,0.50); }
+/* Hinweis: Im Original setzte der ausgewaehlte Zustand einen ungueltigen
+   Inline-Wert ("border: box-shadow: ...") , den der Browser verwarf und der
+   daher keine Wirkung hatte. Dieses Verhalten bleibt erhalten -> die
+   Markierungsklassen bekommen bewusst keine eigenen Regeln. */
+.reveal-exp-strong { color: rgba(255,255,255,0.90); }
+.reveal-exp-text { margin: 5px 0 0 0; color: rgba(255,255,255,0.75); font-style: italic; font-size: 14px; line-height: 1.5; }
+
+/* --- game.php: Timer-Box im Auflösungs-Modus (frueher per JS gesetzt) --- */
+.timer-box-revealed { background: rgba(84,110,122,0.70); box-shadow: none; }
+
+/* --- game.php / game_test.php: Ranking --- */
+.ranking-list-top-gap { margin-top: 16px; }
+.ranking-table th.score-head { text-align: right; }
+
+/* --- join_quiz.php: Code-Eingabefeld --- */
+.join-code-input { text-transform: uppercase; letter-spacing: 2px; }
+
+/* --- host_lobby.php: Teilnahme-Code-Anzeige --- */
+.info-list .info-list-code { font-size: 1.3rem; font-weight: bold; }
+
+/* --- manage_media.php: Bild-Vorschau --- */
+.media-thumb { max-width: 120px; max-height: 80px; border-radius: 10px; }
+
+/* --- manage_questions.php: Import-Meldung --- */
+.import-section.import-message { padding: 12px 20px; margin-bottom: 0; }
+.import-section.import-message-success { background: rgba(34,197,94,0.10); border-color: rgba(34,197,94,0.30); }
+.import-section.import-message-error { background: rgba(239,68,68,0.10); border-color: rgba(239,68,68,0.30); }
+.import-message-text { font-size: 14px; font-weight: 600; }
+.import-message-success .import-message-text { color: #86efac; }
+.import-message-error .import-message-text { color: #fca5a5; }
+
+/* --- manage_questions.php: Abstaende & Hinweise --- */
+.form-group-mb-12 { margin-bottom: 12px; }
+.pool-filter-form { margin-bottom: 16px; }
+.empty-list-hint { padding: 20px 12px; color: rgba(255,255,255,0.4); font-size: 13px; text-align: center; }
+
+/* --- manage_questions.php / manage_users.php: randlose Formulare --- */
+.inline-form { margin: 0; }
+
+/* --- manage_users.php: leere Benutzerliste --- */
+.dashboard-action-card.dashboard-action-card-empty { opacity: 0.5; cursor: default; }

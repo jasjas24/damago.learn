@@ -203,7 +203,7 @@ if (is_dir($uploadDir)) {
                     <?php foreach ($images as $image): ?>
                         <div class="stat-row">
                             <div class="stat-title">
-                                <img src="<?php echo e($uploadUrl . $image); ?>" alt="Hochgeladenes Bild" style="max-width: 120px; max-height: 80px; border-radius: 10px;">
+                                <img src="<?php echo e($uploadUrl . $image); ?>" alt="Hochgeladenes Bild" class="media-thumb">
                             </div>
 
                             <div class="stat-values">

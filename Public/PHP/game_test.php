@@ -81,7 +81,7 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
                         <?php echo htmlspecialchars($ans['text']); ?>
                     </span>
                     <?php if (!$showExplanation): ?>
-                        <input type="checkbox" name="selected_answers[]" value="<?php echo $ans['id']; ?>" style="display:none;" id="check-<?php echo $ans['id']; ?>">
+                        <input type="checkbox" class="answer-checkbox" name="selected_answers[]" value="<?php echo $ans['id']; ?>" id="check-<?php echo $ans['id']; ?>">
                     <?php endif; ?>
                 </button>
             <?php endforeach; ?>
@@ -136,13 +136,13 @@ $timeLimit = $_SESSION['quiz_setup']['time_limit'];
             <h2>Punktestand</h2>
             <p>Die Teilnehmer mit den meisten Punkten stehen oben.</p>
         </div>
-        <div class="ranking-list" style="margin-top: 16px;">
+        <div class="ranking-list ranking-list-top-gap">
             <table class="ranking-table">
                 <thead>
                     <tr>
                         <th>Pl.</th>
                         <th>Name</th>
-                        <th style="text-align: right;">Punkte</th>
+                        <th class="score-head">Punkte</th>
                     </tr>
                 </thead>
                 <tbody>

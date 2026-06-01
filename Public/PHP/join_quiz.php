@@ -123,7 +123,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         name="join_code"
                         value="<?php echo htmlspecialchars($joinCode ?? ''); ?>"
                         placeholder="z. B. A7K9X"
-                        style="text-transform: uppercase; letter-spacing: 2px;"
+                        class="join-code-input"
                         maxlength="6"
                         required
                     >

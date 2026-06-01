@@ -8,8 +8,8 @@ require_once 'init.php';
         <img src="../damago-logo.png" alt="damago Logo" class="topbar-logo">
     </a>
 
-    <div class="topbar-account" style="display: flex; align-items: center; gap: 15px;">
-        <a href="kill_sessions.php" class="logout-button" style="background-color: #e11d48; border-color: #be123c; color: #ffffff;" title="Löscht alle aktuellen Quiz-Sessions für Testzwecke">
+    <div class="topbar-account topbar-account-spaced">
+        <a href="kill_sessions.php" class="logout-button logout-button-kill" title="Löscht alle aktuellen Quiz-Sessions für Testzwecke">
             Sessions killen
         </a>
 
