@@ -97,6 +97,9 @@ if ($lobby_id) {
 // Fallback für den Point-Mode, falls DB-Abfrage fehlschlug
 $pointMode = $_SESSION['quiz_setup']['point_mode'] ?? 'all_or_nothing';
 
+// HOST PLAYS STATUS ABFRAGEN (NEU)
+$hostPlays = $_SESSION['quiz_setup']['host_plays'] ?? 'yes';
+
 // Falls der Host die Variable noch in der Session hat, nutzen wir die als primäre Quelle
 if (isset($_SESSION['quiz_setup']['time_limit'])) {
     $timeLimit = (int)$_SESSION['quiz_setup']['time_limit'];
@@ -210,6 +213,13 @@ foreach ($answers as $ans) {
                     <div class="loader"></div>
                     <button type="button" class="millionaire-answer confirm-button submitted" disabled>
                         <span class="answer-text">Antwort abgegeben. Warte auf Mitspieler...</span>
+                    </button>
+                </div>
+            <?php elseif ($isHost && $hostPlays === 'no' && !$showExplanation): ?>
+                <div class="confirm-button-wrapper confirm-button-wrapper-waiting">
+                    <div class="loader"></div>
+                    <button type="button" class="millionaire-answer confirm-button submitted" disabled>
+                        <span class="answer-text">Du bist der Moderator. Warte auf die Antworten der Spieler...</span>
                     </button>
                 </div>
             <?php else: ?>
@@ -357,7 +367,7 @@ foreach ($answers as $ans) {
     <script>
     (function() {
         // 1. ANTWORTEN AUSWÄHLEN (NUR WENN NOCH NICHT ABGEGEBEN)
-        <?php if (!$showExplanation && !$waitingForReveal): ?>
+        <?php if (!$showExplanation && !$waitingForReveal && !($isHost && $hostPlays === 'no')): ?>
             const answerButtons = document.querySelectorAll('.millionaire-answer:not(.confirm-button)');
             answerButtons.forEach(button => {
                 button.addEventListener('click', function() {
@@ -381,30 +391,47 @@ foreach ($answers as $ans) {
                     setTimeout(() => form.submit(), 350);
                 });
             }
+        <?php endif; ?>
 
+        // 2. GEMEINSAMER TIMER FÜR SPIELER UND MODERATOR (Sauber deklariert)
+        <?php if (!$showExplanation): ?>
             let timeLeft = <?php echo intval($timeLimit); ?>;
             const display = document.getElementById('timer-display');
 
-            const countdown = setInterval(function() {
-                timeLeft--;
-                if (display) display.textContent = timeLeft;
-                    if (timeLeft <= 0) {
-                        console.log("Die Zeit ist abgelaufen! Führe jetzt den Klick aus...");
-                        clearInterval(countdown);
-                    
-                        let timeoutInput = document.createElement('input');
-                        timeoutInput.type = 'hidden';
-                        timeoutInput.name = 'timeout';
-                        timeoutInput.value = '1';
-                        form.appendChild(timeoutInput);
+            <?php if (!$waitingForReveal || ($isHost && $hostPlays === 'no')): ?>
+                const countdown = setInterval(function() {
+                    timeLeft--;
+                    if (display) display.textContent = timeLeft;
 
-                        form.submit();
+                    if (timeLeft <= 0) {
+                        clearInterval(countdown);
+                        
+                        // Das automatische Formular-Submit wird NUR beim aktiven Mitspieler ausgelöst
+                        <?php if (!($isHost && $hostPlays === 'no')): ?>
+                            console.log("Die Zeit ist abgelaufen! Führe jetzt den Klick aus...");
+                            const form = document.getElementById('quiz-form');
+                            if (form) {
+                                let timeoutInput = document.createElement('input');
+                                timeoutInput.type = 'hidden';
+                                timeoutInput.name = 'timeout';
+                                timeoutInput.value = '1';
+                                form.appendChild(timeoutInput);
+
+                                const confirmBtn = document.getElementById('confirm-btn');
+                                if (confirmBtn) {
+                                    confirmBtn.click();
+                                } else {
+                                    form.submit();
+                                }
+                            }
+                        <?php endif; ?>
                     }
-            }, 1000);
+                }, 1000);
+            <?php endif; ?>
         <?php endif; ?>
 
-        // 2. PERMANENTES POLLING FÜR SYNCHRONISATION
-        <?php if ($waitingForReveal || ($showExplanation && !$isHost)): ?>
+        // 3. PERMANENTES POLLING FÜR SYNCHRONISATION
+        <?php if ($waitingForReveal || ($showExplanation && !$isHost) || ($isHost && $hostPlays === 'no' && !$showExplanation)): ?>
             const currentIdx = <?php echo intval($currentIndex); ?>;
             const checkInterval = setInterval(function() {
                 fetch('check_next_question.php')
