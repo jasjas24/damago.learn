@@ -11,14 +11,14 @@ if (!$lobby_id) {
     exit;
 }
 
-$currentDisplayName = $_SESSION['username'] ?? $username ?? 'Gast';
+$currentDisplayName = $_SESSION['player_name'] ?? $_SESSION['username'] ?? $username ?? 'Gast';
 
 $rankingPlayers = [];
 $totalPlayers = 0;
 $totalQuestions = 0;
 $currentPlayerRank = null;
 $currentPlayerScore = 0;
-$winnerName = '';
+$winners = []; // NEU: Array statt einzelnem String
 $winnerScore = 0;
 $quizFinished = true;
 
@@ -63,20 +63,34 @@ try {
 
     $totalPlayers = count($rankingPlayers);
 
-    foreach ($rankingPlayers as $index => $player) {
+    $actualRank = 1;
+    $lastScore = null;
+
+    foreach ($rankingPlayers as $index => &$player) {
         $playerName = $player['username'] ?? '';
         $playerScore = (int)($player['score'] ?? 0);
 
-        if ($index === 0) {
-            $winnerName = $playerName;
-            $winnerScore = $playerScore;
+        if ($lastScore !== null && $playerScore < $lastScore) {
+            $actualRank = $index + 1;
+        }
+        
+        $player['rank'] = $actualRank;
+
+        // NEU: Alle Spieler auf Platz 1 werden in das Gewinner-Array aufgenommen
+        if ($actualRank === 1) {
+            $winners[] = $playerName;
+            $winnerScore = $playerScore; // Die Punktzahl ist für alle auf Platz 1 logischerweise identisch
         }
 
         if ($playerName === $currentDisplayName) {
-            $currentPlayerRank = $index + 1;
+            $currentPlayerRank = $actualRank;
             $currentPlayerScore = $playerScore;
         }
+        
+        $lastScore = $playerScore;
     }
+    unset($player);
+
 } catch (PDOException $e) {
     $rankingPlayers = [];
     $totalPlayers = 0;
@@ -110,8 +124,18 @@ function e(string $value): string
         <section class="question-card">
             <?php if (!$quizFinished): ?>
                 <h2>Das Quiz ist noch nicht vollständig beendet.</h2>
-            <?php elseif (!empty($winnerName)): ?>
-                <h2>Gewinner: <?php echo e($winnerName); ?></h2>
+            <?php elseif (!empty($winners)): ?>
+                <?php
+                    // NEU: Liste der Gewinner schön formatieren (mit Komma und "und")
+                    $safeWinners = array_map('e', $winners);
+                    if (count($safeWinners) > 1) {
+                        $lastWinner = array_pop($safeWinners);
+                        $winnersDisplay = implode(', ', $safeWinners) . ' und ' . $lastWinner;
+                    } else {
+                        $winnersDisplay = $safeWinners[0];
+                    }
+                ?>
+                <h2>Gewinner: <?php echo $winnersDisplay; ?></h2>
             <?php else: ?>
                 <h2>Keine Ergebnisse gefunden.</h2>
             <?php endif; ?>
@@ -184,7 +208,7 @@ function e(string $value): string
                                 $isCurrentPlayer = $playerName === $currentDisplayName;
                             ?>
                             <tr<?php echo $isCurrentPlayer ? ' class="current-player"' : ''; ?>>
-                                <td><?php echo $index + 1; ?>.</td>
+                                <td><?php echo $player['rank']; ?>.</td>
                                 <td>
                                     <?php echo e($playerName); ?>
                                     <?php if ($isCurrentPlayer): ?>
