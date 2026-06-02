@@ -347,7 +347,7 @@ if (empty($rankingPlayers)) {
                                 <td><?php echo $actualRank; ?>.</td>
                                 <td class="ranking-name-cell">
                                     <?php if (!empty($player['avatar'])): ?>
-                                        <img src="../../Uploads/Avatare/<?php echo rawurlencode($player['avatar']); ?>" alt="" class="ranking-avatar">
+                                        <img src="../Uploads/Avatare/<?php echo rawurlencode($player['avatar']); ?>" alt="" class="ranking-avatar">
                                     <?php endif; ?>
                                     <?php echo htmlspecialchars($player['username']); ?>
                                     <?php if ($player['username'] === $currentDisplayName) echo '<span class="you-badge">(Du)</span>'; ?>

@@ -188,7 +188,7 @@ function e(string $value): string
                                 <td>
                                     <span class="ranking-name-cell">
                                         <?php if (!empty($player['avatar'])): ?>
-                                            <img src="../../Uploads/Avatare/<?php echo rawurlencode($player['avatar']); ?>" alt="" class="ranking-avatar">
+                                            <img src="../Uploads/Avatare/<?php echo rawurlencode($player['avatar']); ?>" alt="" class="ranking-avatar">
                                         <?php endif; ?>
                                         <?php echo e($playerName); ?>
                                         <?php if ($isCurrentPlayer): ?>

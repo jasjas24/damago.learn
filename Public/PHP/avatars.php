@@ -2,7 +2,7 @@
 /**
  * Gemeinsame Hilfsfunktionen für die Avatar-Auswahl.
  *
- * Die Avatar-Bilder liegen als PNG-Dateien unter /Uploads/Avatare/.
+ * Die Avatar-Bilder liegen als PNG-Dateien unter /Public/Uploads/Avatare/.
  * Spieler (eingeloggt, Gast oder mitspielender Host) wählen beim Beitritt
  * bzw. beim Erstellen der Lobby genau einen Avatar aus. Gespeichert wird
  * nur der reine Dateiname in der Spalte lobby_players.avatar.
@@ -10,12 +10,12 @@
 
 // Web-Pfad zu den Avatar-Bildern, relativ zu den Seiten in /Public/PHP/.
 if (!defined('DAMAGO_AVATAR_URL')) {
-    define('DAMAGO_AVATAR_URL', '../../Uploads/Avatare/');
+    define('DAMAGO_AVATAR_URL', '../Uploads/Avatare/');
 }
 
 // Pfad zum Avatar-Ordner im Dateisystem.
 if (!defined('DAMAGO_AVATAR_DIR')) {
-    define('DAMAGO_AVATAR_DIR', __DIR__ . '/../../Uploads/Avatare/');
+    define('DAMAGO_AVATAR_DIR', __DIR__ . '/../Uploads/Avatare/');
 }
 
 if (!function_exists('damago_available_avatars')) {
