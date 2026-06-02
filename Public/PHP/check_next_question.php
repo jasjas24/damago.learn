@@ -14,17 +14,17 @@ if (!$lobby_id) {
     exit;
 }
 
-// NEU: Zuerst prüfen, ob der Spieler gekickt wurde
-try {
-    $stmtKick = $pdo->prepare("SELECT COUNT(*) FROM lobby_players WHERE lobby_id = ? AND player_name = ?");
-    $stmtKick->execute([$lobby_id, $username]);
-    if ($stmtKick->fetchColumn() == 0) {
-        // Spieler ist nicht mehr in der Liste -> KICK!
+else {
+    // Prüfen, ob der Spieler noch in der Tabelle ist
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM lobby_players WHERE lobby_id = ? AND player_name = ?");
+    $stmt->execute([$lobby_id, $username]);
+    $exists = $stmt->fetchColumn();
+
+    if ($exists == 0) {
+        // Spieler wurde gekickt!
         echo json_encode(['success' => true, 'action' => 'kicked']);
         exit;
     }
-} catch (PDOException $e) {
-    // Falls DB-Fehler, einfach weitermachen
 }
 
 try {
