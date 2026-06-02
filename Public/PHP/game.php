@@ -356,9 +356,11 @@ if (empty($rankingPlayers)) {
                                     <?php if (!empty($player['avatar'])): ?>
                                         <img src="../Uploads/Avatare/<?php echo rawurlencode($player['avatar']); ?>" alt="" class="ranking-avatar">
                                     <?php endif; ?>
-                                    <?php echo htmlspecialchars($player['username']); ?>
-                                    <?php if ($player['username'] === $currentDisplayName) echo '<span class="you-badge">(Du)</span>'; ?>
                                     
+                                    <?php echo htmlspecialchars($player['username']); ?>
+                                    
+                                    <?php if ($player['username'] === $currentDisplayName) echo '<span class="you-badge">(Du)</span>'; ?>
+
                                     <?php if ($isHost && $player['username'] !== $currentDisplayName): ?>
                                         <button type="button" class="kick-btn" data-username="<?php echo htmlspecialchars($player['username']); ?>">
                                             Kick

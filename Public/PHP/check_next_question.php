@@ -1,15 +1,30 @@
 <?php
 require_once 'init.php';
 require_once 'db.php';
+
 header('Content-Type: application/json');
 
 $lobby_id = $_SESSION['quiz_setup']['lobby_id'] ?? $_SESSION['player_lobby_id'] ?? null;
+$username = $_SESSION['player_name'] ?? $_SESSION['username'] ?? 'Gast';
 $current_local_index = $_SESSION['current_question_index'] ?? 0;
 $local_show_explanation = $_SESSION['show_explanation'] ?? false;
 
 if (!$lobby_id) {
     echo json_encode(['success' => false, 'error' => 'Keine Lobby gefunden']);
     exit;
+}
+
+// NEU: Zuerst prüfen, ob der Spieler gekickt wurde
+try {
+    $stmtKick = $pdo->prepare("SELECT COUNT(*) FROM lobby_players WHERE lobby_id = ? AND player_name = ?");
+    $stmtKick->execute([$lobby_id, $username]);
+    if ($stmtKick->fetchColumn() == 0) {
+        // Spieler ist nicht mehr in der Liste -> KICK!
+        echo json_encode(['success' => true, 'action' => 'kicked']);
+        exit;
+    }
+} catch (PDOException $e) {
+    // Falls DB-Fehler, einfach weitermachen
 }
 
 try {
@@ -33,21 +48,20 @@ try {
             $_SESSION['current_question_index'] = $dbIndex;
             $_SESSION['show_explanation'] = false;
             $_SESSION['last_result'] = null;
-            unset($_SESSION['waiting_for_reveal']); // Wartezustand löschen
+            unset($_SESSION['waiting_for_reveal']); 
             echo json_encode(['success' => true, 'action' => 'reload']);
             exit;
         }
 
-        // Fall 3: Alle haben geantwortet -> AUFLÖSUNG einblenden (ABER NUR, WENN LOKAL NOCH NICHT AKTIV!)
+        // Fall 3: Alle haben geantwortet -> AUFLÖSUNG einblenden
         if ($dbShowExplanation && !$local_show_explanation) {
             $_SESSION['show_explanation'] = true;
-            unset($_SESSION['waiting_for_reveal']); // Zwingend hier löschen!
-            
+            unset($_SESSION['waiting_for_reveal']);
             echo json_encode(['success' => true, 'action' => 'reload']);
             exit;
         }
 
-        // Standard-Rückgabe, wenn sich am Zustand nichts geändert hat (Verhindert das Dauer-Reloading)
+        // Standard-Rückgabe
         echo json_encode([
             'success' => true,
             'action' => 'wait',
