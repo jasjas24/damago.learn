@@ -29,9 +29,11 @@ if (!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) {
             // Variante B: Falls JSON leer ist, ziehe die Fragen relational aus lobby_questions
             if (!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) {
                 $stmtLobbyQ = $pdo->prepare("
-                    SELECT q.id AS question_id, q.question_text, q.explanation AS general_explanation
+                    SELECT q.id AS question_id, q.question_text, q.explanation AS general_explanation,
+                           m.file_name AS image_file
                     FROM lobby_questions lq
                     INNER JOIN questions q ON q.id = lq.question_id
+                    LEFT JOIN media_files m ON m.id = q.image_id
                     WHERE lq.lobby_id = ?
                     ORDER BY lq.sort_order ASC
                 ");
@@ -51,6 +53,7 @@ if (!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) {
                             'id'            => $q['question_id'],
                             'question_text' => $q['question_text'],
                             'explanation'   => $q['general_explanation'],
+                            'image'         => $q['image_file'] ?? null,
                             'answers'       => $answers
                         ];
                     }
@@ -220,6 +223,10 @@ if (empty($rankingPlayers)) {
 
             <section class="question-card">
                 <div class="question-title"><?php echo render_rich_text($currentQuestion['question_text']); ?></div>
+                <?php if (!empty($currentQuestion['image'])): ?>
+                    <img src="../Uploads/Questions/<?php echo rawurlencode($currentQuestion['image']); ?>"
+                         alt="Bild zur Frage" class="question-image">
+                <?php endif; ?>
             </section>
 
             <?php if ($waitingForReveal && !$showExplanation): ?>

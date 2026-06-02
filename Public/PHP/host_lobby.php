@@ -50,6 +50,7 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
                 q.id AS question_id,
                 q.question_text,
                 q.explanation AS general_explanation,
+                m.file_name AS image_file,
                 a.id AS answer_id,
                 a.answer_text,
                 a.is_correct,
@@ -58,6 +59,7 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
             FROM questions q
             INNER JOIN question_pools p ON p.id = q.question_pool_id
             INNER JOIN answer_options a ON a.question_id = q.id
+            LEFT JOIN media_files m ON m.id = q.image_id
             WHERE p.name = ? AND q.is_active = 1
             ORDER BY q.id ASC, a.sort_order ASC
         ");
@@ -72,6 +74,7 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
                     'id'            => $qId,
                     'question_text' => $row['question_text'],
                     'explanation'   => $row['general_explanation'],
+                    'image'         => $row['image_file'] ?? null,
                     'answers'       => []
                 ];
             }

@@ -172,7 +172,7 @@ if (is_dir($uploadDir)) {
 
                     <div class="dashboard-footer-links">
                         <button type="submit" class="btn btn-primary">
-                            Bild hochladen 
+                            Bild hochladen
                         </button>
                     </div>
                 </form>

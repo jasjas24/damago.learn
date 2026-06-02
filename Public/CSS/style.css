@@ -1293,6 +1293,16 @@ h1 + p {
     max-width: 100%;
 }
 
+/* Optionales Bild zur Frage (zwischen Fragetext und Antworten) */
+.question-image {
+    display: block;
+    max-width: 100%;
+    max-height: 320px;
+    margin: 16px auto 0;
+    border-radius: var(--radius-md);
+    object-fit: contain;
+}
+
 /* Code-Blöcke: nur so breit wie der Inhalt (nicht volle Kartenbreite),
    zentriert, linksbündiger Text und kompakter als der Fragetext. */
 .code-block {
