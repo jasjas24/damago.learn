@@ -2,8 +2,7 @@
 require_once 'init.php';
 require_once 'db.php'; // PDO-Verbindung
 
-function e($value)
-{
+function e($value) {
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
@@ -26,6 +25,10 @@ $errorMessage = '';
 
 // Ordner prüfen / erstellen
 if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+
+// Fragenpools laden
+$stmtPools = $pdo->query("SELECT id, name FROM question_pools WHERE is_active = 1 ORDER BY name ASC");
+$pools = $stmtPools->fetchAll(PDO::FETCH_ASSOC);
 
 // POST-Aktionen
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -51,7 +54,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Upload
     elseif ($action === 'upload') {
-        if (!isset($_FILES['image']) || $_FILES['image']['error'] === UPLOAD_ERR_NO_FILE) {
+        $poolId = (int)($_POST['question_pool_id'] ?? 0);
+        if ($poolId <= 0) {
+            $errorMessage = 'Bitte wähle einen Fragenpool aus.';
+        } elseif (!isset($_FILES['image']) || $_FILES['image']['error'] === UPLOAD_ERR_NO_FILE) {
             $errorMessage = 'Bitte wähle eine Bilddatei aus.';
         } elseif ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
             $errorMessage = 'Fehler beim Hochladen.';
@@ -76,15 +82,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             else {
                                 $stmt = $pdo->prepare("
                                     INSERT INTO media_files
-                                    (file_name, original_name, mime_type, file_size, created_by)
-                                    VALUES (:file_name, :original_name, :mime_type, :file_size, :created_by)
+                                    (file_name, original_name, mime_type, file_size, created_by, question_pool_id)
+                                    VALUES (:file_name, :original_name, :mime_type, :file_size, :created_by, :pool_id)
                                 ");
                                 $success = $stmt->execute([
                                     ':file_name' => $newFileName,
                                     ':original_name' => $originalName,
                                     ':mime_type' => $mimeType,
                                     ':file_size' => $file['size'],
-                                    ':created_by' => $userId
+                                    ':created_by' => $userId,
+                                    ':pool_id' => $poolId
                                 ]);
                                 if ($success) $successMessage = 'Bild erfolgreich hochgeladen.';
                                 else $errorMessage = 'Fehler beim Speichern in DB.';
@@ -106,7 +113,7 @@ $images = $stmt->fetchAll();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Medien verwalten | damago Quizsystem</title>
+<title>Medienverwaltung | damago Quizsystem</title>
 <link rel="stylesheet" href="../CSS/style.css">
 </head>
 <body class="manage-questions-page">
@@ -114,33 +121,43 @@ $images = $stmt->fetchAll();
 <?php include_once 'topbar.php'; ?>
 
 <main class="play-layout">
-<section class="quiz-main mq-panel">
+<section class="quiz-main">
 
 <div class="mq-topbar">
     <div class="mq-topbar-info">
         <span class="eyebrow">Medienverwaltung</span>
         <h2>Hochgeladene Dateien</h2>
     </div>
-    <div class="mq-topbar-actions">
+    <div class="mq-topbar-actions mq-topbar-actions-stacked">
         <a href="dashboard.php" class="back-button">← Zurück zum Dashboard</a>
     </div>
 </div>
 
-<?php if ($successMessage): ?><div class="import-message import-message-success"><?php echo e($successMessage); ?></div><?php endif; ?>
-<?php if ($errorMessage): ?><div class="import-message import-message-error"><?php echo e($errorMessage); ?></div><?php endif; ?>
+<?php if ($successMessage): ?>
+<div class="alert-success"><?php echo e($successMessage); ?></div>
+<?php endif; ?>
+<?php if ($errorMessage): ?>
+<div class="alert-error"><?php echo e($errorMessage); ?></div>
+<?php endif; ?>
 
 <div class="mq-toolbar">
-    <form action="manage_media.php" method="POST" enctype="multipart/form-data">
+    <form action="manage_media.php" method="POST" enctype="multipart/form-data" class="questions-form">
         <input type="hidden" name="action" value="upload">
-        <label>Neue Datei:</label>
-        <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" required>
-        <button type="submit" class="btn-icon btn-add">Hochladen</button>
+        <div class="form-group">
+            <label>Fragenpool auswählen *</label>
+            <select name="question_pool_id" required>
+                <option value="">Bitte auswählen</option>
+                <?php foreach($pools as $pool): ?>
+                <option value="<?php echo $pool['id']; ?>"><?php echo e($pool['name']); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Neue Datei:</label>
+            <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Hochladen</button>
     </form>
-</div>
-
-<div class="question-list-header">
-    <span class="col-frage">Dateiname</span>
-    <span class="col-qaktion">Aktion</span>
 </div>
 
 <div class="question-list">
@@ -148,27 +165,20 @@ $images = $stmt->fetchAll();
     <div class="empty-list-hint">Keine Dateien vorhanden.</div>
 <?php else: ?>
     <?php foreach($images as $img): ?>
-        <div class="question-row">
-            <div class="col-frage">
-                <div><?php echo e($img['original_name']); ?></div>
-                <div><?php echo e($img['mime_type']); ?> | <?php echo e(round($img['file_size']/1024,1)); ?> KB</div>
-            </div>
-            <div class="col-qaktion">
-                <form method="POST" action="manage_media.php" class="inline-form">
-                    <input type="hidden" name="action" value="delete_media">
-                    <input type="hidden" name="media_id" value="<?php echo $img['id']; ?>">
-                    <button type="submit" class="btn-icon btn-delete" title="Datei löschen">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-                            <path d="M10 11v6M14 11v6"></path>
-                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
-                        </svg>
-                    </button>
-                </form>
-                <a href="<?php echo e($uploadUrl . $img['file_name']); ?>" target="_blank" class="btn-icon btn-view">Anzeigen</a>
-            </div>
+    <div class="question-card">
+        <div class="col-frage">
+            <div><?php echo e($img['original_name']); ?></div>
+            <div><?php echo e($img['mime_type']); ?> | <?php echo e(round($img['file_size']/1024,1)); ?> KB</div>
         </div>
+        <div class="col-qaktion mq-action-row">
+            <form method="POST" action="manage_media.php">
+                <input type="hidden" name="action" value="delete_media">
+                <input type="hidden" name="media_id" value="<?php echo $img['id']; ?>">
+                <button type="submit" class="btn-icon btn-toggle-inactive" title="Datei löschen">🗑</button>
+            </form>
+            <a href="<?php echo e($uploadUrl . $img['file_name']); ?>" target="_blank" class="btn-icon btn-edit">Anzeigen</a>
+        </div>
+    </div>
     <?php endforeach; ?>
 <?php endif; ?>
 </div>
