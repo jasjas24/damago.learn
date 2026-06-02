@@ -127,6 +127,7 @@ $images = $stmt->fetchAll();
     <div class="mq-topbar-info">
         <span class="eyebrow">Medienverwaltung</span>
         <h2>Hochgeladene Dateien</h2>
+        <p>Hier kannst du Bilder für das Quizsystem hochladen und verwalten. Wähle beim Upload einen Fragenpool aus, um die Datei diesem Pool zuzuordnen.</p>
     </div>
     <div class="mq-topbar-actions mq-topbar-actions-stacked">
         <a href="dashboard.php" class="back-button">← Zurück zum Dashboard</a>
