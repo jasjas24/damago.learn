@@ -358,6 +358,12 @@ if (empty($rankingPlayers)) {
                                     <?php endif; ?>
                                     <?php echo htmlspecialchars($player['username']); ?>
                                     <?php if ($player['username'] === $currentDisplayName) echo '<span class="you-badge">(Du)</span>'; ?>
+                                    
+                                    <?php if ($isHost && $player['username'] !== $currentDisplayName): ?>
+                                        <button type="button" class="kick-btn" data-username="<?php echo htmlspecialchars($player['username']); ?>">
+                                            Kick
+                                        </button>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="score-cell"><?php echo $player['score']; ?></td>
                             </tr>
@@ -376,6 +382,22 @@ if (empty($rankingPlayers)) {
     </script>
 
     <script>
+        // Kick-Logik
+        document.querySelectorAll('.kick-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const username = this.getAttribute('data-username');
+                if (confirm('Willst du ' + username + ' wirklich aus dem Spiel werfen?')) {
+                    fetch('kick_player.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'username=' + encodeURIComponent(username)
+                    }).then(() => {
+                        // Zeile ausblenden
+                        this.closest('tr').remove();
+                    });
+                }
+            });
+        });
     (function() {
         // 1. ANTWORTEN AUSWÄHLEN
         <?php if (!$showExplanation && !$waitingForReveal && !($isHost && $hostPlays === 'no')): ?>
