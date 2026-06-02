@@ -25,8 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
         $pwMessage = 'Passwort konnte nicht gespeichert werden: Bitte alle Felder ausfüllen.';
     } elseif ($new !== $confirm) {
         $pwMessage = 'Passwort konnte nicht gespeichert werden: Die neuen Passwörter stimmen nicht überein.';
-    } elseif (strlen($new) < 8) {
-        $pwMessage = 'Passwort konnte nicht gespeichert werden: Das neue Passwort muss mindestens 8 Zeichen lang sein.';
     } else {
         try {
             $stmt = $pdo->prepare("SELECT password_hash FROM users WHERE id = ?");
