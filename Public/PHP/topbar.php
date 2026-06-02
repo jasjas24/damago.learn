@@ -4,30 +4,33 @@ require_once 'init.php';
 /** @var string $username */
 ?>
 <header class="topbar">
-    <a class="topbar-brand">
+    <a class="topbar-brand" href="dashboard.php">
         <img src="../damago-logo.png" alt="damago Logo" class="topbar-logo">
     </a>
 
-    <div class="topbar-account topbar-account-spaced">
-        <a href="kill_sessions.php" class="logout-button logout-button-kill" title="Löscht alle aktuellen Quiz-Sessions für Testzwecke">
-            Sessions killen
-        </a>
+    <div class="topbar-right">
+        <?php if ($username !== 'Gast'): ?>
+            <a href="profile.php" class="logout-button" style="margin-right: 15px;" title="Zum Profil">
+                <?php echo htmlspecialchars($username); ?>
+            </a>
+        <?php endif; ?>    
+
+        <a href="dashboard.php" class="logout-button">Dashboard</a>
 
         <?php if ($username !== 'Gast'): ?>
-            <div>
-                <a href="profile.php" class="account-name account-link" data-tooltip="Klicken, um Profil zu bearbeiten"><?php echo htmlspecialchars($username); ?></a>
-                <a href="logout.php" class="logout-button">Abmelden</a>
-            </div>
-        <?php elseif (isset($_SESSION['player_name'])): ?>
-            <div>
-                <span class="account-name"><?php echo htmlspecialchars($_SESSION['player_name']); ?></span>
-                <a href="logout.php" class="logout-button">Verlassen</a>
-            </div>
-        <?php else: ?>
-            <div>
-                <span class="account-name">Gast</span>
-                <a href="logout.php" class="logout-button">Spiel beenden</a>
-            </div>
+            <a href="logout.php" class="logout-button" style="margin-left: 10px;">
+                logout
+            </a>
         <?php endif; ?>
-    </div>
+        
+        </div>
 </header>
+
+<script>
+window.addEventListener('pageshow', function (event) {
+    // Falls die Seite aus dem Arbeitsspeicher-Verlauf (Zurück-Button) kommt: Neustart erzwingen!
+    if (event.persisted || (typeof window.performance !== "undefined" && window.performance.navigation.type === 2)) {
+        window.location.reload();
+    }
+});
+</script>
