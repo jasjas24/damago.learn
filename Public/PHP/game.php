@@ -467,8 +467,8 @@ if (empty($rankingPlayers)) {
         <?php endif; ?>
 
         <?php if ($showExplanation): ?>
-            const timerBox = document.querySelector('.timer-box');
-            if (timerBox) { timerBox.classList.add('timer-box-revealed'); }
+            const revealTimerBox = document.querySelector('.timer-box');
+            if (revealTimerBox) { revealTimerBox.classList.add('timer-box-revealed'); }
         <?php endif; ?>
     })();
     </script>
