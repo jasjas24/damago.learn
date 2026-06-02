@@ -2,69 +2,58 @@
 require_once 'init.php';
 require_once 'db.php';
 
-/** @var string $username */
-/** @var string $role */
-
-if (($username ?? 'Gast') === 'Gast') {
-    header('Location: dashboard.php');
+// Nur eingeloggte Benutzer (keine Gäste/Spieler) dürfen das Profil sehen
+if (($_SESSION['user_role'] ?? 'guest') === 'guest' || empty($_SESSION['user_id'])) {
+    header("Location: dashboard.php");
     exit;
 }
 
-$successMessage = '';
-$errorMessage = '';
+$userId       = (int) $_SESSION['user_id'];
+$profileName  = $_SESSION['username'] ?? '';
+$profileEmail = $_SESSION['user_email'] ?? '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $currentPassword = $_POST['current_password'] ?? '';
-    $newPassword = $_POST['new_password'] ?? '';
-    $repeatPassword = $_POST['repeat_password'] ?? '';
+$pwMessage = '';   // Rückmeldung an den Benutzer
+$pwSuccess = false;
 
-    if ($currentPassword === '' || $newPassword === '' || $repeatPassword === '') {
-        $errorMessage = 'Bitte fülle alle Passwortfelder aus.';
-    } elseif ($newPassword !== $repeatPassword) {
-        $errorMessage = 'Das neue Passwort und die Wiederholung stimmen nicht überein.';
+// Passwort-Änderung verarbeiten
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'change_password') {
+    $current = $_POST['current_password'] ?? '';
+    $new     = $_POST['new_password'] ?? '';
+    $confirm = $_POST['confirm_password'] ?? '';
+
+    if ($current === '' || $new === '' || $confirm === '') {
+        $pwMessage = 'Passwort konnte nicht gespeichert werden: Bitte alle Felder ausfüllen.';
+    } elseif ($new !== $confirm) {
+        $pwMessage = 'Passwort konnte nicht gespeichert werden: Die neuen Passwörter stimmen nicht überein.';
+    } elseif (strlen($new) < 8) {
+        $pwMessage = 'Passwort konnte nicht gespeichert werden: Das neue Passwort muss mindestens 8 Zeichen lang sein.';
     } else {
         try {
-            $stmt = $pdo->prepare("
-                SELECT id, password_hash
-                FROM users
-                WHERE username = ?
-                LIMIT 1
-            ");
-            $stmt->execute([$username]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt = $pdo->prepare("SELECT password_hash FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $hash = $stmt->fetchColumn();
 
-            if (!$user) {
-                $errorMessage = 'Benutzerkonto wurde nicht gefunden.';
-            } elseif (!password_verify($currentPassword, $user['password_hash'])) {
-                $errorMessage = 'Das aktuelle Passwort ist falsch.';
+            if (!$hash || !password_verify($current, $hash)) {
+                $pwMessage = 'Passwort konnte nicht gespeichert werden: Das aktuelle Passwort ist falsch.';
             } else {
-                $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
-
-                $updateStmt = $pdo->prepare("
-                    UPDATE users
-                    SET password_hash = ?
-                    WHERE id = ?
-                ");
-                $updateStmt->execute([
-                    $newPasswordHash,
-                    $user['id']
-                ]);
-
-                $successMessage = 'Dein Passwort wurde erfolgreich geändert.';
+                $newHash = password_hash($new, PASSWORD_DEFAULT);
+                $upd = $pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+                $upd->execute([$newHash, $userId]);
+                $pwSuccess = true;
+                $pwMessage = 'Passwort erfolgreich gespeichert.';
             }
         } catch (PDOException $e) {
-            $errorMessage = 'Beim Ändern des Passworts ist ein Fehler aufgetreten.';
+            $pwMessage = 'Passwort konnte nicht gespeichert werden (Datenbankfehler).';
         }
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profil | damago Quizsystem</title>
+    <title>Mein Profil | damago Quizsystem</title>
     <link rel="stylesheet" href="../CSS/style.css">
 </head>
 <body class="auth-page">
@@ -77,84 +66,89 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <?php include_once 'topbar.php'; ?>
 
-    <main class="auth-layout">
-        <section class="auth-info">
-            <h1>Mein Profil.</h1>
-            <p>
-                Hier kannst du dein Passwort ändern.
-                Gib dafür zuerst dein aktuelles Passwort ein.
-            </p>
-
-            <div class="info-list">
-                <div class="info-list-code">
-                    Angemeldet als: <?php echo htmlspecialchars($username, ENT_QUOTES, 'UTF-8'); ?>
-                </div>
-            </div>
-        </section>
-
-        <section class="auth-card">
+    <main class="host-layout">
+        <section class="host-card profile-card">
             <div class="auth-header">
-                <span class="eyebrow">Profil</span>
-                <h2>Passwort ändern</h2>
-                <p>
-                    Wenn der Admin dir ein neues Übergangspasswort gegeben hat,
-                    gib dieses als aktuelles Passwort ein.
-                </p>
+                <span class="eyebrow">Konto</span>
+                <h2>Mein Profil</h2>
+                <p>Deine bei der Registrierung hinterlegten Daten.</p>
             </div>
 
-            <?php if ($successMessage !== ''): ?>
-                <div class="status-message">
-                    <?php echo htmlspecialchars($successMessage, ENT_QUOTES, 'UTF-8'); ?>
-                </div>
-            <?php endif; ?>
+            <div class="form-group">
+                <label for="profile_username">Benutzername</label>
+                <input type="text" id="profile_username" value="<?php echo htmlspecialchars($profileName); ?>" disabled>
+            </div>
 
-            <?php if ($errorMessage !== ''): ?>
-                <div class="status-message">
-                    <?php echo htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8'); ?>
-                </div>
-            <?php endif; ?>
+            <div class="form-group">
+                <label for="profile_email">E-Mail-Adresse</label>
+                <input type="email" id="profile_email" value="<?php echo htmlspecialchars($profileEmail); ?>" disabled>
+            </div>
 
-            <form class="auth-form" action="profile.php" method="POST">
-                <div class="form-group">
-                    <label for="current_password">Aktuelles Passwort</label>
-                    <input 
-                        type="password" 
-                        id="current_password" 
-                        name="current_password" 
-                        required
-                    >
-                </div>
+            <p class="profile-hint">Diese Daten kann nur der Administrator ändern.</p>
 
-                <div class="form-group">
-                    <label for="new_password">Neues Passwort</label>
-                    <input 
-                        type="password" 
-                        id="new_password" 
-                        name="new_password" 
-                        required
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="repeat_password">Neues Passwort wiederholen</label>
-                    <input 
-                        type="password" 
-                        id="repeat_password" 
-                        name="repeat_password" 
-                        required
-                    >
-                </div>
-
-                <button type="submit" class="btn btn-primary">
-                    Passwort speichern
+            <div class="profile-pw<?php echo $pwMessage !== '' ? ' is-open' : ''; ?>">
+                <button type="button" class="profile-pw-toggle" aria-expanded="<?php echo $pwMessage !== '' ? 'true' : 'false'; ?>">
+                    <span>Passwort ändern</span>
+                    <span class="profile-pw-chevron" aria-hidden="true">▾</span>
                 </button>
-            </form>
 
-            <div class="auth-links">
-                <a href="dashboard.php">Zurück zum Dashboard</a>
+                <div class="profile-pw-body" id="profile-pw-body"<?php echo $pwMessage !== '' ? '' : ' hidden'; ?>>
+                    <?php if ($pwMessage !== ''): ?>
+                        <div class="<?php echo $pwSuccess ? 'alert-success' : 'alert-error'; ?>">
+                            <?php echo htmlspecialchars($pwMessage); ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <form class="auth-form" action="profile.php" method="POST">
+                        <input type="hidden" name="action" value="change_password">
+
+                        <div class="form-group">
+                            <label for="current_password">Aktuelles Passwort</label>
+                            <input type="password" id="current_password" name="current_password" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new_password">Neues Passwort</label>
+                            <input type="password" id="new_password" name="new_password" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirm_password">Passwort bestätigen</label>
+                            <input type="password" id="confirm_password" name="confirm_password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Speichern</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="host-back">
+                <a href="dashboard.php" class="back-button">← Zurück zum Dashboard</a>
             </div>
         </section>
     </main>
+
+    <script>
+        // Passwort-Bereich auf-/zuklappen
+        (function () {
+            const box    = document.querySelector('.profile-pw');
+            const toggle = document.querySelector('.profile-pw-toggle');
+            const body   = document.getElementById('profile-pw-body');
+            if (!box || !toggle || !body) return;
+
+            toggle.addEventListener('click', function () {
+                if (body.hasAttribute('hidden')) {
+                    body.removeAttribute('hidden');
+                    box.classList.add('is-open');
+                    toggle.setAttribute('aria-expanded', 'true');
+                } else {
+                    body.setAttribute('hidden', '');
+                    box.classList.remove('is-open');
+                    toggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+        })();
+    </script>
 
 </body>
 </html>

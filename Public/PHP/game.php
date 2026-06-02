@@ -142,7 +142,7 @@ $rankingPlayers = [];
 if ($lobby_id) {
     try {
         $stmtRank = $pdo->prepare("
-            SELECT player_name AS username, points AS score
+            SELECT player_name AS username, points AS score, avatar
             FROM lobby_players
             WHERE lobby_id = ?
         ");
@@ -159,7 +159,8 @@ if ($lobby_id) {
             
             $rankingPlayers[] = [
                 'username' => $player['username'],
-                'score' => $score
+                'score' => $score,
+                'avatar' => $player['avatar'] ?? null
             ];
         }
 
@@ -344,7 +345,10 @@ if (empty($rankingPlayers)) {
                         ?>
                             <tr<?php echo ($player['username'] === $currentDisplayName) ? ' class="current-player"' : ''; ?>>
                                 <td><?php echo $actualRank; ?>.</td>
-                                <td>
+                                <td class="ranking-name-cell">
+                                    <?php if (!empty($player['avatar'])): ?>
+                                        <img src="../../Uploads/Avatare/<?php echo rawurlencode($player['avatar']); ?>" alt="" class="ranking-avatar">
+                                    <?php endif; ?>
                                     <?php echo htmlspecialchars($player['username']); ?>
                                     <?php if ($player['username'] === $currentDisplayName) echo '<span class="you-badge">(Du)</span>'; ?>
                                 </td>
@@ -397,11 +401,22 @@ if (empty($rankingPlayers)) {
         <?php if (!$showExplanation): ?>
             let timeLeft = <?php echo intval($timeLimit); ?>;
             const display = document.getElementById('timer-display');
+            const timerBox = document.querySelector('.timer-box');
 
             <?php if (!$waitingForReveal || ($isHost && $hostPlays === 'no')): ?>
                 const countdown = setInterval(function() {
                     timeLeft--;
                     if (display) display.textContent = timeLeft;
+
+                    // Nur optisch (keine Logik): ab 10s pulsieren, ab 5s rot + schneller pulsieren
+                    if (timerBox) {
+                        if (timeLeft <= 5) {
+                            timerBox.classList.remove('pulse');
+                            timerBox.classList.add('danger');
+                        } else if (timeLeft <= 10) {
+                            timerBox.classList.add('pulse');
+                        }
+                    }
 
                     if (timeLeft <= 0) {
                         clearInterval(countdown);
@@ -452,5 +467,7 @@ if (empty($rankingPlayers)) {
     </script>
 
 <?php endif; ?>
+    <?php include_once 'footbar.php'; ?>
+
 </body>
 </html>

@@ -1,11 +1,13 @@
 <?php
 require_once 'init.php';
 require_once 'db.php';
+require_once 'avatars.php';
 
 /** @var string $username */
 /** @var string $role */
 
 $error = '';
+$selectedAvatar = '';
 
 // FIX: Ermitteln, ob der Benutzer EXPLIZIT als Gast beitreten möchte (z. B. über einen URL-Parameter ?mode=guest)
 // Wenn er nicht eingeloggt ist, ist er sowieso Gast.
@@ -22,8 +24,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $playerName = $username;
     }
 
+    // Gewählten Avatar übernehmen (für erneute Anzeige bei Fehlern)
+    $selectedAvatar = trim($_POST['avatar'] ?? '');
+
     if (empty($joinCode) || empty($playerName)) {
         $error = 'Bitte fülle alle Felder aus.';
+    } elseif (!damago_is_valid_avatar($selectedAvatar)) {
+        // Avatar ist Pflicht – ohne gültigen Avatar kein Beitritt.
+        $error = 'Bitte wähle einen Avatar aus.';
     } else {
         try {
             // 1. Prüfen, ob die Lobby mit diesem Code existiert und offen ist
@@ -52,14 +60,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     unset($_SESSION['last_result']);
 
                     // 4. Spieler in die Tabelle eintragen
-                    $stmtJoin = $pdo->prepare("INSERT INTO lobby_players (lobby_id, player_name) VALUES (?, ?)");
-                    $stmtJoin->execute([$lobby['id'], $playerName]);
+                    $stmtJoin = $pdo->prepare("INSERT INTO lobby_players (lobby_id, player_name, avatar) VALUES (?, ?, ?)");
+                    $stmtJoin->execute([$lobby['id'], $playerName, $selectedAvatar]);
 
                     // 5. Wichtige Daten für den Spieler in die Session schreiben
                     $_SESSION['player_lobby_id']   = $lobby['id'];
                     $_SESSION['player_lobby_code'] = $joinCode;
                     $_SESSION['player_name']       = $playerName;
 
+                    // FIX: Weiterleitung in den Warteraum für SPIELER (nicht für den Host!) MIT dem Code in der URL
                     header("Location: host_lobby.php?code=" . urlencode($joinCode));
                     exit;
                 }
@@ -145,6 +154,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     </button>
                 <?php endif; ?>
 
+                <?php damago_render_avatar_picker($selectedAvatar); ?>
+
                 <button type="submit" class="btn btn-primary">
                     Lobby betreten
                 </button>
@@ -170,6 +181,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             if (f) { f.value = 'Gast-' + Math.floor(1000 + Math.random() * 9000); }
         })();
     </script>
+
+    <?php include_once 'footbar.php'; ?>
 
 </body>
 </html>

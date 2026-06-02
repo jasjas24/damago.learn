@@ -81,5 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </div>
     </main>
 
+    <?php include_once 'footbar.php'; ?>
+
 </body>
 </html>

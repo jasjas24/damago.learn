@@ -15,7 +15,7 @@ require_once 'init.php';
 
         <?php if ($username !== 'Gast'): ?>
             <div>
-                <a href="profile.php" class="account-name"><?php echo htmlspecialchars($username); ?></a>
+                <a href="profile.php" class="account-name account-link" data-tooltip="Klicken, um Profil zu bearbeiten"><?php echo htmlspecialchars($username); ?></a>
                 <a href="logout.php" class="logout-button">Abmelden</a>
             </div>
         <?php elseif (isset($_SESSION['player_name'])): ?>

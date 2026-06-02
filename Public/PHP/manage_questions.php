@@ -231,7 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     foreach ($ss->si as $si) {
                         // Alle <t>-Elemente zusammenführen (Inline-Formatierung)
                         $text = '';
-                        foreach ($si->xpath('.//t') as $t) {
+                        foreach ($si->xpath('.//*[local-name()="t"]') as $t) {
                             $text .= (string)$t;
                         }
                         $sharedStrings[] = $text;
@@ -247,9 +247,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $sheet->registerXPathNamespace('x', 'http://schemas.openxmlformats.org/spreadsheetml/2006/main');
                 $rows = [];
 
-                foreach ($sheet->xpath('//x:row') as $row) {
+                foreach ($sheet->xpath('//*[local-name()="row"]') as $row) {
                     $rowData = [];
-                    foreach ($row->xpath('x:c') as $cell) {
+                    foreach ($row->xpath('*[local-name()="c"]') as $cell) {
                         // Spaltenindex aus Zelladresse (A1 → 0, B1 → 1 ...)
                         $ref  = (string)$cell['r'];
                         preg_match('/^([A-Z]+)/', $ref, $m);
@@ -450,13 +450,18 @@ if (!empty($questions)) {
                 <span class="eyebrow">Fragen-Verwaltung</span>
                 <h2>Vorhandene Fragen</h2>
             </div>
-            <div class="mq-topbar-actions">
-                <button type="button" class="btn-icon btn-edit mq-action-btn" onclick="openImportModal()">
-                    Importieren
-                </button>
-                <button type="button" class="btn-icon btn-add mq-action-btn" onclick="openCreateModal()">
-                    + Neue Frage
-                </button>
+            <div class="mq-topbar-actions mq-topbar-actions-stacked">
+                <a href="<?php echo $role === 'admin' ? 'admin_area.php' : 'teacher_area.php'; ?>" class="back-button">
+                    ← Zurück zum <?php echo $role === 'admin' ? 'Adminbereich' : 'Lehrerbereich'; ?>
+                </a>
+                <div class="mq-action-row">
+                    <button type="button" class="btn-icon btn-edit mq-action-btn" onclick="openImportModal()">
+                        Importieren
+                    </button>
+                    <button type="button" class="btn-icon btn-add mq-action-btn" onclick="openCreateModal()">
+                        + Neue Frage
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -589,12 +594,6 @@ if (!empty($questions)) {
                 </div>
             </div>
         <?php endif; ?>
-
-        <div class="dashboard-footer-links">
-            <a href="<?php echo $role === 'admin' ? 'admin_area.php' : 'teacher_area.php'; ?>">
-                ← Zurück zum <?php echo $role === 'admin' ? 'Adminbereich' : 'Lehrerbereich'; ?>
-            </a>
-        </div>
 
     </section>
 
@@ -1093,6 +1092,8 @@ if (!empty($questions)) {
         render();
     })();
 </script>
+
+    <?php include_once 'footbar.php'; ?>
 
 </body>
 </html>

@@ -5,13 +5,6 @@ require_once 'db.php';
 /** @var string $username */
 /** @var string $role */
 
-$quizRules = [
-    'pool' => 'Nicht angegeben',
-    'count' => 'Nicht angegeben',
-    'time_per_question' => 'Nicht angegeben',
-    'point_mode' => 'Nicht angegeben'
-];
-
 // 1. Prüfen, ob wir über das Host-Setup kommen oder als Spieler per Join
 if (isset($_SESSION['quiz_setup'])) {
     // Ansicht für den Host
@@ -24,12 +17,6 @@ if (isset($_SESSION['quiz_setup'])) {
     }
     $lobby_id = $setup['lobby_id'] ?? null;
     $is_host = true;
-
-    $quizRules['pool'] = $setup['pool'] ?? $setup['question_pool'] ?? $setup['question_pool_name'] ?? $setup['pool_name'] ?? 'Nicht angegeben';
-    $quizRules['count'] = $setup['count'] ?? $setup['question_count'] ?? $setup['amount_questions'] ?? 'Nicht angegeben';
-    $quizRules['time_per_question'] = $setup['time_per_question'] ?? $setup['question_time'] ?? $setup['time_limit'] ?? $setup['time'] ?? 'Nicht angegeben';
-    $quizRules['point_mode'] = $setup['point_mode'] ?? $setup['points_mode'] ?? $setup['score_mode'] ?? 'Nicht angegeben';
-
 } elseif (isset($_SESSION['player_lobby_id'])) {
     // Ansicht für den beitretenden Spieler / Gast
     $lobby_id = $_SESSION['player_lobby_id'];
@@ -50,72 +37,6 @@ try {
     $stmtHost = $pdo->prepare("SELECT host_name FROM quiz_lobbies WHERE id = ?");
     $stmtHost->execute([$lobby_id]);
     $hostName = (string)$stmtHost->fetchColumn();
-} catch (PDOException $e) {}
-
-// Quizregeln aus der Datenbank laden, damit auch Teilnehmer die Regeln sehen
-try {
-    $stmtRules = $pdo->prepare("SELECT * FROM quiz_lobbies WHERE id = ?");
-    $stmtRules->execute([$lobby_id]);
-    $lobbyRules = $stmtRules->fetch(PDO::FETCH_ASSOC);
-
-    if ($lobbyRules) {
-        if ($quizRules['pool'] === 'Nicht angegeben') {
-            $quizRules['pool'] =
-                $lobbyRules['pool']
-                ?? $lobbyRules['question_pool']
-                ?? $lobbyRules['question_pool_name']
-                ?? $lobbyRules['pool_name']
-                ?? 'Nicht angegeben';
-        }
-
-        if ($quizRules['count'] === 'Nicht angegeben') {
-            $quizRules['count'] =
-                $lobbyRules['count']
-                ?? $lobbyRules['question_count']
-                ?? $lobbyRules['amount_questions']
-                ?? 'Nicht angegeben';
-        }
-
-        if ($quizRules['time_per_question'] === 'Nicht angegeben') {
-            $quizRules['time_per_question'] =
-                $lobbyRules['time_per_question']
-                ?? $lobbyRules['question_time']
-                ?? $lobbyRules['time_limit']
-                ?? $lobbyRules['time']
-                ?? 'Nicht angegeben';
-        }
-
-        if ($quizRules['point_mode'] === 'Nicht angegeben') {
-            $quizRules['point_mode'] =
-                $lobbyRules['point_mode']
-                ?? $lobbyRules['points_mode']
-                ?? $lobbyRules['score_mode']
-                ?? 'Nicht angegeben';
-        }
-    }
-} catch (PDOException $e) {}
-
-$scoreModeCode = $quizRules['point_mode'];
-
-if ($scoreModeCode === 'partial') {
-    $scoreModeCode = 'partial_points';
-}
-
-$pointModeLabel = $quizRules['point_mode'];
-
-try {
-    $stmtScoreMode = $pdo->prepare("
-        SELECT display_name
-        FROM score_modes
-        WHERE code = ?
-        LIMIT 1
-    ");
-    $stmtScoreMode->execute([$scoreModeCode]);
-    $displayName = $stmtScoreMode->fetchColumn();
-
-    if ($displayName) {
-        $pointModeLabel = $displayName;
-    }
 } catch (PDOException $e) {}
 
 // 2. NUR DER HOST generiert und mischt die Fragen
@@ -240,34 +161,6 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
             <div class="info-list">
                 <div class="info-list-code">Teilnahme-Code: <?php echo htmlspecialchars($code); ?></div>
             </div>
-
-            <div class="info-list">
-                <h2>Quizregeln:</h2>
-
-                <table>
-                    <tbody>
-                        <tr>
-                            <td><strong>Fragenpool:</strong></td>
-                            <td><?php echo htmlspecialchars($quizRules['pool'], ENT_QUOTES, 'UTF-8'); ?></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Zeit pro Frage:</strong></td>
-                            <td>
-                                <?php echo htmlspecialchars($quizRules['time_per_question'], ENT_QUOTES, 'UTF-8'); ?>
-                                <?php echo $quizRules['time_per_question'] !== 'Nicht angegeben' ? ' Sekunden' : ''; ?>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>Anzahl der Fragen:</strong></td>
-                            <td><?php echo htmlspecialchars($quizRules['count'], ENT_QUOTES, 'UTF-8'); ?></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Punktemodus:</strong></td>
-                            <td><?php echo htmlspecialchars($pointModeLabel, ENT_QUOTES, 'UTF-8'); ?></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
         </section>
 
         <section class="auth-card">
@@ -310,7 +203,21 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
                     data.players.forEach(p => {
                         const li = document.createElement('li');
                         li.className = 'player-item';
-                        li.textContent = p.player_name;
+
+                        // Avatar-Bild anzeigen (falls vorhanden)
+                        if (p.avatar) {
+                            const img = document.createElement('img');
+                            img.className = 'player-avatar';
+                            img.src = '../../Uploads/Avatare/' + encodeURIComponent(p.avatar);
+                            img.alt = 'Avatar';
+                            li.appendChild(img);
+                        }
+
+                        const nameSpan = document.createElement('span');
+                        nameSpan.className = 'player-name';
+                        nameSpan.textContent = p.player_name;
+                        li.appendChild(nameSpan);
+
                         // Den Host in der Teilnehmerliste mit "(Host)" markieren
                         if (hostName && p.player_name === hostName) {
                             const badge = document.createElement('small');
@@ -348,5 +255,7 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
         setInterval(updateLobby, 2000);
         updateLobby();
     </script>
+    <?php include_once 'footbar.php'; ?>
+
 </body>
 </html>

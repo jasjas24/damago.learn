@@ -294,9 +294,9 @@ $activePools = (int)$pdo->query("SELECT COUNT(*) FROM question_pools WHERE is_ac
                 <h2>Vorhandene Fragenpools</h2>
             </div>
             <div class="mq-topbar-actions">
-                <button type="button" class="btn-icon btn-add mq-action-btn" onclick="openCreateModal()">
-                    + Neuer Pool
-                </button>
+                <a href="<?php echo $role === 'admin' ? 'admin_area.php' : 'teacher_area.php'; ?>" class="back-button">
+                    ← Zurück zum <?php echo $role === 'admin' ? 'Adminbereich' : 'Lehrerbereich'; ?>
+                </a>
             </div>
         </div>
 
@@ -435,9 +435,9 @@ $activePools = (int)$pdo->query("SELECT COUNT(*) FROM question_pools WHERE is_ac
         <?php endif; ?>
 
         <div class="dashboard-footer-links">
-            <a href="<?php echo $role === 'admin' ? 'admin_area.php' : 'teacher_area.php'; ?>">
-                ← Zurück zum <?php echo $role === 'admin' ? 'Adminbereich' : 'Lehrerbereich'; ?>
-            </a>
+            <button type="button" class="btn-icon btn-add mq-action-btn" onclick="openCreateModal()">
+                Neuen Fragenpool erstellen
+            </button>
         </div>
 
     </section>
@@ -685,6 +685,8 @@ $activePools = (int)$pdo->query("SELECT COUNT(*) FROM question_pools WHERE is_ac
         render();
     })();
 </script>
+
+    <?php include_once 'footbar.php'; ?>
 
 </body>
 </html>

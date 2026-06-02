@@ -30,37 +30,52 @@ $displayRole = $roleNames[$role];
 $dashboardCards = [
     "join_quiz" => [
         "href" => "join_quiz.php",
-        "icon" => "QB",
+        "icon" => "join",
         "title" => "Quiz beitreten",
         "description" => "Teilnahme-Code eingeben und einer Quizrunde beitreten."
     ],
     "create_quiz" => [
         "href" => "host_quiz.php",
-        "icon" => "QS",
+        "icon" => "create",
         "title" => "Quiz eröffnen",
         "description" => "Eine neue Quizrunde erstellen und hosten."
     ],
     "history" => [
         "href" => "statistic.php",
-        "icon" => "LF",
+        "icon" => "history",
         "title" => "Lernfortschritt",
         "description" => "Eigene Ergebnisse und gespielte Quizrunden ansehen."
     ],
-    
+
     "admin" => [
         "href" => "admin_area.php",
-        "icon" => "AD",
+        "icon" => "admin",
         "title" => "Adminbereich",
         "description" => "Fragenpools, Fragen, Medien, Nutzer und Archive verwalten."
     ],
 
     "teacher" => [
         "href" => "teacher_area.php",
-        "icon" => "DB",
+        "icon" => "teacher",
         "title" => "Verwaltungsbereich",
         "description" => "Fragenpools, Fragen, Medien und Archive verwalten."
     ],
 
+];
+
+// Inline-SVG-Icons (Feather-Stil). Styling liegt in style.css unter ".dashboard-action-icon svg".
+$svgAttrs = 'viewBox="0 0 24 24" aria-hidden="true"';
+$icons = [
+    // Quiz beitreten – Login/Eintreten
+    'join'    => '<svg ' . $svgAttrs . '><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>',
+    // Quiz eröffnen – Plus im Kreis
+    'create'  => '<svg ' . $svgAttrs . '><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>',
+    // Lernfortschritt – Balkendiagramm
+    'history' => '<svg ' . $svgAttrs . '><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>',
+    // Adminbereich – Schild
+    'admin'   => '<svg ' . $svgAttrs . '><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>',
+    // Verwaltungsbereich – Regler/Einstellungen
+    'teacher' => '<svg ' . $svgAttrs . '><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>',
 ];
 
 /*
@@ -179,7 +194,7 @@ $dashboardCategories = [
 
                                         <a href="<?php echo htmlspecialchars($card["href"]); ?>" class="dashboard-action-card">
                                             <div class="dashboard-action-icon">
-                                                <?php echo htmlspecialchars($card["icon"]); ?>
+                                                <?php echo $icons[$card["icon"]] ?? htmlspecialchars($card["icon"]); ?>
                                             </div>
 
                                             <div>
@@ -204,5 +219,7 @@ $dashboardCategories = [
             </div>
         </section>
     </main>
+    <?php include_once 'footbar.php'; ?>
+
 </body>
 </html>

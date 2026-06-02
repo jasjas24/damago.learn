@@ -96,8 +96,11 @@ if ($lobby_id && $current_question) {
         }
 
         // 4. In DB eintragen, dass dieser Spieler geantwortet hat
-        $stmt = $pdo->prepare("INSERT IGNORE INTO player_answers (lobby_id, question_id, player_name) VALUES (?, ?, ?)");
-        $stmt->execute([$lobby_id, $current_question['id'], $username]);
+        //    (inkl. Korrektheit & erreichter Punkte – Grundlage für die Archiv-Statistik)
+        //    is_correct = 1 nur bei vollständig richtiger Antwort (1000 Punkte), sonst 0.
+        $isCorrect = (!$isTimeout && $pointsEarned === 1000) ? 1 : 0;
+        $stmt = $pdo->prepare("INSERT IGNORE INTO player_answers (lobby_id, question_id, player_name, is_correct, points_earned) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$lobby_id, $current_question['id'], $username, $isCorrect, $pointsEarned]);
 
         // 5. Die erreichten Punkte direkt beim Spieler in der Lobby-Tabelle aufaddieren
         $stmtScore = $pdo->prepare("UPDATE lobby_players SET points = points + ? WHERE lobby_id = ? AND player_name = ?");

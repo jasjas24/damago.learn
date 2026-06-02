@@ -64,7 +64,10 @@ if (!function_exists('render_rich_text')) {
 
         $out     = '';
         $offset  = 0;
-        $pattern = '/```[ \t]*([A-Za-z0-9+#._-]*)[ \t]*\n(.*?)```/s';
+        // Der Zeilenumbruch nach ```sprache ist optional (\n?), damit auch
+        // einzeilige Blöcke aus dem Excel-Import (z. B. ```python code```)
+        // als Code-Block erkannt und passend hervorgehoben werden.
+        $pattern = '/```[ \t]*([A-Za-z0-9+#._-]*)[ \t]*\n?(.*?)```/s';
 
         if (preg_match_all($pattern, $text, $matches, PREG_OFFSET_CAPTURE)) {
             foreach ($matches[0] as $i => $full) {

@@ -1,6 +1,7 @@
 <?php
 require_once 'init.php';
 require_once 'db.php';
+require_once 'avatars.php';
 
 /** @var string $username */
 /** @var string $role */
@@ -93,6 +94,8 @@ try {
                     </select>
                 </div>
 
+                <?php damago_render_avatar_picker(); ?>
+
                 <button type="submit" class="btn btn-primary">
                     Lobby erstellen
                 </button>
@@ -104,6 +107,8 @@ try {
         </section>
     </main>
 
+    <?php include_once 'footbar.php'; ?>
+
 </body>
 <script>
 document.getElementById('quizForm').addEventListener('submit', function(event) {
@@ -114,5 +119,23 @@ document.getElementById('quizForm').addEventListener('submit', function(event) {
     }
     document.getElementById('join_code').value = generatedCode;
 });
+
+// Avatar-Auswahl nur anzeigen/verlangen, wenn der Host selbst mitspielt
+(function () {
+    const hostPlays = document.getElementById('host_plays');
+    const avatarGroup = document.querySelector('.avatar-group');
+    if (!hostPlays || !avatarGroup) return;
+
+    function syncAvatarRequirement() {
+        const plays = hostPlays.value === 'yes';
+        avatarGroup.hidden = !plays;
+        avatarGroup.querySelectorAll('input[name="avatar"]').forEach(function (radio) {
+            radio.required = plays;
+        });
+    }
+
+    hostPlays.addEventListener('change', syncAvatarRequirement);
+    syncAvatarRequirement();
+})();
 </script>
 </html>

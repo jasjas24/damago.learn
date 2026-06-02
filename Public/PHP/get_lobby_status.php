@@ -12,7 +12,7 @@ if ($lobby_id > 0) {
         $is_started = (int)$stmtLobby->fetchColumn();
 
         // Spieler holen
-        $stmtPlayers = $pdo->prepare("SELECT player_name FROM lobby_players WHERE lobby_id = ? ORDER BY joined_at ASC");
+        $stmtPlayers = $pdo->prepare("SELECT player_name, avatar FROM lobby_players WHERE lobby_id = ? ORDER BY joined_at ASC");
         $stmtPlayers->execute([$lobby_id]);
         $players = $stmtPlayers->fetchAll(PDO::FETCH_ASSOC);
 

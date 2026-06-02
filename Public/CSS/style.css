@@ -1,8 +1,8 @@
 /* ============================================================
-   damago.learn – Glassmorphism Design
+   01 · Grundlagen (Variablen, Reset, Body, Hintergrund-Orbs)
    ============================================================ */
 
-/* ── Variables ── */
+/* ── Variablen ── */
 :root {
     --bg-gradient: linear-gradient(150deg, #05090f 0%, #0b1525 35%, #132843 65%, #1e4d80 88%, #2f66a3 100%);
     --primary:        #2f66a3;
@@ -33,7 +33,7 @@
 
 body {
     margin: 0;
-    padding: 0;
+    padding: 0 0 68px;           /* Platz für die fest fixierte Fußzeile (.footbar) */
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
     min-height: 100vh;
     background: var(--bg-gradient);
@@ -92,7 +92,7 @@ main.container {
 }
 
 /* ============================================================
-   Topbar
+   02 · Topbar (topbar.php)
    ============================================================ */
 .topbar {
     position: sticky;
@@ -180,7 +180,7 @@ main.container {
 }
 
 /* ============================================================
-   Allgemeine Karten-Basis (Glass)
+   03 · Karten-Basis (Glass)
    ============================================================ */
 .glass-card {
     background: var(--glass-md);
@@ -192,7 +192,7 @@ main.container {
 }
 
 /* ============================================================
-   Auth-Seiten (Login / Register)
+   04 · Auth-Seiten (Login / Register) – inkl. Formulare & Buttons
    ============================================================ */
 .auth-page {
     min-height: 100vh;
@@ -432,7 +432,7 @@ main.container {
 }
 
 /* ============================================================
-   Dashboard
+   05 · Dashboard (dashboard.php)
    ============================================================ */
 .dashboard-auth-layout { max-width: 1100px; }
 
@@ -527,6 +527,17 @@ main.container {
     flex-shrink: 0;
 }
 
+/* SVG-Icons in den Verwaltungs-Kacheln (Adminbereich) */
+.dashboard-action-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 .dashboard-action-card h3 {
     margin: 0 0 1px;
     font-size: 14px;
@@ -556,7 +567,7 @@ main.container {
    Sekundaer-Buttons im Projekt aussieht. */
 
 /* ============================================================
-   Lobby
+   06 · Lobby (lobby.html / host_lobby.php)
    ============================================================ */
 body.lobby-page { overflow: hidden; }
 
@@ -802,7 +813,7 @@ body.lobby-page { overflow: hidden; }
 .lobby-secondary-link:hover { color: #fff; }
 
 /* ============================================================
-   Quiz-Spielseite
+   07 · Quiz-Spielseite (game.php)
    ============================================================ */
 body.quiz-play-page {
     min-height: 100vh;
@@ -813,7 +824,7 @@ body.quiz-play-page {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
     color: #fff;
     margin: 0;
-    padding: 0;
+    padding: 0 0 68px;           /* Platz für die fest fixierte Fußzeile (.footbar) */
 }
 
 .play-layout {
@@ -1145,7 +1156,7 @@ body.quiz-play-page {
 }
 
 /* ============================================================
-   Statistik-Seite
+   08 · Statistik-Seite (statistic.php) – inkl. Sekundaer-Buttons
    ============================================================ */
 .container {
     max-width: 860px;
@@ -1237,7 +1248,7 @@ h1 + p {
 }
 
 /* ============================================================
-   Code-Blöcke in Fragen
+   09 · Code-Blöcke in Fragen
    ============================================================ */
 .question-card pre,
 .question-text pre {
@@ -1263,12 +1274,10 @@ h1 + p {
 
 .question-card code,
 .question-text code {
-    background: rgba(0,0,0,0.30);
-    padding: 2px 7px;
-    border-radius: 5px;
-    font-size: 16px;
     color: #93c5fd;
     font-family: 'Courier New', Courier, monospace;
+    font-size: inherit;
+    font-weight: 500;
 }
 
 /* Fragetext: gleiche Optik wie zuvor das <h2>, aber als Block-Container,
@@ -1276,29 +1285,46 @@ h1 + p {
 .question-title {
     text-align: center;
     font-size: 28px;
-    margin: 12px 0 0;
+    margin: 12px auto 0;
     color: #fff;
     font-weight: 700;
     line-height: 1.3;
+    width: fit-content;
+    max-width: 100%;
 }
 
-/* Code-Blöcke immer linksbündig, auch innerhalb des zentrierten Fragetexts */
-.code-block { text-align: left; }
+/* Code-Blöcke: nur so breit wie der Inhalt (nicht volle Kartenbreite),
+   zentriert, linksbündiger Text und kompakter als der Fragetext. */
+.code-block {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    margin: 10px auto;
+    text-align: left;
+}
+/* Im Fragetext: Code-Block exakt so breit wie der Fragetext-Container */
+.question-title .code-block {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+}
+.question-card pre.code-block {
+    padding: 10px 14px;
+}
+.question-card pre.code-block code,
 .question-title .code-block code,
 .reveal-exp-text .code-block code {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 400;
+    line-height: 1.5;
 }
 
 /* Inline-Code (`...`) einheitlich an jeder Stelle (Frage, Antwort, Erklärung) */
 .inline-code {
-    background: rgba(0, 0, 0, 0.30);
-    padding: 2px 7px;
-    border-radius: 5px;
     color: #93c5fd;
     font-family: 'Courier New', Courier, monospace;
     font-size: 0.92em;
-    font-weight: 400;
+    font-weight: 500;
 }
 
 /* highlight.js bringt einen eigenen Hintergrund mit – wir nutzen den der
@@ -1309,7 +1335,7 @@ h1 + p {
 }
 
 /* ============================================================
-   Host-Layout (host_quiz.php)
+   10 · Host-Layout (host_quiz.php)
    ============================================================ */
 .host-layout {
     max-width: 680px;
@@ -1343,7 +1369,7 @@ h1 + p {
 }
 
 /* ============================================================
-   Fehlermeldungen / Alerts
+   11 · Fehlermeldungen / Alerts (+ Sekundaer-Button)
    ============================================================ */
 .alert-error {
     background: rgba(239, 68, 68, 0.15);
@@ -1398,7 +1424,7 @@ h1 + p {
 }
 
 /* ============================================================
-   Quiz-Code-Seite (quiz_code.php – Legacy)
+   12 · Quiz-Code-Seite (quiz_code.php – Legacy)
    ============================================================ */
 .quiz-code-layout {
     max-width: 480px;
@@ -1459,7 +1485,7 @@ h1 + p {
 .quiz-code-back a:hover { color: #fff; }
 
 /* ============================================================
-   Erklärungsbereich (game_test.php / game.php)
+   13 · Erklärungsbereich (Auflösung in game.php)
    ============================================================ */
 .explanation-card {
     margin-top: 28px;
@@ -1497,7 +1523,7 @@ h1 + p {
 .wrong-text    { color: #fca5a5; font-weight: 600; }
 
 /* ============================================================
-   Ranking-Tabelle (game.php)
+   14 · Ranking-Tabelle (game.php)
    ============================================================ */
 .ranking-table {
     width: 100%;
@@ -1549,7 +1575,7 @@ h1 + p {
 }
 
 /* ============================================================
-   Host-Lobby: Spieler-Liste
+   15 · Host-Lobby: Spieler-Liste
    ============================================================ */
 .player-list {
     list-style: none;
@@ -1561,6 +1587,9 @@ h1 + p {
 }
 
 .player-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     padding: 11px 16px;
     background: rgba(255, 255, 255, 0.07);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1588,7 +1617,7 @@ h1 + p {
 }
 
 /* ============================================================
-   Fragen-Verwaltung (manage_questions)
+   16 · Fragen-Verwaltung – linke Seite (manage_questions)
    ============================================================ */
 
 .manage-questions-page .play-layout {
@@ -1619,7 +1648,7 @@ h1 + p {
     justify-content: space-between;
     gap: 16px;
     flex-wrap: wrap;
-    margin-bottom: 20px;
+    margin-bottom: 28px;
 }
 
 .mq-topbar-info {
@@ -1641,8 +1670,20 @@ h1 + p {
     gap: 10px;
 }
 
+/* Gestapelt: Zurück-Button oben, Aktions-Buttons rechtsbündig darunter */
+.mq-topbar-actions-stacked {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 14px;
+}
+
+.mq-action-row {
+    display: flex;
+    gap: 14px;
+}
+
 .manage-questions-page .btn-icon.mq-action-btn {
-    padding: 9px 16px;
+    padding: 10px 18px;
     font-size: 13px;
 }
 
@@ -1665,7 +1706,7 @@ h1 + p {
     justify-content: space-between;
     gap: 20px;
     flex-wrap: wrap;
-    margin: 4px 0 4px;
+    margin: 18px 0 10px;
 }
 
 .mq-toolbar .mq-filter {
@@ -1750,7 +1791,8 @@ h1 + p {
     gap: 4px;
 }
 
-.manage-questions-page .btn-icon.mq-pager-btn {
+.manage-questions-page .btn-icon.mq-pager-btn,
+.manage-users-layout .btn-icon.mq-pager-btn {
     min-width: 32px;
     padding: 6px 10px;
     text-align: center;
@@ -1759,17 +1801,20 @@ h1 + p {
     justify-content: center;
 }
 
-.manage-questions-page .btn-icon.mq-pager-btn:disabled {
+.manage-questions-page .btn-icon.mq-pager-btn:disabled,
+.manage-users-layout .btn-icon.mq-pager-btn:disabled {
     opacity: 0.4;
     cursor: default;
 }
 
-.manage-questions-page .btn-icon.mq-pager-btn:disabled:hover {
+.manage-questions-page .btn-icon.mq-pager-btn:disabled:hover,
+.manage-users-layout .btn-icon.mq-pager-btn:disabled:hover {
     background: rgba(255, 255, 255, 0.07);
     color: var(--text-secondary);
 }
 
-.manage-questions-page .btn-icon.mq-page-num.is-active {
+.manage-questions-page .btn-icon.mq-page-num.is-active,
+.manage-users-layout .btn-icon.mq-page-num.is-active {
     background: rgba(59, 130, 246, 0.18);
     color: #93c5fd;
     border-color: rgba(59, 130, 246, 0.4);
@@ -2042,18 +2087,18 @@ h1 + p {
 }
 
 /* ============================================================
-   Benutzerverwaltung (manage_users)
+   17 · Benutzerverwaltung (manage_users) – inkl. Modal-Basis
    ============================================================ */
 
 .manage-users-layout {
-    max-width: 1400px;
-    grid-template-columns: 320px 1fr;
+    max-width: 1040px;
+    grid-template-columns: 1fr;
 }
 
 .manage-users-layout .user-list-header,
 .manage-users-layout .user-row {
     display: grid;
-    grid-template-columns: 1fr 130px 100px 230px;
+    grid-template-columns: 1fr 130px 230px;
     align-items: center;
     gap: 0;
 }
@@ -2192,17 +2237,30 @@ h1 + p {
 
 .manage-users-layout .user-list-toolbar {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
     margin-top: 16px;
 }
 
+.manage-users-layout .user-count {
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
 .manage-users-layout .btn-icon.btn-create {
-    color: #86efac;
-    border-color: rgba(34, 197, 94, 0.3);
+    color: #fff;
+    background: linear-gradient(135deg, #2f66a3, #1e4d80);
+    border: 1px solid rgba(74, 133, 199, 0.45);
+    box-shadow: 0 4px 14px rgba(30, 77, 128, 0.45);
+    padding: 9px 16px;
+    font-size: 13px;
 }
 
 .manage-users-layout .btn-icon.btn-create:hover {
-    background: rgba(34, 197, 94, 0.12);
+    background: linear-gradient(135deg, #3d7cbd, #2f66a3);
+    color: #fff;
 }
 
 .modal .btn-icon.btn-create {
@@ -2384,7 +2442,7 @@ h1 + p {
 }
 
 /* ============================================================
-   Fragen-Verwaltung Rechte Seite (manage_questions)
+   18 · Fragen-Verwaltung – rechte Seite & Modals (manage_questions)
    ============================================================ */
 
 .manage-questions-page .question-list-header,
@@ -2554,8 +2612,8 @@ h1 + p {
 
 .manage-questions-page .col-qaktion {
     display: flex;
-    justify-content: flex-end;
-    gap: 5px;
+    justify-content: center;
+    gap: 6px;
 }
 
 .manage-questions-page .badge {
@@ -2711,7 +2769,7 @@ h1 + p {
 }
 
 /* ============================================================
-   Media Queries
+   19 · Media Queries (responsives Verhalten)
    ============================================================ */
 @media (max-width: 1024px) {
     .play-layout { flex-direction: column; }
@@ -2779,24 +2837,7 @@ h1 + p {
 }
 
 /* ============================================================
-   Medienverwaltung – zwei mittige Boxen
-   Betrifft nur manage_media.php mit body.media-page
-   ============================================================ */
-
-.media-page .play-layout {
-    justify-content: center;
-    max-width: 1400px;
-    margin: 0 auto;
-    gap: 24px;
-}
-
-.media-page .ranking-panel {
-    flex: 0 0 48%;
-    max-width: 48%;
-}
-
-/* ============================================================
-   Ausgelagerte Inline-Styles (1:1 aus den PHP-Dateien extrahiert)
+   20 · Ausgelagerte Inline-Styles (1:1 aus den PHP-Dateien extrahiert)
    Hier wurden ausschliesslich vorhandene Inline-/<style>-/JS-Stile
    gebuendelt; Werte und Wirkung bleiben unveraendert.
    ============================================================ */
@@ -2905,3 +2946,488 @@ h1 + p {
 
 /* --- manage_users.php: leere Benutzerliste --- */
 .dashboard-action-card.dashboard-action-card-empty { opacity: 0.5; cursor: default; }
+
+/* ============================================================
+   21 · Archiv (archive.php) – aufklappbare 3 Ebenen
+   ============================================================ */
+.archive-empty { color: var(--text-muted); margin: 8px 0; }
+
+/* Kopfzeile: blaue Eyebrow-Überschrift links, Zurück-Button rechts */
+.archive-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.archive-head .eyebrow { margin-bottom: 0; }
+.archive-hint  { color: var(--text-muted); font-size: 12px; margin-top: 12px; font-style: italic; }
+.archive-table { width: 100%; }
+.archive-pool-row > td { font-weight: 600; }
+.archive-detail-row > td {
+    background: rgba(0, 0, 0, 0.18);
+    padding: 4px 12px 6px 18px;
+}
+.archive-subtable {
+    width: 100%;
+    margin: 8px 0 12px;
+}
+.archive-subtable th { font-size: 12px; }
+.archive-game-row > td { font-weight: 500; }
+
+button.archive-toggle {
+    cursor: pointer;
+    border: none;
+    font: inherit;
+    white-space: nowrap;
+}
+
+/* Breiterer Rahmen nur für die Archiv-Seite (global .container bleibt 860px) */
+.container.archive-page {
+    max-width: 1400px;
+}
+
+/* Inhalte wie Datum, Modus, Aktion nicht umbrechen lassen */
+.archive-table th,
+.archive-table td,
+.archive-subtable th,
+.archive-subtable td {
+    white-space: nowrap;
+}
+
+/* Zelle, die eine Unter-Tabelle enthält, darf weiterhin volle Breite nutzen */
+.archive-detail-row > td {
+    white-space: normal;
+}
+
+/* Einklappbarer Filter – schlanke Leiste statt dauerhaft offenem Formular */
+.archive-filter { gap: 0; }
+
+.archive-filter-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 0;
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.archive-filter-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.archive-filter-badge {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    color: var(--primary-light);
+    background: rgba(47, 102, 163, 0.30);
+    border: 1px solid rgba(74, 133, 199, 0.45);
+    border-radius: 999px;
+    padding: 2px 10px;
+}
+
+.archive-filter-chevron {
+    flex-shrink: 0;
+    font-size: 14px;
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+}
+
+.archive-filter.is-open .archive-filter-chevron { transform: rotate(180deg); }
+
+.archive-filter-body {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.archive-filter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.archive-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px 18px;
+}
+
+/* Kompaktere, modernere Felder im Filter */
+.archive-filter-form .form-group { gap: 6px; }
+
+.archive-filter-form .form-group label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+}
+
+.archive-filter-form .form-group input,
+.archive-filter-form .form-group select {
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: var(--radius-sm);
+}
+
+/* Kalender-Icon der Datumsfelder im Dark-Theme sichtbar machen */
+.archive-filter-form input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.55;
+    cursor: pointer;
+}
+
+/* Aktionen rechtsbündig; Zurücksetzen als dezenter Text-Link statt Button */
+.archive-filter-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 18px;
+}
+
+.archive-filter-actions .btn {
+    width: auto;
+    margin-top: 0;
+    padding: 10px 22px;
+}
+
+.archive-filter-actions .back-button {
+    min-width: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.archive-filter-actions .back-button:hover {
+    background: none;
+    color: #fff;
+}
+
+/* Gewinner-Zeile (Platz 1) in der Teilnehmer-Tabelle dezent hervorheben */
+.archive-winner-row > td { background: rgba(245, 158, 11, 0.10); }
+.archive-winner-row > td:first-child { color: var(--accent); font-weight: 700; }
+
+/* Pagination-Buttons im Archiv/Lernfortschritt (gleiche Optik wie in der Verwaltung) */
+.archive-page .btn-icon {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.80);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.archive-page .btn-icon:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+.archive-page .btn-icon.mq-pager-btn {
+    min-width: 32px;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.archive-page .btn-icon.mq-pager-btn:disabled { opacity: 0.4; cursor: default; }
+.archive-page .btn-icon.mq-pager-btn:disabled:hover { background: rgba(255, 255, 255, 0.07); color: rgba(255, 255, 255, 0.80); }
+
+.archive-page .btn-icon.mq-page-num.is-active {
+    background: rgba(59, 130, 246, 0.18);
+    color: #93c5fd;
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+/* Zahlen-Spalten in allen Archiv-Tabellen zentriert (Kopf + Werte),
+   auch die sonst rechtsbündigen score-cells – aber nur hier im Archiv. */
+.archive-table .cell-num,
+.archive-table .score-cell,
+.archive-table .cell-action,
+.archive-subtable .cell-num,
+.archive-subtable .score-cell,
+.archive-subtable .cell-action { text-align: center; }
+
+/* Host-Spalte: Platz reservieren und lange Hostnamen umbrechen statt quetschen */
+.archive-subtable .cell-host {
+    min-width: 150px;
+    white-space: normal;
+}
+
+/* Schwache Quoten (< 50 %) hervorheben – fetter und minimal größer,
+   Farbe bleibt wie der Rest (Blauton aus .score-cell). */
+.archive-table .pct-low,
+.archive-subtable .pct-low {
+    font-weight: 800;
+    font-size: 16px;
+}
+
+/* 0 % ist kritisch: zusätzlich zur Größe/Breite in Rot darstellen */
+.archive-table .pct-zero,
+.archive-subtable .pct-zero {
+    color: #fca5a5;
+}
+
+/* ============================================================
+   22 · Avatare – Auswahl (Picker) + Anzeige (Liste / Ranking)
+   ============================================================ */
+
+/* ── Auswahl: Picker in join_quiz.php & host_quiz.php ── */
+.avatar-required {
+    color: var(--primary-light);
+}
+
+.avatar-hint {
+    margin: 0;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.avatar-picker {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: 10px;
+    max-height: 260px;
+    overflow-y: auto;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: var(--radius-md);
+}
+
+.avatar-option {
+    cursor: pointer;
+    display: block;
+    margin: 0;
+}
+
+/* Radio-Button optisch ausblenden, aber für Screenreader/Validierung erhalten */
+.avatar-option input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.avatar-thumb {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 2px solid transparent;
+    background: rgba(255, 255, 255, 0.07);
+    transition: border-color 0.15s, transform 0.15s;
+    display: block;
+}
+
+.avatar-option:hover .avatar-thumb {
+    border-color: rgba(255, 255, 255, 0.35);
+    transform: scale(1.05);
+}
+
+.avatar-option input:checked + .avatar-thumb {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(47, 102, 163, 0.35);
+}
+
+.avatar-option input:focus-visible + .avatar-thumb {
+    border-color: var(--primary-light);
+}
+
+/* ── Anzeige: Avatar-Bild in der Teilnehmerliste (host_lobby.php) ── */
+.player-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    flex-shrink: 0;
+}
+
+/* ── Anzeige: Avatar im Live-Ranking (game.php) ── */
+.ranking-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ranking-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   23 · Profil & Konto (profile.php) + Topbar-Tooltip
+   ============================================================ */
+
+/* Benutzername in der Topbar als anklickbarer Link mit Tooltip */
+.account-link {
+    position: relative;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.account-link:hover { color: #fff; }
+
+.account-link[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: rgba(8, 12, 30, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border-strong);
+    border-radius: var(--radius-sm);
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    z-index: 1100;
+    pointer-events: none;
+}
+
+/* Read-only-Felder (Benutzername / E-Mail) ausgegraut darstellen */
+.profile-card input:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.profile-hint {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* Passwort-Bereich (einklappbar) */
+.profile-pw {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.profile-pw-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 0;
+    background: none;
+    border: none;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    font-size: 15px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.profile-pw-chevron {
+    flex-shrink: 0;
+    font-size: 14px;
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+}
+
+.profile-pw.is-open .profile-pw-chevron { transform: rotate(180deg); }
+
+.profile-pw-body { margin-top: 16px; }
+
+/* ============================================================
+   24 · Footbar (gemeinsame Fußzeile) + Credits (credits.php)
+   ============================================================ */
+.footbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 90;                 /* über dem Inhalt, aber unter Topbar (1000) und Modals (100) */
+    width: 100%;
+    background: #000000;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 14px 28px;
+    box-sizing: border-box;
+}
+
+.footbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.footbar-credit {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.footbar-button {
+    padding: 7px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.30);
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.footbar-button:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.55);
+}
+
+/* Credits-Seite */
+.credits-text {
+    margin: 0 0 22px;
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.credits-people h3 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.credits-people ul {
+    margin: 0;
+    padding-left: 18px;
+    color: rgba(255, 255, 255, 0.82);
+    line-height: 1.9;
+    font-size: 15px;
+}

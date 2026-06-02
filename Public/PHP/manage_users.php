@@ -166,24 +166,15 @@ $roles = $rolesStmt->fetchAll();
 
     <main class="auth-layout dashboard-auth-layout manage-users-layout">
 
-        <section class="auth-info">
-            <h1>Benutzer.</h1>
-            <p>
-                Verwalte Benutzerkonten, weise Rollen zu und behalte den Überblick
-                über alle registrierten Benutzer im System.
-            </p>
-
-            <div class="info-list">
-                <div>Zugriff nur für Administratoren</div>
-                <div><?php echo count($users); ?> Benutzer registriert</div>
-            </div>
-        </section>
-
         <section class="dashboard-panel">
-            <div class="auth-header">
+            <div class="archive-head">
                 <span class="eyebrow">Benutzerverwaltung</span>
+                <a href="admin_area.php" class="back-button">← Zurück zum Adminbereich</a>
+            </div>
+
+            <div class="auth-header">
                 <h2>Alle Benutzer</h2>
-                <p>Status ändern oder Benutzerdaten bearbeiten.</p>
+                <p>Verwalte Benutzerkonten, weise Rollen zu und behalte den Überblick über alle registrierten Benutzer im System.</p>
             </div>
 
             <?php if ($message): ?>
@@ -193,6 +184,7 @@ $roles = $rolesStmt->fetchAll();
             <?php endif; ?>
 
             <div class="user-list-toolbar">
+                <span class="user-count"><?php echo count($users); ?> Benutzer registriert</span>
                 <button type="button" class="btn-icon btn-create" onclick="openCreateModal()">
                     + Benutzer anlegen
                 </button>
@@ -201,7 +193,6 @@ $roles = $rolesStmt->fetchAll();
             <div class="user-list-header">
                 <span class="col-benutzer">Benutzer</span>
                 <span class="col-rolle">Rolle</span>
-                <span class="col-status">Status</span>
                 <span class="col-aktion">Aktion</span>
             </div>
 
@@ -225,12 +216,6 @@ $roles = $rolesStmt->fetchAll();
                             <div class="col-rolle">
                                 <span class="badge badge-role">
                                     <?php echo htmlspecialchars($user['role_name'] ?? 'Unbekannt'); ?>
-                                </span>
-                            </div>
-
-                            <div class="col-status">
-                                <span class="badge <?php echo $user['is_active'] ? 'badge-active' : 'badge-inactive'; ?>">
-                                    <?php echo $user['is_active'] ? 'Aktiv' : 'Inaktiv'; ?>
                                 </span>
                             </div>
 
@@ -263,9 +248,29 @@ $roles = $rolesStmt->fetchAll();
                 <?php endif; ?>
             </div>
 
-            <div class="dashboard-footer-links">
-                <a href="admin_area.php">← Zurück zum Adminbereich</a>
-            </div>
+            <?php if (!empty($users)): ?>
+                <div class="mq-pagination" id="muPagination">
+                    <div class="mq-pagination-info">
+                        <span id="muRangeInfo"></span>
+                    </div>
+                    <div class="mq-pagination-controls">
+                        <label class="mq-perpage">
+                            Pro Seite
+                            <select id="muPerPage">
+                                <option value="10" selected>10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
+                        </label>
+                        <div class="mq-pager">
+                            <button type="button" class="btn-icon mq-pager-btn" id="muPrev" aria-label="Vorherige Seite">‹</button>
+                            <span class="mq-pager-pages" id="muPages"></span>
+                            <button type="button" class="btn-icon mq-pager-btn" id="muNext" aria-label="Nächste Seite">›</button>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
         </section>
 
     </main>
@@ -346,6 +351,83 @@ $roles = $rolesStmt->fetchAll();
         document.getElementById('createModal').addEventListener('click', function(e) {
             if (e.target === this) closeCreateModal();
         });
+
+        // Pagination der Benutzerliste (10 / 25 / 50 pro Seite)
+        (function () {
+            const rows = Array.from(document.querySelectorAll('.user-list .user-row'));
+            const bar  = document.getElementById('muPagination');
+            if (!rows.length || !bar) { if (bar) bar.style.display = 'none'; return; }
+
+            const perPageSel = document.getElementById('muPerPage');
+            const rangeInfo  = document.getElementById('muRangeInfo');
+            const pagesBox   = document.getElementById('muPages');
+            const prevBtn    = document.getElementById('muPrev');
+            const nextBtn    = document.getElementById('muNext');
+
+            let perPage = parseInt(perPageSel.value, 10) || 10;
+            let current = 1;
+
+            function totalPages() {
+                return Math.max(1, Math.ceil(rows.length / perPage));
+            }
+
+            function pageList(total, cur) {
+                const out = [];
+                for (let i = 1; i <= total; i++) {
+                    if (i === 1 || i === total || (i >= cur - 1 && i <= cur + 1)) {
+                        out.push(i);
+                    } else if (out[out.length - 1] !== '…') {
+                        out.push('…');
+                    }
+                }
+                return out;
+            }
+
+            function render() {
+                const total = totalPages();
+                if (current > total) current = total;
+
+                const start = (current - 1) * perPage;
+                const end   = start + perPage;
+                rows.forEach((row, i) => {
+                    row.style.display = (i >= start && i < end) ? '' : 'none';
+                });
+
+                const from = rows.length ? start + 1 : 0;
+                const to   = Math.min(end, rows.length);
+                rangeInfo.textContent = from + '–' + to + ' von ' + rows.length;
+
+                pagesBox.innerHTML = '';
+                pageList(total, current).forEach(p => {
+                    if (p === '…') {
+                        const span = document.createElement('span');
+                        span.className = 'mq-pager-ellipsis';
+                        span.textContent = '…';
+                        pagesBox.appendChild(span);
+                    } else {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn-icon mq-pager-btn mq-page-num' + (p === current ? ' is-active' : '');
+                        btn.textContent = p;
+                        btn.addEventListener('click', () => { current = p; render(); });
+                        pagesBox.appendChild(btn);
+                    }
+                });
+
+                prevBtn.disabled = current <= 1;
+                nextBtn.disabled = current >= total;
+            }
+
+            prevBtn.addEventListener('click', () => { if (current > 1) { current--; render(); } });
+            nextBtn.addEventListener('click', () => { if (current < totalPages()) { current++; render(); } });
+            perPageSel.addEventListener('change', () => {
+                perPage = parseInt(perPageSel.value, 10) || 10;
+                current = 1;
+                render();
+            });
+
+            render();
+        })();
     </script>
 
     <!-- Create-Modal -->
@@ -391,6 +473,8 @@ $roles = $rolesStmt->fetchAll();
             </form>
         </div>
     </div>
+
+    <?php include_once 'footbar.php'; ?>
 
 </body>
 </html>
