@@ -208,7 +208,7 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
                         if (p.avatar) {
                             const img = document.createElement('img');
                             img.className = 'player-avatar';
-                            img.src = '../../Uploads/Avatare/' + encodeURIComponent(p.avatar);
+                            img.src = '../Uploads/Avatare/' + encodeURIComponent(p.avatar);
                             img.alt = 'Avatar';
                             li.appendChild(img);
                         }
