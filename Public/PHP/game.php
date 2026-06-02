@@ -471,11 +471,20 @@ if (empty($rankingPlayers)) {
 
         // 3. PERMANENTES POLLING FÜR SYNCHRONISATION
         <?php if ($waitingForReveal || ($showExplanation && !$isHost) || ($isHost && $hostPlays === 'no' && !$showExplanation)): ?>
-            const currentIdx = <?php echo intval($currentIndex); ?>;
             const checkInterval = setInterval(function() {
                 fetch('check_next_question.php')
                     .then(response => response.json())
                     .then(data => {
+                        // Prüfung auf Kick
+                        if (data.kicked === true || data.action === 'kicked') {
+    clearInterval(checkInterval);
+    alert("Du wurdest aus dem Spiel entfernt.");
+    // Wir senden den Spieler zu einem Skript, das die Session löscht
+    window.location.href = 'logout.php'; 
+    return;
+}
+
+                        // BESTEHENDER CODE:
                         if (data.success) {
                             if (data.action === 'reload') {
                                 clearInterval(checkInterval);
