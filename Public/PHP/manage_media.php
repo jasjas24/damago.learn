@@ -25,66 +25,71 @@ $successMessage = '';
 $errorMessage = '';
 
 // Ordner prüfen / erstellen
-if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0755, true);
-}
+if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
 
-// Bild hochladen
+// POST-Aktionen
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_FILES['image']) || $_FILES['image']['error'] === UPLOAD_ERR_NO_FILE) {
-        $errorMessage = 'Bitte wähle eine Bilddatei aus.';
-    } elseif ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
-        $errorMessage = 'Beim Hochladen ist ein Fehler aufgetreten.';
-    } else {
-        $file = $_FILES['image'];
+    $action = $_POST['action'] ?? '';
 
-        if ($file['size'] > $maxFileSize) {
-            $errorMessage = 'Die Datei ist zu groß. Maximal erlaubt sind 20 MB.';
+    // Löschen
+    if ($action === 'delete_media') {
+        $mediaId = (int)($_POST['media_id'] ?? 0);
+        if ($mediaId > 0) {
+            $stmt = $pdo->prepare("SELECT file_name FROM media_files WHERE id = ?");
+            $stmt->execute([$mediaId]);
+            $file = $stmt->fetch();
+            if ($file) {
+                $filePath = $uploadDir . $file['file_name'];
+                if (is_file($filePath)) unlink($filePath);
+                $deletedBy = $_SESSION['user_id'] ?? null;
+                $stmtUpd = $pdo->prepare("UPDATE media_files SET deleted_at = NOW(), deleted_by = ? WHERE id = ?");
+                $stmtUpd->execute([$deletedBy, $mediaId]);
+                $successMessage = 'Bild wurde entfernt und als gelöscht markiert.';
+            }
+        }
+    }
+
+    // Upload
+    elseif ($action === 'upload') {
+        if (!isset($_FILES['image']) || $_FILES['image']['error'] === UPLOAD_ERR_NO_FILE) {
+            $errorMessage = 'Bitte wähle eine Bilddatei aus.';
+        } elseif ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+            $errorMessage = 'Fehler beim Hochladen.';
         } else {
-            $originalName = $file['name'];
-            $tmpPath = $file['tmp_name'];
-            $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-
-            if (!in_array($extension, $allowedExtensions, true)) {
-                $errorMessage = 'Dieser Dateityp ist nicht erlaubt. Erlaubt sind jpg, jpeg, png und webp.';
-            } else {
-                $finfo = new finfo(FILEINFO_MIME_TYPE);
-                $mimeType = $finfo->file($tmpPath);
-
-                if (!in_array($mimeType, $allowedMimeTypes, true)) {
-                    $errorMessage = 'Die Datei wurde nicht als gültiges Bild erkannt.';
-                } else {
-                    $newFileName = bin2hex(random_bytes(16)) . '.' . $extension;
-                    $targetPath = $uploadDir . $newFileName;
-
-                    if (move_uploaded_file($tmpPath, $targetPath)) {
-                        // DB-Eintrag
-                        $userId = $_SESSION['user_id'] ?? null; // int für created_by
-                        if (!$userId) {
-                            $errorMessage = 'Fehler: User nicht angemeldet.';
-                        } else {
-                            $stmt = $pdo->prepare("
-                                INSERT INTO media_files
-                                (file_name, original_name, mime_type, file_size, created_by)
-                                VALUES (:file_name, :original_name, :mime_type, :file_size, :created_by)
-                            ");
-                            $success = $stmt->execute([
-                                ':file_name' => $newFileName,
-                                ':original_name' => $originalName,
-                                ':mime_type' => $mimeType,
-                                ':file_size' => $file['size'],
-                                ':created_by' => $userId
-                            ]);
-
-                            if ($success) {
-                                $successMessage = 'Das Bild wurde erfolgreich hochgeladen und in der DB gespeichert.';
-                            } else {
-                                $error = $stmt->errorInfo();
-                                $errorMessage = 'Fehler beim Speichern in der DB: ' . $error[2];
+            $file = $_FILES['image'];
+            if ($file['size'] > $maxFileSize) $errorMessage = 'Maximal 20 MB erlaubt.';
+            else {
+                $originalName = $file['name'];
+                $tmpPath = $file['tmp_name'];
+                $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+                if (!in_array($extension, $allowedExtensions, true)) $errorMessage = 'Dateityp nicht erlaubt.';
+                else {
+                    $finfo = new finfo(FILEINFO_MIME_TYPE);
+                    $mimeType = $finfo->file($tmpPath);
+                    if (!in_array($mimeType, $allowedMimeTypes, true)) $errorMessage = 'Datei ungültig.';
+                    else {
+                        $newFileName = bin2hex(random_bytes(16)) . '.' . $extension;
+                        $targetPath = $uploadDir . $newFileName;
+                        if (move_uploaded_file($tmpPath, $targetPath)) {
+                            $userId = $_SESSION['user_id'] ?? null;
+                            if (!$userId) $errorMessage = 'User nicht angemeldet.';
+                            else {
+                                $stmt = $pdo->prepare("
+                                    INSERT INTO media_files
+                                    (file_name, original_name, mime_type, file_size, created_by)
+                                    VALUES (:file_name, :original_name, :mime_type, :file_size, :created_by)
+                                ");
+                                $success = $stmt->execute([
+                                    ':file_name' => $newFileName,
+                                    ':original_name' => $originalName,
+                                    ':mime_type' => $mimeType,
+                                    ':file_size' => $file['size'],
+                                    ':created_by' => $userId
+                                ]);
+                                if ($success) $successMessage = 'Bild erfolgreich hochgeladen.';
+                                else $errorMessage = 'Fehler beim Speichern in DB.';
                             }
-                        }
-                    } else {
-                        $errorMessage = 'Das Bild konnte nicht gespeichert werden.';
+                        } else $errorMessage = 'Datei konnte nicht gespeichert werden.';
                     }
                 }
             }
@@ -92,128 +97,85 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Bilder aus DB laden
-$stmt = $pdo->query("SELECT * FROM media_files ORDER BY created_at DESC");
+// Bilder laden (nur nicht-gelöschte)
+$stmt = $pdo->query("SELECT * FROM media_files WHERE deleted_at IS NULL ORDER BY created_at DESC");
 $images = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medien verwalten | damago Quizsystem</title>
-    <link rel="stylesheet" href="../CSS/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medien verwalten | damago Quizsystem</title>
+<link rel="stylesheet" href="../CSS/style.css">
 </head>
-<body class="auth-page">
+<body class="manage-questions-page">
 
-    <div class="page-orbs">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
+<?php include_once 'topbar.php'; ?>
+
+<main class="play-layout">
+<section class="quiz-main mq-panel">
+
+<div class="mq-topbar">
+    <div class="mq-topbar-info">
+        <span class="eyebrow">Medienverwaltung</span>
+        <h2>Hochgeladene Dateien</h2>
     </div>
+    <div class="mq-topbar-actions">
+        <a href="dashboard.php" class="back-button">← Zurück zum Dashboard</a>
+    </div>
+</div>
 
-    <?php include_once 'topbar.php'; ?>
+<?php if ($successMessage): ?><div class="import-message import-message-success"><?php echo e($successMessage); ?></div><?php endif; ?>
+<?php if ($errorMessage): ?><div class="import-message import-message-error"><?php echo e($errorMessage); ?></div><?php endif; ?>
 
-    <main class="auth-layout dashboard-auth-layout">
+<div class="mq-toolbar">
+    <form action="manage_media.php" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="upload">
+        <label>Neue Datei:</label>
+        <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" required>
+        <button type="submit" class="btn-icon btn-add">Hochladen</button>
+    </form>
+</div>
 
-        <section class="auth-info">
-            <h1>Medien verwalten</h1>
-            <p>
-                Lade Bilder für Fragen hoch und verwalte vorhandene Medien.
-                Erlaubt sind jpg, jpeg, png und webp bis maximal 20 MB.
-            </p>
-            <div class="info-list">
-                <div>Upload nur für Administratoren</div>
-                <div>Speicherort: /Public/Uploads/Questions/</div>
-                <div>Originaldateinamen werden nicht übernommen</div>
+<div class="question-list-header">
+    <span class="col-frage">Dateiname</span>
+    <span class="col-qaktion">Aktion</span>
+</div>
+
+<div class="question-list">
+<?php if(empty($images)): ?>
+    <div class="empty-list-hint">Keine Dateien vorhanden.</div>
+<?php else: ?>
+    <?php foreach($images as $img): ?>
+        <div class="question-row">
+            <div class="col-frage">
+                <div><?php echo e($img['original_name']); ?></div>
+                <div><?php echo e($img['mime_type']); ?> | <?php echo e(round($img['file_size']/1024,1)); ?> KB</div>
             </div>
-            <div class="dashboard-footer-links">
-                <a href="dashboard.php">← Zurück zum Dashboard</a>
-            </div>
-        </section>
-
-        <section class="dashboard-panel">
-
-            <div class="auth-header">
-                <span class="eyebrow">Bilder</span>
-                <h2>Bild hochladen</h2>
-                <p>Wähle ein Bild aus, das später einer Quizfrage zugeordnet werden kann.</p>
-            </div>
-
-            <?php if (!empty($successMessage)): ?>
-                <div class="statistics-card">
-                    <div class="stat-row">
-                        <div class="stat-title">Erfolg</div>
-                        <div class="stat-values">
-                            <span><?php echo e($successMessage); ?></span>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
-
-            <?php if (!empty($errorMessage)): ?>
-                <div class="statistics-card">
-                    <div class="stat-row">
-                        <div class="stat-title">Fehler</div>
-                        <div class="stat-values">
-                            <span><?php echo e($errorMessage); ?></span>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
-
-            <div class="statistics-card">
-                <form action="manage_media.php" method="POST" enctype="multipart/form-data">
-                    <div class="stat-row">
-                        <div class="stat-title">Neue Datei</div>
-                        <div class="stat-values">
-                            <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" required>
-                        </div>
-                    </div>
-                    <div class="dashboard-footer-links">
-                        <button type="submit" class="btn btn-primary">
-                            Bild hochladen
-                        </button>
-                    </div>
+            <div class="col-qaktion">
+                <form method="POST" action="manage_media.php" class="inline-form">
+                    <input type="hidden" name="action" value="delete_media">
+                    <input type="hidden" name="media_id" value="<?php echo $img['id']; ?>">
+                    <button type="submit" class="btn-icon btn-delete" title="Datei löschen">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                            <path d="M10 11v6M14 11v6"></path>
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                        </svg>
+                    </button>
                 </form>
+                <a href="<?php echo e($uploadUrl . $img['file_name']); ?>" target="_blank" class="btn-icon btn-view">Anzeigen</a>
             </div>
+        </div>
+    <?php endforeach; ?>
+<?php endif; ?>
+</div>
 
-            <div class="auth-header">
-                <h2>Hochgeladene Bilder</h2>
-                <p>Diese Bilder befinden sich aktuell im Medienordner.</p>
-            </div>
+</section>
+</main>
 
-            <?php if (empty($images)): ?>
-                <div class="statistics-card">
-                    <div class="stat-row">
-                        <div class="stat-title">Keine Bilder vorhanden</div>
-                        <div class="stat-values">
-                            <span>Es wurden bisher keine Bilder hochgeladen.</span>
-                        </div>
-                    </div>
-                </div>
-            <?php else: ?>
-                <div class="statistics-card">
-                    <?php foreach ($images as $image): ?>
-                        <div class="stat-row">
-                            <div class="stat-title">
-                                <img src="<?php echo e($uploadUrl . $image['file_name']); ?>" alt="Hochgeladenes Bild" class="media-thumb">
-                            </div>
-                            <div class="stat-values">
-                                <span><?php echo e($image['original_name']); ?></span>
-                                <span><?php echo e($image['mime_type']); ?></span>
-                                <span><a href="<?php echo e($uploadUrl . $image['file_name']); ?>" target="_blank">Anzeigen</a></span>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
-
-        </section>
-
-    </main>
-
-    <?php include_once 'footbar.php'; ?>
-
+<?php include_once 'footbar.php'; ?>
 </body>
 </html>
