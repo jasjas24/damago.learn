@@ -7,7 +7,7 @@ function e($value)
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
-// Rolle prüfen
+// Rollen prüfen
 $currentRole = $role ?? ($_SESSION['role'] ?? ($_SESSION['user']['role'] ?? 'guest'));
 if (!in_array($currentRole, ['admin', 'teacher'])) {
     header("Location: dashboard.php");
@@ -24,6 +24,7 @@ $allowedMimeTypes = ['image/jpeg','image/png','image/webp'];
 $successMessage = '';
 $errorMessage = '';
 
+// Ordner prüfen / erstellen
 if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0755, true);
 }
@@ -70,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $success = $stmt->execute([
                                 ':file_name' => $newFileName,
                                 ':original_name' => $originalName,
-                                ':mime_type' => $extension,
+                                ':mime_type' => $mimeType,
                                 ':file_size' => $file['size'],
                                 ':created_by' => $userId
                             ]);
@@ -170,13 +171,9 @@ $images = $stmt->fetchAll();
                         </div>
                     </div>
                     <div class="dashboard-footer-links">
-<<<<<<< HEAD
-                        <button type="submit" class="btn btn-primary">Bild hochladen</button>
-=======
                         <button type="submit" class="btn btn-primary">
                             Bild hochladen
                         </button>
->>>>>>> 5997dead2cec9af8d9bdbba6d37131c830cdd83d
                     </div>
                 </form>
             </div>
@@ -204,7 +201,7 @@ $images = $stmt->fetchAll();
                             </div>
                             <div class="stat-values">
                                 <span><?php echo e($image['original_name']); ?></span>
-                                <span><?php echo e(strtoupper($image['mime_type'])); ?></span>
+                                <span><?php echo e($image['mime_type']); ?></span>
                                 <span><a href="<?php echo e($uploadUrl . $image['file_name']); ?>" target="_blank">Anzeigen</a></span>
                             </div>
                         </div>
