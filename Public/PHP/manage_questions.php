@@ -16,8 +16,8 @@ function e($val) {
 }
 
 // Bild-Upload-Ordner (gleicher Pfad wie in manage_media.php)
-$imageUploadDir    = __DIR__ . '/../uploads/questions/';
-$imageUploadUrl    = '../uploads/questions/';
+$imageUploadDir    = __DIR__ . '/../Uploads/Questions/';
+$imageUploadUrl    = '../Uploads/Questions/';
 $imageExtensions   = ['jpg', 'jpeg', 'png', 'webp'];
 
 // Verfügbare, hochgeladene Bilder einlesen (Dateien auf der Platte)
@@ -120,9 +120,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
         $correctAnswers = $_POST['correct_answers'] ?? [];
 
+        // Nur als richtig zählen, was auch tatsächlich einen Antworttext hat
+        $validCorrect = array_filter($correctAnswers, function ($letter) use ($answers) {
+            return isset($answers[$letter]) && $answers[$letter]['text'] !== '';
+        });
+        $hasCorrect = count($validCorrect) >= 1;
+
         $imageId = resolveQuestionImageId($_POST['image_file'] ?? '', $pdo, $imageUploadDir, $imageExtensions, $currentUserId);
 
-        if ($questionId > 0 && $questionText !== '' && $poolId > 0) {
+        if ($questionId > 0 && $questionText !== '' && $poolId > 0 && $hasCorrect) {
             $stmtQ = $pdo->prepare(
                 "UPDATE questions SET question_pool_id = ?, question_text = ?, image_id = ?, explanation = ?,
                  is_active = ?, updated_by = ?, updated_at = NOW() WHERE id = ?"
@@ -151,7 +157,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message     = 'Frage erfolgreich aktualisiert.';
             $messageType = 'success';
         } else {
-            $message     = 'Pflichtfelder fehlen (Pool, Fragetext).';
+            $message     = ($questionId > 0 && $questionText !== '' && $poolId > 0 && !$hasCorrect)
+                ? 'Bitte mindestens eine richtige Antwort markieren.'
+                : 'Pflichtfelder fehlen (Pool, Fragetext).';
             $messageType = 'error';
         }
     }
@@ -173,9 +181,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $correctAnswers = $_POST['correct_answers'] ?? [];
 
         $hasAnswer = !empty(array_filter(array_column($answers, 'text')));
+
+        // Nur als richtig zählen, was auch tatsächlich einen Antworttext hat
+        $validCorrect = array_filter($correctAnswers, function ($letter) use ($answers) {
+            return isset($answers[$letter]) && $answers[$letter]['text'] !== '';
+        });
+        $hasCorrect = count($validCorrect) >= 1;
+
         $imageId   = resolveQuestionImageId($_POST['image_file'] ?? '', $pdo, $imageUploadDir, $imageExtensions, $currentUserId);
 
-        if ($poolId > 0 && $questionText !== '' && $hasAnswer) {
+        if ($poolId > 0 && $questionText !== '' && $hasAnswer && $hasCorrect) {
             $stmtQ = $pdo->prepare(
                 "INSERT INTO questions (question_pool_id, question_text, image_id, explanation, created_by, is_active)
                  VALUES (?, ?, ?, ?, ?, ?)"
@@ -202,7 +217,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message     = 'Frage erfolgreich erstellt.';
             $messageType = 'success';
         } else {
-            $message     = 'Pflichtfelder fehlen (Pool, Fragetext, mindestens eine Antwort).';
+            $message     = ($poolId > 0 && $questionText !== '' && $hasAnswer && !$hasCorrect)
+                ? 'Bitte mindestens eine richtige Antwort markieren.'
+                : 'Pflichtfelder fehlen (Pool, Fragetext, mindestens eine Antwort).';
             $messageType = 'error';
         }
     }
@@ -719,7 +736,7 @@ if (!empty($questions)) {
                 <div class="modal-title">Fragen importieren</div>
                 <div class="modal-subtitle">XLSX-Datei hochladen und mehrere Fragen auf einmal importieren.</div>
             </div>
-            <a href="../../Uploads/Vorlagen/fragen_import_vorlage.xlsx" class="import-download-btn" download>
+            <a href="../Uploads/Vorlagen/fragen_import_vorlage.xlsx" class="import-download-btn" download>
                 Vorlage herunterladen
             </a>
         </div>

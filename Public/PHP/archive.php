@@ -332,7 +332,7 @@ $hasFilter = ($fPool !== '' || $fFrom !== '' || $fTo !== '' || $fUser !== '');
                                                             <?php if ($winner): ?>
                                                                 <span class="ranking-name-cell">
                                                                     <?php if (!empty($winner['avatar'])): ?>
-                                                                        <img src="../../Uploads/Avatare/<?php echo rawurlencode($winner['avatar']); ?>" alt="" class="ranking-avatar">
+                                                                        <img src="../Uploads/Avatare/<?php echo rawurlencode($winner['avatar']); ?>" alt="" class="ranking-avatar">
                                                                     <?php endif; ?>
                                                                     <?php echo e($winner['player_name']); ?>
                                                                 </span>
@@ -377,7 +377,7 @@ $hasFilter = ($fPool !== '' || $fFrom !== '' || $fTo !== '' || $fUser !== '');
                                                                                 <td>
                                                                                     <span class="ranking-name-cell">
                                                                                         <?php if (!empty($p['avatar'])): ?>
-                                                                                            <img src="../../Uploads/Avatare/<?php echo rawurlencode($p['avatar']); ?>" alt="" class="ranking-avatar">
+                                                                                            <img src="../Uploads/Avatare/<?php echo rawurlencode($p['avatar']); ?>" alt="" class="ranking-avatar">
                                                                                         <?php endif; ?>
                                                                                         <?php echo e($p['player_name']); ?>
                                                                                     </span>

@@ -13,8 +13,8 @@ if (!in_array($currentRole, ['admin', 'teacher'])) {
     exit;
 }
 
-$uploadDir = __DIR__ . '/../uploads/questions/';
-$uploadUrl = '../uploads/questions/';
+$uploadDir = __DIR__ . '/../Uploads/Questions/';
+$uploadUrl = '../Uploads/Questions/';
 $maxFileSize = 20 * 1024 * 1024;
 
 $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
@@ -119,7 +119,7 @@ if (is_dir($uploadDir)) {
 
             <div class="info-list">
                 <div>Upload nur für Administratoren</div>
-                <div>Speicherort: /uploads/questions/</div>
+                <div>Speicherort: /Public/Uploads/Questions/</div>
                 <div>Originaldateinamen werden nicht übernommen</div>
             </div>
 

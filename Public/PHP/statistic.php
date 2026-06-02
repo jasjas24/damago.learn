@@ -374,7 +374,7 @@ $hasFilter     = $activeFilters > 0;
                                                                                 <td>
                                                                                     <span class="ranking-name-cell">
                                                                                         <?php if (!empty($p['avatar'])): ?>
-                                                                                            <img src="../../Uploads/Avatare/<?php echo rawurlencode($p['avatar']); ?>" alt="" class="ranking-avatar">
+                                                                                            <img src="../Uploads/Avatare/<?php echo rawurlencode($p['avatar']); ?>" alt="" class="ranking-avatar">
                                                                                         <?php endif; ?>
                                                                                         <?php echo e($p['player_name']); ?>
                                                                                         <?php if ($isMe): ?><span class="you-badge">(Du)</span><?php endif; ?>
