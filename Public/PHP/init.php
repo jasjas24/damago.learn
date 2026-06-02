@@ -1,16 +1,12 @@
 <?php
 // Vor session_start() definieren, dass das Cookie beim Schließen des Browsers verfällt
+
 ini_set('session.cookie_lifetime', 0);
 ini_set('session.gc_maxlifetime', 1440); // 24 Minuten Inaktivitäts-Puffer auf dem Server
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
-// 1b. Cache-Control Header gegen den "Zurück-Button"-Effekt nach dem Logout
-header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1
-header("Pragma: no-cache");                                   // HTTP 1.0
-header("Expires: 0");                                          // Proxies
 
 // 2. Standardwerte für Benutzer und Rollen festlegen
 // Wir prüfen alle gängigen Keys, damit nichts verloren geht:

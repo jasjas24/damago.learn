@@ -4,14 +4,6 @@ require_once 'init.php';
 /** @var string $username */
 /** @var string $role */
 
-
-
-// $allowedRoles = ["admin", "teacher", "student", "guest"];
-
-// if (!in_array($role, $allowedRoles, true)) {
-//     $role = "gast";
-// }
-
 $roleNames = [
     "admin" => "Administrator",
     "teacher" => "Dozent",

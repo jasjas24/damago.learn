@@ -75,6 +75,7 @@ if ($currentUserId === null && $username !== 'Gast') {
 
 $message     = '';
 $messageType = '';
+$importErrors = []; // Zeilengenaue Fehlermeldungen beim Import (leer = kein Importfehler)
 
 // POST-Aktionen
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -128,7 +129,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $imageId = resolveQuestionImageId($_POST['image_file'] ?? '', $pdo, $imageUploadDir, $imageExtensions, $currentUserId);
 
-        if ($questionId > 0 && $questionText !== '' && $poolId > 0 && $hasCorrect) {
+        // Exakt vier ausgefüllte Antworten erzwingen
+        $filledCount = count(array_filter(array_column($answers, 'text'), function ($t) {
+            return $t !== '';
+        }));
+        $hasFourAnswers = ($filledCount === 4);
+
+        if ($questionId > 0 && $questionText !== '' && $poolId > 0 && $hasFourAnswers && $hasCorrect) {
             $stmtQ = $pdo->prepare(
                 "UPDATE questions SET question_pool_id = ?, question_text = ?, image_id = ?, explanation = ?,
                  is_active = ?, updated_by = ?, updated_at = NOW() WHERE id = ?"
@@ -157,9 +164,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message     = 'Frage erfolgreich aktualisiert.';
             $messageType = 'success';
         } else {
-            $message     = ($questionId > 0 && $questionText !== '' && $poolId > 0 && !$hasCorrect)
-                ? 'Bitte mindestens eine richtige Antwort markieren.'
-                : 'Pflichtfelder fehlen (Pool, Fragetext).';
+            if ($questionId > 0 && $questionText !== '' && $poolId > 0 && !$hasFourAnswers) {
+                $message = 'Bitte alle vier Antwortfelder (A bis D) ausfüllen.';
+            } elseif ($questionId > 0 && $questionText !== '' && $poolId > 0 && $hasFourAnswers && !$hasCorrect) {
+                $message = 'Bitte mindestens eine richtige Antwort markieren.';
+            } else {
+                $message = 'Pflichtfelder fehlen (Pool, Fragetext).';
+            }
             $messageType = 'error';
         }
     }
@@ -180,7 +191,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
         $correctAnswers = $_POST['correct_answers'] ?? [];
 
-        $hasAnswer = !empty(array_filter(array_column($answers, 'text')));
+        // Exakt vier ausgefüllte Antworten erzwingen
+        $filledCount = count(array_filter(array_column($answers, 'text'), function ($t) {
+            return $t !== '';
+        }));
+        $hasFourAnswers = ($filledCount === 4);
 
         // Nur als richtig zählen, was auch tatsächlich einen Antworttext hat
         $validCorrect = array_filter($correctAnswers, function ($letter) use ($answers) {
@@ -190,7 +205,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $imageId   = resolveQuestionImageId($_POST['image_file'] ?? '', $pdo, $imageUploadDir, $imageExtensions, $currentUserId);
 
-        if ($poolId > 0 && $questionText !== '' && $hasAnswer && $hasCorrect) {
+        if ($poolId > 0 && $questionText !== '' && $hasFourAnswers && $hasCorrect) {
             $stmtQ = $pdo->prepare(
                 "INSERT INTO questions (question_pool_id, question_text, image_id, explanation, created_by, is_active)
                  VALUES (?, ?, ?, ?, ?, ?)"
@@ -217,9 +232,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message     = 'Frage erfolgreich erstellt.';
             $messageType = 'success';
         } else {
-            $message     = ($poolId > 0 && $questionText !== '' && $hasAnswer && !$hasCorrect)
-                ? 'Bitte mindestens eine richtige Antwort markieren.'
-                : 'Pflichtfelder fehlen (Pool, Fragetext, mindestens eine Antwort).';
+            if ($poolId > 0 && $questionText !== '' && !$hasFourAnswers) {
+                $message = 'Bitte alle vier Antwortfelder (A bis D) ausfüllen.';
+            } elseif ($poolId > 0 && $questionText !== '' && $hasFourAnswers && !$hasCorrect) {
+                $message = 'Bitte mindestens eine richtige Antwort markieren.';
+            } else {
+                $message = 'Pflichtfelder fehlen (Pool, Fragetext).';
+            }
             $messageType = 'error';
         }
     }
@@ -320,62 +339,118 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      VALUES (?, ?, ?, ?, ?, ?)"
                 );
 
-                $imported  = 0;
-                $skipped   = 0;
+                // ── Phase A: ALLE Datenzeilen prüfen, dabei NICHTS in die DB schreiben ──
+                $validRows = [];
 
-                foreach (array_slice($allRows, 2) as $row) {
-                    // Leere Zeile überspringen
+                foreach (array_slice($allRows, 2, null, true) as $i => $row) {
+                    $lineNo = $i + 1; // 1-basierte Tabellenzeile (für die Fehlermeldung)
+
+                    // Komplett leere Zeile stillschweigend überspringen (kein Fehler)
                     if (empty(array_filter($row, fn($v) => trim($v) !== ''))) continue;
 
                     $get = fn(string $key) => trim($row[$colMap[$key] ?? -1] ?? '');
 
                     $questionText = $get('question_text');
-                    $answerA      = $get('answer_a');
-                    $correctRaw   = $get('correct_answers');
-
-                    if ($questionText === '' || $answerA === '' || $correctRaw === '') {
-                        $skipped++;
-                        continue;
-                    }
-
-                    // correct_answers: "A,C" → ['A','C']
-                    $correctLetters = array_map('trim', explode(',', strtoupper($correctRaw)));
-
-                    $explanation = $get('question_explanation');
-                    $imageId     = resolveQuestionImageId($get('image'), $pdo, $imageUploadDir, $imageExtensions, $currentUserId);
-                    $stmtQ->execute([$poolId, $questionText, $imageId, $explanation, $currentUserId]);
-                    $newId = (int)$pdo->lastInsertId();
-
-                    $answerDefs = [
-                        'A' => ['answer_a', 'answer_a_explanation'],
-                        'B' => ['answer_b', 'answer_b_explanation'],
-                        'C' => ['answer_c', 'answer_c_explanation'],
-                        'D' => ['answer_d', 'answer_d_explanation'],
+                    $answers = [
+                        'A' => $get('answer_a'),
+                        'B' => $get('answer_b'),
+                        'C' => $get('answer_c'),
+                        'D' => $get('answer_d'),
                     ];
+                    $correctRaw = $get('correct_answers');
 
-                    $sort = 1;
-                    foreach ($answerDefs as $letter => [$textKey, $expKey]) {
-                        $ansText = $get($textKey);
-                        if ($ansText === '') continue;
-                        $stmtA->execute([
-                            $newId, $sort, $ansText,
-                            in_array($letter, $correctLetters) ? 1 : 0,
-                            $get($expKey),
-                            $currentUserId
-                        ]);
-                        $sort++;
+                    // Fragetext muss vorhanden sein
+                    if ($questionText === '') {
+                        $importErrors[] = "Zeile $lineNo: Fragetext fehlt.";
                     }
 
-                    $imported++;
+                    // Alle vier Antworten müssen vorhanden sein
+                    foreach ($answers as $letter => $text) {
+                        if ($text === '') {
+                            $importErrors[] = "Zeile $lineNo: Antwort $letter fehlt.";
+                        }
+                    }
+
+                    // Richtige Antworten prüfen
+                    $correctLetters = [];
+                    if ($correctRaw === '') {
+                        $importErrors[] = "Zeile $lineNo: Es wurde keine richtige Antwort angegeben.";
+                    } else {
+                        $correctLetters = array_filter(
+                            array_map('trim', explode(',', strtoupper($correctRaw))),
+                            fn($l) => $l !== ''
+                        );
+                        $invalid = array_diff($correctLetters, ['A', 'B', 'C', 'D']);
+                        if (!empty($invalid)) {
+                            $importErrors[] = "Zeile $lineNo: Ungültiger Wert in der Spalte correct_answers (" . implode(', ', $invalid) . ").";
+                        }
+                        if (empty($correctLetters)) {
+                            $importErrors[] = "Zeile $lineNo: Es wurde keine richtige Antwort angegeben.";
+                        }
+                        // Als richtig markierte Antworten müssen auch einen Text besitzen
+                        foreach ($correctLetters as $cl) {
+                            if (isset($answers[$cl]) && $answers[$cl] === '') {
+                                $importErrors[] = "Zeile $lineNo: Als richtig markierte Antwort $cl ist leer.";
+                            }
+                        }
+                    }
+
+                    // Daten für Phase B vormerken (werden nur genutzt, wenn es KEINE Fehler gibt)
+                    $validRows[] = [
+                        'questionText'   => $questionText,
+                        'answers'        => $answers,
+                        'correctLetters' => $correctLetters,
+                        'explanation'    => $get('question_explanation'),
+                        'image'          => $get('image'),
+                        'answerExp'      => [
+                            'A' => $get('answer_a_explanation'),
+                            'B' => $get('answer_b_explanation'),
+                            'C' => $get('answer_c_explanation'),
+                            'D' => $get('answer_d_explanation'),
+                        ],
+                    ];
                 }
 
-                if ($imported > 0) {
-                    $message = $imported . ' Frage' . ($imported !== 1 ? 'n' : '') . ' erfolgreich importiert'
-                        . ($skipped > 0 ? ', ' . $skipped . ' übersprungen (Pflichtfeld fehlte)' : '') . '.';
-                    $messageType = 'success';
-                } else {
-                    $message     = 'Keine Fragen importiert. Bitte Pflichtfelder prüfen (Fragetext, Antwort A, Richtige Antworten).';
+                // ── Auswertung von Phase A ──
+                if (empty($validRows) && empty($importErrors)) {
+                    $message     = 'Die Datei enthält keine verwertbaren Datenzeilen.';
                     $messageType = 'error';
+                } elseif (!empty($importErrors)) {
+                    // Mindestens ein Fehler -> KOMPLETTER Abbruch, es wird NICHTS gespeichert
+                    $message     = 'Import fehlgeschlagen – es wurde nichts gespeichert. Bitte korrigiere die folgenden Punkte:';
+                    $messageType = 'error';
+                } else {
+                    // ── Phase B: Schreiben, gekapselt in einer Transaktion ──
+                    try {
+                        $pdo->beginTransaction();
+                        foreach ($validRows as $vr) {
+                            $imageId = resolveQuestionImageId($vr['image'], $pdo, $imageUploadDir, $imageExtensions, $currentUserId);
+                            $stmtQ->execute([$poolId, $vr['questionText'], $imageId, $vr['explanation'], $currentUserId]);
+                            $newId = (int)$pdo->lastInsertId();
+
+                            $sort = 1;
+                            foreach ($vr['answers'] as $letter => $ansText) {
+                                $stmtA->execute([
+                                    $newId, $sort, $ansText,
+                                    in_array($letter, $vr['correctLetters'], true) ? 1 : 0,
+                                    $vr['answerExp'][$letter] ?? '',
+                                    $currentUserId
+                                ]);
+                                $sort++;
+                            }
+                        }
+                        $pdo->commit();
+
+                        $cnt = count($validRows);
+                        $message     = $cnt . ' Frage' . ($cnt !== 1 ? 'n' : '') . ' erfolgreich importiert.';
+                        $messageType = 'success';
+                    } catch (Throwable $e) {
+                        if ($pdo->inTransaction()) {
+                            $pdo->rollBack();
+                        }
+                        $message     = 'Technischer Fehler beim Import – es wurde nichts gespeichert.';
+                        $messageType = 'error';
+                    }
                 }
             }
         }
@@ -487,6 +562,13 @@ if (!empty($questions)) {
                 <span class="import-message-text">
                     <?php echo e($message); ?>
                 </span>
+                <?php if (!empty($importErrors)): ?>
+                    <ul class="import-error-list">
+                        <?php foreach ($importErrors as $err): ?>
+                            <li><?php echo e($err); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
 
@@ -648,7 +730,7 @@ if (!empty($questions)) {
             <div class="modal-field-pair">
                 <div class="modal-field">
                     <label>Antwort A</label>
-                    <input type="text" name="answer_a" placeholder="Antwortmöglichkeit A">
+                    <input type="text" name="answer_a" placeholder="Antwortmöglichkeit A" required>
                 </div>
                 <div class="modal-field">
                     <label>Erklärung A</label>
@@ -659,7 +741,7 @@ if (!empty($questions)) {
             <div class="modal-field-pair">
                 <div class="modal-field">
                     <label>Antwort B</label>
-                    <input type="text" name="answer_b" placeholder="Antwortmöglichkeit B">
+                    <input type="text" name="answer_b" placeholder="Antwortmöglichkeit B" required>
                 </div>
                 <div class="modal-field">
                     <label>Erklärung B</label>
@@ -670,7 +752,7 @@ if (!empty($questions)) {
             <div class="modal-field-pair">
                 <div class="modal-field">
                     <label>Antwort C</label>
-                    <input type="text" name="answer_c" placeholder="Antwortmöglichkeit C">
+                    <input type="text" name="answer_c" placeholder="Antwortmöglichkeit C" required>
                 </div>
                 <div class="modal-field">
                     <label>Erklärung C</label>
@@ -681,7 +763,7 @@ if (!empty($questions)) {
             <div class="modal-field-pair">
                 <div class="modal-field">
                     <label>Antwort D</label>
-                    <input type="text" name="answer_d" placeholder="Antwortmöglichkeit D">
+                    <input type="text" name="answer_d" placeholder="Antwortmöglichkeit D" required>
                 </div>
                 <div class="modal-field">
                     <label>Erklärung D</label>
@@ -740,6 +822,17 @@ if (!empty($questions)) {
                 Vorlage herunterladen
             </a>
         </div>
+
+        <?php if (!empty($importErrors)): ?>
+            <div class="import-message import-message-error">
+                <span class="import-message-text"><?php echo e($message); ?></span>
+                <ul class="import-error-list">
+                    <?php foreach ($importErrors as $err): ?>
+                        <li><?php echo e($err); ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
 
         <form method="POST" action="manage_questions.php" enctype="multipart/form-data">
             <input type="hidden" name="action" value="import_questions">
@@ -802,7 +895,7 @@ if (!empty($questions)) {
             <div class="modal-field-pair">
                 <div class="modal-field">
                     <label>Antwort A</label>
-                    <input type="text" name="answer_a" id="editAnswerA" placeholder="Antwortmöglichkeit A">
+                    <input type="text" name="answer_a" id="editAnswerA" placeholder="Antwortmöglichkeit A" required>
                 </div>
                 <div class="modal-field">
                     <label>Erklärung A</label>
@@ -813,7 +906,7 @@ if (!empty($questions)) {
             <div class="modal-field-pair">
                 <div class="modal-field">
                     <label>Antwort B</label>
-                    <input type="text" name="answer_b" id="editAnswerB" placeholder="Antwortmöglichkeit B">
+                    <input type="text" name="answer_b" id="editAnswerB" placeholder="Antwortmöglichkeit B" required>
                 </div>
                 <div class="modal-field">
                     <label>Erklärung B</label>
@@ -824,7 +917,7 @@ if (!empty($questions)) {
             <div class="modal-field-pair">
                 <div class="modal-field">
                     <label>Antwort C</label>
-                    <input type="text" name="answer_c" id="editAnswerC" placeholder="Antwortmöglichkeit C">
+                    <input type="text" name="answer_c" id="editAnswerC" placeholder="Antwortmöglichkeit C" required>
                 </div>
                 <div class="modal-field">
                     <label>Erklärung C</label>
@@ -835,7 +928,7 @@ if (!empty($questions)) {
             <div class="modal-field-pair">
                 <div class="modal-field">
                     <label>Antwort D</label>
-                    <input type="text" name="answer_d" id="editAnswerD" placeholder="Antwortmöglichkeit D">
+                    <input type="text" name="answer_d" id="editAnswerD" placeholder="Antwortmöglichkeit D" required>
                 </div>
                 <div class="modal-field">
                     <label>Erklärung D</label>

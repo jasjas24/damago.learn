@@ -170,7 +170,13 @@ $images = $stmt->fetchAll();
                         </div>
                     </div>
                     <div class="dashboard-footer-links">
+<<<<<<< HEAD
                         <button type="submit" class="btn btn-primary">Bild hochladen</button>
+=======
+                        <button type="submit" class="btn btn-primary">
+                            Bild hochladen
+                        </button>
+>>>>>>> 5997dead2cec9af8d9bdbba6d37131c830cdd83d
                     </div>
                 </form>
             </div>
