@@ -61,8 +61,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $questionPool, 
             $questionCount, 
             $timeLimit, 
-            $pointMode, 
-            $hostPlaysRaw
+            $pointMode,
+            $isHostPlaying ? 1 : 0
         ]);
         
         $lobbyId = $pdo->lastInsertId();
