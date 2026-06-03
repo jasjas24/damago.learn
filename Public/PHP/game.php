@@ -190,11 +190,13 @@ if ($lobby_id) {
         });
 
     } catch (PDOException $e) {
-        $rankingPlayers = [[ 'username' => $currentDisplayName, 'score' => $_SESSION['quiz_score'] ?? 0 ]];
+        $rankingPlayers = [];
     }
 }
 
-if (empty($rankingPlayers)) {
+// Fallback nur für echte Spieler: Ein moderierender Host (spielt nicht mit) darf NIE
+// im Ranking auftauchen, auch nicht, wenn die Spielerliste (noch) leer ist.
+if (empty($rankingPlayers) && !($isHost && $hostPlays === 'no')) {
     $rankingPlayers = [[ 'username' => $currentDisplayName, 'score' => $_SESSION['quiz_score'] ?? 0 ]];
 }
 
@@ -298,16 +300,6 @@ if ($lobby_id && !empty($currentQuestion['id'])) {
                     <button type="button" class="millionaire-answer confirm-button submitted" disabled>
                         <span class="answer-text">Du bist der Moderator. Warte auf die Antworten der Spieler...</span>
                     </button>
-                </div>
-                <!-- Der Moderator kann die Auflösung jederzeit selbst freischalten und muss nicht
-                     auf alle Spieler oder den Timer warten (LH 9.4/9.5). -->
-                <div class="confirm-button-wrapper">
-                    <form action="host_reveal.php" method="POST" class="reveal-now-form">
-                        <input type="hidden" name="host_token" value="<?php echo htmlspecialchars($hostToken); ?>">
-                        <button type="submit" class="millionaire-answer confirm-button btn-blue">
-                            <span class="answer-text">Auflösung anzeigen</span>
-                        </button>
-                    </form>
                 </div>
             <?php else: ?>
                 <form class="millionaire-answers" id="quiz-form" action="next_question.php" method="POST">

@@ -12,7 +12,10 @@ if (!$lobby_id) {
     exit;
 }
 
-$currentDisplayName = $_SESSION['username'] ?? $username ?? 'Gast';
+// Eigenen Namen so ermitteln, wie er in lobby_players steht (player_name), damit sich der
+// Spieler im finalen Ranking wiederfindet (Rang, Punkte und "(Du)"-Markierung). Bei Gästen
+// ist $_SESSION['username'] nur "Gast", der echte Name steht in player_name.
+$currentDisplayName = $_SESSION['player_name'] ?? $_SESSION['username'] ?? $username ?? 'Gast';
 
 $rankingPlayers = [];
 $totalPlayers = 0;
