@@ -255,12 +255,6 @@ if ($lobby_id && !empty($currentQuestion['id'])) {
                         </div>
                     <?php endif; ?>
                 </div>
-                <?php if ($isHost): ?>
-                    <form action="abort_game.php" method="POST" class="abort-form" onsubmit="return confirm('Willst du das Spiel wirklich abbrechen? Alle Teilnehmer werden entfernt.');">
-                        <input type="hidden" name="host_token" value="<?php echo htmlspecialchars($hostToken); ?>">
-                        <button type="submit" class="btn btn-abort">Spiel abbrechen</button>
-                    </form>
-                <?php endif; ?>
             </aside>
 
             <div class="quiz-content">
@@ -268,6 +262,12 @@ if ($lobby_id && !empty($currentQuestion['id'])) {
                 <div>
                     <span class="eyebrow">Frage <?php echo $currentIndex + 1; ?> von <?php echo $totalQuestions; ?></span>
                 </div>
+                <?php if ($isHost): ?>
+                    <form action="abort_game.php" method="POST" class="abort-form abort-form-inline" onsubmit="return confirm('Willst du das Spiel wirklich abbrechen? Alle Teilnehmer werden entfernt.');">
+                        <input type="hidden" name="host_token" value="<?php echo htmlspecialchars($hostToken); ?>">
+                        <button type="submit" class="btn btn-abort">Spiel abbrechen</button>
+                    </form>
+                <?php endif; ?>
             </div>
 
             <section class="question-card">
@@ -545,7 +545,7 @@ if ($lobby_id && !empty($currentQuestion['id'])) {
         //    Spieler pollen in JEDER Phase (auch während sie noch an der Antwort sitzen),
         //    damit ein Kick oder Spielabbruch SOFORT erkannt wird und nicht erst, wenn der
         //    Timer abläuft. Der moderierende Host pollt während der laufenden Frage.
-        <?php if (!$isHost || ($isHost && $hostPlays === 'no' && !$showExplanation)): ?>
+        <?php if (!$isHost || $waitingForReveal || ($isHost && $hostPlays === 'no' && !$showExplanation)): ?>
             const checkInterval = setInterval(function() {
                 fetch('check_next_question.php')
                     .then(response => response.json())

@@ -26,6 +26,11 @@
 .btn-abort:active { transform: translateY(0); }
 .abort-form { margin: 0; width: 100%; }
 
+/* Abbrechen-Button oben rechts im Fragebereich (quiz-topline): nicht volle Breite,
+   damit der Flex-Container ihn rechts in die Ecke setzt. */
+.abort-form-inline { width: auto; flex: 0 0 auto; }
+.abort-form-inline .btn-abort { margin-top: 0; }
+
 /* ============================================================
    01 · Grundlagen (Variablen, Reset, Body, Hintergrund-Orbs)
    ============================================================ */
