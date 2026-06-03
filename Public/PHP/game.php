@@ -541,7 +541,10 @@ if ($lobby_id && !empty($currentQuestion['id'])) {
         <?php endif; ?>
 
         // 3. PERMANENTES POLLING FÜR SYNCHRONISATION
-        <?php if ($waitingForReveal || ($showExplanation && !$isHost) || ($isHost && $hostPlays === 'no' && !$showExplanation)): ?>
+        //    Spieler pollen in JEDER Phase (auch während sie noch an der Antwort sitzen),
+        //    damit ein Kick oder Spielabbruch SOFORT erkannt wird und nicht erst, wenn der
+        //    Timer abläuft. Der moderierende Host pollt während der laufenden Frage.
+        <?php if (!$isHost || ($isHost && $hostPlays === 'no' && !$showExplanation)): ?>
             const checkInterval = setInterval(function() {
                 fetch('check_next_question.php')
                     .then(response => response.json())

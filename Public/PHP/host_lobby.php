@@ -239,6 +239,13 @@ if ($is_host && !isset($_SESSION['quiz_questions'])) {
             fetch('get_lobby_status.php?lobby_id=' + lobbyId)
                 .then(response => response.json())
                 .then(data => {
+                    // Der anfragende Spieler wurde vom Host aus der Lobby entfernt: Meldung zeigen und hinausleiten.
+                    if (data.kicked === 1 && !isHost) {
+                        alert('Du wurdest vom Host aus dem Spiel entfernt.');
+                        window.location.href = 'logout.php';
+                        return;
+                    }
+
                     // Host hat das Spiel abgebrochen, also die Teilnehmer hinausleiten.
                     if (data.is_aborted === 1) {
                         if (!isHost) {
