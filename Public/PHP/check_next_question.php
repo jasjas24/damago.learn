@@ -9,13 +9,20 @@ $username = $_SESSION['player_name'] ?? $_SESSION['username'] ?? 'Gast';
 $current_local_index = $_SESSION['current_question_index'] ?? 0;
 $local_show_explanation = $_SESSION['show_explanation'] ?? false;
 
+// Ist der aktuelle Benutzer der moderierende Host (spielt selbst nicht mit)?
+// Ein solcher Host steht NICHT in lobby_players und darf daher nicht über den
+// Kick-Check (der auf lobby_players prüft) aus dem Spiel geworfen werden.
+$isHost            = isset($_SESSION['quiz_setup']['lobby_id']);
+$hostPlays         = $_SESSION['quiz_setup']['host_plays'] ?? 'yes';
+$isModeratingHost  = $isHost && $hostPlays === 'no';
+
 if (!$lobby_id) {
     echo json_encode(['success' => false, 'error' => 'Keine Lobby gefunden']);
     exit;
 }
 
-else {
-    // Prüfen, ob der Spieler noch in der Tabelle ist
+else if (!$isModeratingHost) {
+    // Nur echte Spieler (inkl. mitspielender Host) prüfen, ob sie noch in der Tabelle stehen.
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM lobby_players WHERE lobby_id = ? AND player_name = ?");
     $stmt->execute([$lobby_id, $username]);
     $exists = $stmt->fetchColumn();

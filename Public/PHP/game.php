@@ -284,11 +284,30 @@ if ($lobby_id && !empty($currentQuestion['id'])) {
                     </button>
                 </div>
             <?php elseif ($isHost && $hostPlays === 'no' && !$showExplanation): ?>
+                <!-- Moderatoransicht: Antwortmöglichkeiten nur zur Anzeige (Beamer), ohne Auswahl. -->
+                <div class="millionaire-answers">
+                    <?php foreach ($answers as $ans): ?>
+                        <button type="button" class="millionaire-answer" disabled>
+                            <span class="answer-text"><?php echo render_inline_text($ans['text']); ?></span>
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+
                 <div class="confirm-button-wrapper confirm-button-wrapper-waiting">
                     <div class="loader"></div>
                     <button type="button" class="millionaire-answer confirm-button submitted" disabled>
                         <span class="answer-text">Du bist der Moderator. Warte auf die Antworten der Spieler...</span>
                     </button>
+                </div>
+                <!-- Der Moderator kann die Auflösung jederzeit selbst freischalten und muss nicht
+                     auf alle Spieler oder den Timer warten (LH 9.4/9.5). -->
+                <div class="confirm-button-wrapper">
+                    <form action="host_reveal.php" method="POST" class="reveal-now-form">
+                        <input type="hidden" name="host_token" value="<?php echo htmlspecialchars($hostToken); ?>">
+                        <button type="submit" class="millionaire-answer confirm-button btn-blue">
+                            <span class="answer-text">Auflösung anzeigen</span>
+                        </button>
+                    </form>
                 </div>
             <?php else: ?>
                 <form class="millionaire-answers" id="quiz-form" action="next_question.php" method="POST">
