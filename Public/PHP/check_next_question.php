@@ -28,14 +28,35 @@ else {
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT current_question_index, question_count, show_explanation FROM quiz_lobbies WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT current_question_index, question_count, show_explanation, is_aborted, time_limit, current_question_started_at, TIMESTAMPDIFF(SECOND, current_question_started_at, NOW()) AS elapsed FROM quiz_lobbies WHERE id = ?");
     $stmt->execute([$lobby_id]);
     $lobby = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($lobby) {
+        // Host hat das Spiel abgebrochen, also die Teilnehmer hinausleiten.
+        if ((int)$lobby['is_aborted'] === 1) {
+            echo json_encode(['success' => true, 'aborted' => true]);
+            exit;
+        }
+
         $dbIndex = (int)$lobby['current_question_index'];
         $maxQuestions = (int)$lobby['question_count'];
         $dbShowExplanation = (int)$lobby['show_explanation'] === 1;
+
+        // SERVER-WATCHDOG (LH 13.3 / 13.4): Ist die Zeit der aktuellen Frage abgelaufen,
+        // wird die Auflösung serverseitig erzwungen, auch wenn ein Spieler den Tab geschlossen
+        // hat und nichts mehr absendet. So kann das Spiel nicht hängen bleiben.
+        $grace = 2;
+        $remainingTime = null;
+        if ($lobby['current_question_started_at'] !== null) {
+            $timeLimit = (int)$lobby['time_limit'];
+            $elapsed = (int)$lobby['elapsed'];
+            $remainingTime = max(0, $timeLimit - $elapsed);
+            if (!$dbShowExplanation && $elapsed > ($timeLimit + $grace)) {
+                $pdo->prepare("UPDATE quiz_lobbies SET show_explanation = 1 WHERE id = ?")->execute([$lobby_id]);
+                $dbShowExplanation = true;
+            }
+        }
 
         // Fall 1: Host hat das Spiel komplett beendet
         if ($dbIndex >= $maxQuestions) {
@@ -53,7 +74,7 @@ try {
             exit;
         }
 
-        // Fall 3: Alle haben geantwortet -> AUFLÖSUNG einblenden
+        // Fall 3: Alle haben geantwortet, jetzt die Auflösung einblenden
         if ($dbShowExplanation && !$local_show_explanation) {
             $_SESSION['show_explanation'] = true;
             unset($_SESSION['waiting_for_reveal']);
@@ -61,12 +82,30 @@ try {
             exit;
         }
 
+        // Antwort-Zähler der aktuellen Frage (Host-/Beameransicht, LH 9.5)
+        $answered = 0;
+        $stmtTot = $pdo->prepare("SELECT COUNT(*) FROM lobby_players WHERE lobby_id = ?");
+        $stmtTot->execute([$lobby_id]);
+        $total = (int)$stmtTot->fetchColumn();
+
+        $stmtQid = $pdo->prepare("SELECT question_id FROM lobby_questions WHERE lobby_id = ? AND sort_order = ?");
+        $stmtQid->execute([$lobby_id, $dbIndex]);
+        $qid = $stmtQid->fetchColumn();
+        if ($qid) {
+            $stmtAns = $pdo->prepare("SELECT COUNT(*) FROM player_answers WHERE lobby_id = ? AND question_id = ?");
+            $stmtAns->execute([$lobby_id, $qid]);
+            $answered = (int)$stmtAns->fetchColumn();
+        }
+
         // Standard-Rückgabe
         echo json_encode([
             'success' => true,
             'action' => 'wait',
             'current_index' => $dbIndex,
-            'show_explanation' => $dbShowExplanation
+            'show_explanation' => $dbShowExplanation,
+            'remaining_time' => $remainingTime,
+            'answered' => $answered,
+            'total' => $total
         ]);
         exit;
     }

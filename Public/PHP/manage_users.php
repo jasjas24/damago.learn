@@ -22,6 +22,7 @@ $messageType = '';
 
 // POST-Aktionen verarbeiten
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_check();
     $action = $_POST['action'] ?? '';
 
     // Status umschalten
@@ -49,18 +50,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $newPassword = $_POST['new_password'] ?? '';
 
         if ($userId > 0 && $newUsername !== '' && $newEmail !== '') {
-            // Benutzername-Duplikat prüfen
+            // E-Mail-Format und (falls gesetzt) Passwortlänge serverseitig prüfen (LH 27.1)
+            $emailStmt = $pdo->prepare("SELECT id FROM users WHERE email = :email AND id != :id LIMIT 1");
+            $emailStmt->execute([':email' => $newEmail, ':id' => $userId]);
+
             $checkStmt = $pdo->prepare(
                 "SELECT id FROM users WHERE username = :username AND id != :id LIMIT 1"
             );
             $checkStmt->execute([':username' => $newUsername, ':id' => $userId]);
 
-            if ($checkStmt->fetch()) {
+            if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
+                $message     = 'Bitte eine gültige E-Mail-Adresse angeben.';
+                $messageType = 'error';
+            } elseif ($newPassword !== '' && strlen($newPassword) < 8) {
+                $message     = 'Das Passwort muss mindestens 8 Zeichen lang sein.';
+                $messageType = 'error';
+            } elseif ($checkStmt->fetch()) {
                 $message     = 'Dieser Benutzername ist bereits vergeben.';
+                $messageType = 'error';
+            } elseif ($emailStmt->fetch()) {
+                $message     = 'Diese E-Mail-Adresse ist bereits vergeben.';
                 $messageType = 'error';
             } else {
                 if ($newPassword !== '') {
-                    $hash = password_hash($newPassword, PASSWORD_BCRYPT);
+                    $hash = password_hash($newPassword, PASSWORD_DEFAULT);
                     $stmt = $pdo->prepare(
                         "UPDATE users SET username = :username, email = :email, role_id = :roleId,
                          password_hash = :hash, updated_by = :updatedBy WHERE id = :id"
@@ -103,14 +116,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $newPassword = $_POST['new_password'] ?? '';
 
         if ($newUsername !== '' && $newEmail !== '' && $newPassword !== '') {
-            // Benutzername-Duplikat prüfen
+            // E-Mail-Format und Passwortlänge serverseitig prüfen (LH 27.1)
             $checkStmt = $pdo->prepare("SELECT id FROM users WHERE username = :username LIMIT 1");
             $checkStmt->execute([':username' => $newUsername]);
-            if ($checkStmt->fetch()) {
+
+            $emailStmt = $pdo->prepare("SELECT id FROM users WHERE email = :email LIMIT 1");
+            $emailStmt->execute([':email' => $newEmail]);
+
+            if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
+                $message     = 'Bitte eine gültige E-Mail-Adresse angeben.';
+                $messageType = 'error';
+            } elseif (strlen($newPassword) < 8) {
+                $message     = 'Das Passwort muss mindestens 8 Zeichen lang sein.';
+                $messageType = 'error';
+            } elseif ($checkStmt->fetch()) {
                 $message     = 'Dieser Benutzername ist bereits vergeben.';
                 $messageType = 'error';
+            } elseif ($emailStmt->fetch()) {
+                $message     = 'Diese E-Mail-Adresse ist bereits vergeben.';
+                $messageType = 'error';
             } else {
-                $hash = password_hash($newPassword, PASSWORD_BCRYPT);
+                $hash = password_hash($newPassword, PASSWORD_DEFAULT);
                 $stmt = $pdo->prepare(
                     "INSERT INTO users (username, email, password_hash, role_id, is_active, created_by)
                      VALUES (:username, :email, :hash, :roleId, 1, :createdBy)"
@@ -222,6 +248,7 @@ $roles = $rolesStmt->fetchAll();
                             <div class="col-aktion">
                                 <!-- Status umschalten -->
                                 <form method="POST" class="inline-form">
+                                    <?php echo csrf_field(); ?>
                                     <input type="hidden" name="action" value="toggle_status">
                                     <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
                                     <button type="submit"
@@ -236,8 +263,8 @@ $roles = $rolesStmt->fetchAll();
                                     class="btn-icon btn-edit"
                                     onclick="openEditModal(
                                         <?php echo $user['id']; ?>,
-                                        '<?php echo addslashes(htmlspecialchars($user['username'])); ?>',
-                                        '<?php echo addslashes(htmlspecialchars($user['email'])); ?>',
+                                        <?php echo htmlspecialchars(json_encode($user['username']), ENT_QUOTES); ?>,
+                                        <?php echo htmlspecialchars(json_encode($user['email']), ENT_QUOTES); ?>,
                                         <?php echo $user['role_id']; ?>
                                     )">
                                     Bearbeiten
@@ -282,6 +309,7 @@ $roles = $rolesStmt->fetchAll();
             <div class="modal-subtitle" id="modalSubtitle">Daten anpassen</div>
 
             <form method="POST">
+                <?php echo csrf_field(); ?>
                 <input type="hidden" name="action" value="update_user">
                 <input type="hidden" name="user_id" id="editUserId">
 
@@ -321,6 +349,7 @@ $roles = $rolesStmt->fetchAll();
     </div>
 
     <script>
+        // Füllt das Bearbeiten-Modal mit den Daten des Benutzers und zeigt es an.
         function openEditModal(id, username, email, roleId) {
             document.getElementById('editUserId').value   = id;
             document.getElementById('editUsername').value = username;
@@ -331,6 +360,7 @@ $roles = $rolesStmt->fetchAll();
             document.getElementById('editModal').classList.add('active');
         }
 
+        // Schließt das Bearbeiten-Modal wieder.
         function closeEditModal() {
             document.getElementById('editModal').classList.remove('active');
         }
@@ -340,10 +370,12 @@ $roles = $rolesStmt->fetchAll();
             if (e.target === this) closeEditModal();
         });
 
+        // Öffnet das Modal zum Anlegen eines neuen Benutzers.
         function openCreateModal() {
             document.getElementById('createModal').classList.add('active');
         }
 
+        // Schließt das Anlegen-Modal wieder.
         function closeCreateModal() {
             document.getElementById('createModal').classList.remove('active');
         }
@@ -367,10 +399,12 @@ $roles = $rolesStmt->fetchAll();
             let perPage = parseInt(perPageSel.value, 10) || 10;
             let current = 1;
 
+            // Berechnet, wie viele Seiten die Liste bei der gewählten Seitengröße hat.
             function totalPages() {
                 return Math.max(1, Math.ceil(rows.length / perPage));
             }
 
+            // Baut die Liste der anzuzeigenden Seitenzahlen, bei vielen Seiten mit Auslassungspunkten.
             function pageList(total, cur) {
                 const out = [];
                 for (let i = 1; i <= total; i++) {
@@ -383,6 +417,7 @@ $roles = $rolesStmt->fetchAll();
                 return out;
             }
 
+            // Zeigt nur die Zeilen der aktuellen Seite an und baut die Seiten-Buttons neu.
             function render() {
                 const total = totalPages();
                 if (current > total) current = total;
@@ -437,6 +472,7 @@ $roles = $rolesStmt->fetchAll();
             <div class="modal-subtitle">Neues Benutzerkonto erstellen</div>
 
             <form method="POST">
+                <?php echo csrf_field(); ?>
                 <input type="hidden" name="action" value="create_user">
 
                 <div class="modal-field">

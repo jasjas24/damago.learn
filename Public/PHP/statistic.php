@@ -5,7 +5,7 @@ require_once 'db.php';
 /** @var string $username */
 /** @var string $role */
 
-// Login erforderlich – Gäste haben keine persönliche Historie
+// Login erforderlich, Gäste haben keine persönliche Historie
 $userId      = $_SESSION['user_id'] ?? null;
 $currentRole = $_SESSION['user_role'] ?? $role ?? 'guest';
 if (empty($userId) || $currentRole === 'guest') {
@@ -16,11 +16,13 @@ if (empty($userId) || $currentRole === 'guest') {
 // In lobby_players steht der player_name = Benutzername des angemeldeten Nutzers
 $me = $_SESSION['username'] ?? $username;
 
+// Kurzes Kürzel, um Text sicher auszugeben (HTML-Sonderzeichen werden escaped).
 function e($value)
 {
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
+// Gibt zum gespeicherten Punkte-Modus-Code den lesbaren Namen zurück.
 function modeName(?string $code): string
 {
     switch ($code) {
@@ -32,11 +34,13 @@ function modeName(?string $code): string
     }
 }
 
+// Rechnet aus richtigen und beantworteten Fragen die Prozentquote aus (null, wenn nichts beantwortet).
 function pct(int $correct, int $answered): ?int
 {
     return $answered > 0 ? (int) round($correct / $answered * 100) : null;
 }
 
+// Formatiert die Quote als Prozenttext für die Anzeige.
 function pctLabel(?int $p): string
 {
     return $p === null ? '—' : $p . '%';
@@ -51,6 +55,7 @@ function pctClass(?int $p): string
     return $p === 0 ? ' pct-low pct-zero' : ' pct-low';
 }
 
+// Bringt einen Zeitstempel in ein lesbares deutsches Datumsformat.
 function formatDateTime($dt): string
 {
     if (empty($dt)) return '—';
@@ -91,13 +96,15 @@ if ($fDept !== '' && ctype_digit($fDept)) {
 }
 
 // ---------------------------------------------------------------------------
-// Spiele (Ebene 2) laden – nur Runden, an denen DER NUTZER teilgenommen hat
+// Spiele (Ebene 2) laden, nur Runden, an denen der Nutzer teilgenommen hat
 // ---------------------------------------------------------------------------
 $where       = ['ql.is_started = 1'];
 $whereParams = [];
 
-$where[]       = 'EXISTS (SELECT 1 FROM lobby_players lp WHERE lp.lobby_id = ql.id AND lp.player_name = ?)';
-$whereParams[] = $me;
+// Eigene Teilnahme eindeutig über die user_id erkennen (nicht über den Anzeigenamen,
+// sonst würde ein Gast mit gleichem Namen in fremde Historie einfließen, LH 21.2).
+$where[]       = 'EXISTS (SELECT 1 FROM lobby_players lp WHERE lp.lobby_id = ql.id AND lp.user_id = ?)';
+$whereParams[] = $userId;
 
 if ($fFrom !== '') { $where[] = 'ql.created_at >= ?'; $whereParams[] = $fFrom . ' 00:00:00'; }
 if ($fTo   !== '') { $where[] = 'ql.created_at <= ?'; $whereParams[] = $fTo   . ' 23:59:59'; }
@@ -158,6 +165,7 @@ if (!empty($lobbyIds)) {
                 lp.player_name,
                 lp.avatar,
                 lp.points,
+                lp.user_id,
                 (SELECT COUNT(*) FROM player_answers pa
                     WHERE pa.lobby_id = lp.lobby_id AND pa.player_name = lp.player_name
                       AND pa.is_correct IS NOT NULL) AS answered,
@@ -179,7 +187,7 @@ if (!empty($lobbyIds)) {
 }
 
 // ---------------------------------------------------------------------------
-// Spiele zu Pools (Ebene 1) gruppieren – Aggregate beziehen sich auf DEN NUTZER
+// Spiele zu Pools (Ebene 1) gruppieren, die Summen beziehen sich auf den Nutzer
 // ---------------------------------------------------------------------------
 $pools = [];
 foreach ($games as $g) {
@@ -361,13 +369,18 @@ $hasFilter     = $activeFilters > 0;
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
+                                                                        <?php $stPrevScore = null; $stRank = 0; ?>
                                                                         <?php foreach ($gPlayers as $rankIdx => $p):
                                                                             $pAns   = (int) $p['answered'];
                                                                             $pCor   = (int) $p['correct'];
                                                                             $pWrong = $pAns - $pCor;
                                                                             $pPct   = pct($pCor, $pAns);
-                                                                            $pRank  = $rankIdx + 1;
-                                                                            $isMe   = ($p['player_name'] === $me);
+                                                                            // Standard-Competition-Ranking (LH 20): gleiche Punkte = gleicher Platz.
+                                                                            $pPoints = (int) $p['points'];
+                                                                            if ($stPrevScore === null || $pPoints < $stPrevScore) { $stRank = $rankIdx + 1; }
+                                                                            $stPrevScore = $pPoints;
+                                                                            $pRank  = $stRank;
+                                                                            $isMe   = ((int)($p['user_id'] ?? 0) === (int)$userId);
                                                                         ?>
                                                                             <tr<?php echo $isMe ? ' class="current-player"' : ''; ?>>
                                                                                 <td class="cell-num"><?php echo $pRank; ?>.</td>
@@ -483,11 +496,14 @@ $hasFilter     = $activeFilters > 0;
             let perPage = parseInt(perPageSel.value, 10) || 10;
             let current = 1;
 
+            // Findet die zugehörige aufklappbare Detailzeile zu einer Pool-Zeile, falls vorhanden.
             function detailOf(row) {
                 const n = row.nextElementSibling;
                 return (n && n.classList.contains('archive-detail-row')) ? n : null;
             }
+            // Berechnet, wie viele Seiten die Pool-Liste bei der gewählten Seitengröße hat.
             function totalPages() { return Math.max(1, Math.ceil(poolRows.length / perPage)); }
+            // Baut die Liste der anzuzeigenden Seitenzahlen, bei vielen Seiten mit Auslassungspunkten.
             function pageList(total, cur) {
                 const out = [];
                 for (let i = 1; i <= total; i++) {
@@ -499,6 +515,7 @@ $hasFilter     = $activeFilters > 0;
                 }
                 return out;
             }
+            // Zeigt nur die Pools der aktuellen Seite an und baut die Seiten-Buttons neu.
             function render() {
                 const total = totalPages();
                 if (current > total) current = total;

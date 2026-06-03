@@ -10,6 +10,7 @@ if ($role !== 'admin') {
     exit;
 }
 
+// Die Kacheln, die im Adminbereich verlinkt werden
 $menuItems = [
     [
         "href"        => "manage_question_pools.php",
@@ -46,15 +47,15 @@ $menuItems = [
 // Inline-SVG-Icons (Feather-Stil). Styling (Größe, stroke, fill ...) liegt in style.css unter ".dashboard-action-icon svg".
 $svgAttrs = 'viewBox="0 0 24 24" aria-hidden="true"';
 $icons = [
-    // Fragenpools – gestapelte Ebenen
+    // Symbol für die Fragenpools
     'pools' => '<svg ' . $svgAttrs . '><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>',
-    // Fragen – Fragezeichen im Kreis
+    // Symbol für die Fragen
     'questions' => '<svg ' . $svgAttrs . '><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
-    // Medien – Bild
+    // Symbol für die Medien
     'media' => '<svg ' . $svgAttrs . '><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>',
-    // Nutzer – Personen
+    // Symbol für die Benutzer
     'users' => '<svg ' . $svgAttrs . '><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
-    // Archiv – Archivbox
+    // Symbol für das Archiv
     'archive' => '<svg ' . $svgAttrs . '><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>',
 ];
 ?>

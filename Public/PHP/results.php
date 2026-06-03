@@ -1,6 +1,7 @@
 <?php
 require_once 'init.php';
 require_once 'db.php';
+require_once 'game_results.php';
 
 /** @var string $username */
 
@@ -20,6 +21,8 @@ $currentPlayerRank = null;
 $currentPlayerScore = 0;
 $winnerName = '';
 $winnerScore = 0;
+$winnerAvatar = '';
+$winners = [];
 $quizFinished = true;
 
 try {
@@ -63,18 +66,42 @@ try {
 
     $totalPlayers = count($rankingPlayers);
 
+    // Standard-Competition-Ranking (LH 20): gleiche Punktzahl = gleicher Platz,
+    // danach wird der Platz entsprechend übersprungen (z. B. 1,1,3,4).
+    $rankCounter = 0;
+    $prevScore   = null;
     foreach ($rankingPlayers as $index => $player) {
         $playerName = $player['username'] ?? '';
         $playerScore = (int)($player['score'] ?? 0);
 
+        if ($prevScore === null || $playerScore < $prevScore) {
+            $rankCounter = $index + 1;
+        }
+        $prevScore = $playerScore;
+        $rankingPlayers[$index]['rank'] = $rankCounter;
+
         if ($index === 0) {
             $winnerName = $playerName;
             $winnerScore = $playerScore;
+            $winnerAvatar = $player['avatar'] ?? '';
         }
 
         if ($playerName === $currentDisplayName) {
-            $currentPlayerRank = $index + 1;
+            $currentPlayerRank = $rankCounter;
             $currentPlayerScore = $playerScore;
+        }
+    }
+
+    // Alle Spieler mit der höchsten Punktzahl sind Gewinner (Punktgleichstand an der Spitze).
+    // Liste ist nach Punkten absteigend sortiert, also sammeln wir die führenden gleichen Werte.
+    if (!empty($rankingPlayers)) {
+        $topScore = (int)($rankingPlayers[0]['score'] ?? 0);
+        foreach ($rankingPlayers as $p) {
+            if ((int)($p['score'] ?? 0) === $topScore) {
+                $winners[] = ['name' => $p['username'] ?? '', 'avatar' => $p['avatar'] ?? ''];
+            } else {
+                break;
+            }
         }
     }
 } catch (PDOException $e) {
@@ -82,6 +109,12 @@ try {
     $totalPlayers = 0;
 }
 
+// Beendetes Spiel: Ergebnisse dauerhaft sichern (idempotent, LH 21.1).
+if ($quizFinished && !empty($rankingPlayers)) {
+    save_game_results($pdo, $lobby_id);
+}
+
+// Kurzes Kürzel, um Text sicher auszugeben (HTML-Sonderzeichen werden escaped).
 function e(string $value): string
 {
     return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -110,8 +143,28 @@ function e(string $value): string
         <section class="question-card">
             <?php if (!$quizFinished): ?>
                 <h2>Das Quiz ist noch nicht vollständig beendet.</h2>
-            <?php elseif (!empty($winnerName)): ?>
-                <h2>Gewinner: <?php echo e($winnerName); ?></h2>
+            <?php elseif (!empty($winners)): ?>
+                <?php if (count($winners) === 1): ?>
+                    <h2 class="winner-heading">
+                        <span>Gewinner:</span>
+                        <?php if (!empty($winners[0]['avatar'])): ?>
+                            <img src="../Uploads/Avatare/<?php echo rawurlencode($winners[0]['avatar']); ?>" alt="" class="winner-avatar">
+                        <?php endif; ?>
+                        <span><?php echo e($winners[0]['name']); ?></span>
+                    </h2>
+                <?php else: ?>
+                    <h2 class="winner-heading winner-heading-multi"><?php echo count($winners); ?> Gewinner (Gleichstand):</h2>
+                    <ul class="winner-list">
+                        <?php foreach ($winners as $w): ?>
+                            <li class="winner-entry">
+                                <?php if (!empty($w['avatar'])): ?>
+                                    <img src="../Uploads/Avatare/<?php echo rawurlencode($w['avatar']); ?>" alt="" class="winner-avatar">
+                                <?php endif; ?>
+                                <span><?php echo e($w['name']); ?></span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
             <?php else: ?>
                 <h2>Keine Ergebnisse gefunden.</h2>
             <?php endif; ?>
@@ -121,32 +174,32 @@ function e(string $value): string
             <div class="stat-row">
                 <span class="stat-title">Dein Ergebnis</span>
                 <div class="stat-values">
-                    <span>
-                        Platz:
-                        <?php echo $currentPlayerRank !== null ? (int)$currentPlayerRank : '-'; ?>
-                    </span>
-                    <span>
-                        Punkte:
-                        <?php echo (int)$currentPlayerScore; ?>
-                    </span>
+                    <div class="stat-metric">
+                        <span class="stat-label">Platz</span>
+                        <span class="stat-num"><?php echo $currentPlayerRank !== null ? (int)$currentPlayerRank : '-'; ?></span>
+                    </div>
+                    <div class="stat-metric">
+                        <span class="stat-label">Punkte</span>
+                        <span class="stat-num"><?php echo (int)$currentPlayerScore; ?></span>
+                    </div>
                 </div>
             </div>
 
             <div class="stat-row">
                 <span class="stat-title">Quiz-Übersicht</span>
                 <div class="stat-values">
-                    <span>
-                        Teilnehmer:
-                        <?php echo (int)$totalPlayers; ?>
-                    </span>
-                    <span>
-                        Fragen:
-                        <?php echo (int)$totalQuestions; ?>
-                    </span>
-                    <span>
-                        Gewinnerpunkte:
-                        <?php echo (int)$winnerScore; ?>
-                    </span>
+                    <div class="stat-metric">
+                        <span class="stat-label">Teilnehmer</span>
+                        <span class="stat-num"><?php echo (int)$totalPlayers; ?></span>
+                    </div>
+                    <div class="stat-metric">
+                        <span class="stat-label">Fragen</span>
+                        <span class="stat-num"><?php echo (int)$totalQuestions; ?></span>
+                    </div>
+                    <div class="stat-metric">
+                        <span class="stat-label">Gewinnerpunkte</span>
+                        <span class="stat-num"><?php echo (int)$winnerScore; ?></span>
+                    </div>
                 </div>
             </div>
         </section>
@@ -184,7 +237,7 @@ function e(string $value): string
                                 $isCurrentPlayer = $playerName === $currentDisplayName;
                             ?>
                             <tr<?php echo $isCurrentPlayer ? ' class="current-player"' : ''; ?>>
-                                <td><?php echo $index + 1; ?>.</td>
+                                <td><?php echo (int)($player['rank'] ?? ($index + 1)); ?>.</td>
                                 <td>
                                     <span class="ranking-name-cell">
                                         <?php if (!empty($player['avatar'])): ?>

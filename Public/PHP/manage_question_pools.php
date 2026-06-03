@@ -11,12 +11,13 @@ if (!in_array($role, ['admin', 'teacher'])) {
     exit;
 }
 
+// Kurzes Kürzel, um Text sicher auszugeben (HTML-Sonderzeichen werden escaped).
 function e($value)
 {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
-// Eingeloggten User ermitteln – primär über die beim Login gesetzte Session-ID
+// Eingeloggten User ermitteln, in erster Linie über die beim Login gesetzte Session-ID
 $currentUserId = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
 
 // Fallback: über den Benutzernamen, falls die Session-ID einmal fehlt
@@ -92,6 +93,7 @@ $messageType = '';
 
 // POST-Aktionen
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_check();
     $action = $_POST['action'] ?? '';
 
     // Gewählte Fachbereiche aus dem Formular (nur gültige IDs)
@@ -381,6 +383,7 @@ $activePools = (int)$pdo->query("SELECT COUNT(*) FROM question_pools WHERE is_ac
 
                         <div class="col-qaktion">
                             <form method="POST" action="manage_question_pools.php<?php echo $filterQuery; ?>" class="inline-form">
+                                <?php echo csrf_field(); ?>
                                 <input type="hidden" name="action" value="toggle_status">
                                 <input type="hidden" name="pool_id" value="<?php echo $p['id']; ?>">
                                 <button type="submit" class="btn-icon <?php echo $p['is_active'] ? 'btn-toggle-active' : 'btn-toggle-inactive'; ?>">
@@ -451,6 +454,7 @@ $activePools = (int)$pdo->query("SELECT COUNT(*) FROM question_pools WHERE is_ac
         <div class="modal-subtitle">Lege einen neuen Themenbereich für Fragen an.</div>
 
         <form method="POST" action="manage_question_pools.php<?php echo $filterQuery; ?>">
+            <?php echo csrf_field(); ?>
             <input type="hidden" name="action" value="create_pool">
 
             <div class="modal-field">
@@ -490,6 +494,7 @@ $activePools = (int)$pdo->query("SELECT COUNT(*) FROM question_pools WHERE is_ac
         <div class="modal-subtitle" id="editPoolSubtitle">Pooldaten anpassen</div>
 
         <form method="POST" action="manage_question_pools.php<?php echo $filterQuery; ?>">
+            <?php echo csrf_field(); ?>
             <input type="hidden" name="action" value="update_pool">
             <input type="hidden" name="pool_id" id="editPoolId">
 
@@ -534,6 +539,7 @@ $activePools = (int)$pdo->query("SELECT COUNT(*) FROM question_pools WHERE is_ac
         <div class="modal-subtitle" id="deletePoolSubtitle">Möchtest du diesen Fragenpool wirklich löschen?</div>
 
         <form method="POST" action="manage_question_pools.php<?php echo $filterQuery; ?>">
+            <?php echo csrf_field(); ?>
             <input type="hidden" name="action" value="delete_pool">
             <input type="hidden" name="pool_id" id="deletePoolId">
 
@@ -623,10 +629,12 @@ $activePools = (int)$pdo->query("SELECT COUNT(*) FROM question_pools WHERE is_ac
         let perPage = parseInt(perPageSel.value, 10) || 10;
         let current = 1;
 
+        // Berechnet, wie viele Seiten die Liste bei der gewählten Seitengröße hat.
         function totalPages() {
             return Math.max(1, Math.ceil(rows.length / perPage));
         }
 
+        // Baut die Liste der anzuzeigenden Seitenzahlen, bei vielen Seiten mit Auslassungspunkten.
         function pageList(total, cur) {
             const out = [];
             for (let i = 1; i <= total; i++) {
@@ -639,6 +647,7 @@ $activePools = (int)$pdo->query("SELECT COUNT(*) FROM question_pools WHERE is_ac
             return out;
         }
 
+        // Zeigt nur die Zeilen der aktuellen Seite an und baut die Seiten-Buttons neu.
         function render() {
             const total = totalPages();
             if (current > total) current = total;

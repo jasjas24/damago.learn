@@ -1,0 +1,9 @@
+# Upload-Ordner: hochgeladene Dateien dürfen NICHT als Skript ausgeführt werden
+# (LH 24.2 / 27.4). Gilt auch für alle Unterordner (Questions/, Avatare/, Vorlagen/).
+#
+# WICHTIG: KEIN php_admin_flag/php_value hier verwenden – das ist in .htaccess nicht
+# erlaubt und führt zu "Internal Server Error". Stattdessen werden Skript-/ausführbare
+# Dateiendungen komplett gesperrt, sodass sie nicht ausgeführt oder ausgeliefert werden.
+<FilesMatch "\.(php|php3|php4|php5|php7|phps|phtml|pht|phar|cgi|pl|py|asp|aspx|sh|exe)$">
+    Require all denied
+</FilesMatch>

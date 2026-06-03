@@ -2,6 +2,7 @@
 require_once 'init.php';
 require_once 'db.php';
 
+// Zeigt das eigene Profil und nimmt eine Passwortänderung entgegen.
 // Nur eingeloggte Benutzer (keine Gäste/Spieler) dürfen das Profil sehen
 if (($_SESSION['user_role'] ?? 'guest') === 'guest' || empty($_SESSION['user_id'])) {
     header("Location: dashboard.php");
@@ -23,6 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'chang
 
     if ($current === '' || $new === '' || $confirm === '') {
         $pwMessage = 'Passwort konnte nicht gespeichert werden: Bitte alle Felder ausfüllen.';
+    } elseif (strlen($new) < 8) {
+        $pwMessage = 'Passwort konnte nicht gespeichert werden: Das neue Passwort muss mindestens 8 Zeichen lang sein.';
     } elseif ($new !== $confirm) {
         $pwMessage = 'Passwort konnte nicht gespeichert werden: Die neuen Passwörter stimmen nicht überein.';
     } else {

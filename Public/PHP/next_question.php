@@ -18,7 +18,25 @@ if ($lobby_id && $current_question) {
     try {
         // 1. Die vom Spieler ausgewählten IDs direkt aus dem nativen Checkbox-Array holen (als Integers)
         $chosenIds = isset($_POST['selected_answers']) ? array_map('intval', $_POST['selected_answers']) : [];
-        $isTimeout = isset($_POST['timeout']) && $_POST['timeout'] == '1';
+
+        // 1b. SERVER ist maßgebliche Zeitquelle (LH 13.4 / 26.3):
+        //     Verstrichene Zeit serverseitig aus dem Fragestart-Zeitstempel berechnen.
+        //     Eine verspätete Abgabe (über time_limit + Toleranz) wird wie ein Timeout gewertet.
+        $grace = 2; // Sekunden Toleranz gegen Netzwerk-/Anzeigeverzögerung
+        $isTimeout = false;
+        $remainingTime = null;
+        $serverTimeLimit = 0;
+        $stmtTime = $pdo->prepare("SELECT time_limit, current_question_started_at, TIMESTAMPDIFF(SECOND, current_question_started_at, NOW()) AS elapsed FROM quiz_lobbies WHERE id = ?");
+        $stmtTime->execute([$lobby_id]);
+        $timeRow = $stmtTime->fetch(PDO::FETCH_ASSOC);
+        if ($timeRow) {
+            $serverTimeLimit = (int)$timeRow['time_limit'];
+            if ($timeRow['current_question_started_at'] !== null) {
+                $elapsed = (int)$timeRow['elapsed'];
+                $remainingTime = max(0, $serverTimeLimit - $elapsed);
+                $isTimeout = $elapsed > ($serverTimeLimit + $grace);
+            }
+        }
 
         // 2. Die wirklich korrekten IDs aus der Session/Frage sammeln
         $correctIds = [];
@@ -30,11 +48,10 @@ if ($lobby_id && $current_question) {
             }
         }
 
-        // 3. ERWEITERTE PUNKTEBERECHNUNG (Je nach Modus)
-        $pointsEarned = 0;
+        // 3. PUNKTEBERECHNUNG je nach Modus
         $pointMode = $_SESSION['quiz_setup']['point_mode'] ?? null;
-        
-        // NEU: Für Mitspieler den Punktemodus live aus der DB holen, da sie keine Host-Session haben
+
+        // Für Mitspieler den Punktemodus live aus der DB holen, da sie keine Host-Session haben
         if (empty($pointMode) && $lobby_id) {
             $stmtMode = $pdo->prepare("SELECT point_mode FROM quiz_lobbies WHERE id = ?");
             $stmtMode->execute([$lobby_id]);
@@ -44,61 +61,51 @@ if ($lobby_id && $current_question) {
                 $_SESSION['quiz_setup']['point_mode'] = $dbMode; // In Session merken
             }
         }
-
-        // Fallback, falls absolut nichts gefunden wurde
         if (empty($pointMode)) {
             $pointMode = 'all_or_nothing';
         }
-        
-        if (!$isTimeout && !empty($correctIds)) {
-            
-            // MODUS: Ganz oder gar nicht
+
+        // 3a. Korrektheit modusunabhängig bestimmen: vollständig richtig / teilweise / falsch.
+        $chosenCorrect = 0;
+        $chosenWrong   = 0;
+        foreach ($chosenIds as $id) {
+            if (in_array($id, $correctIds)) { $chosenCorrect++; }
+            else { $chosenWrong++; }
+        }
+        $totalCorrect = count($correctIds);
+
+        $answerCategory = 'wrong';
+        if (!$isTimeout && $totalCorrect > 0 && $chosenWrong === 0 && $chosenCorrect > 0) {
+            // keine falsche gewählt, mindestens eine richtige (bei genau 1 richtigen = vollständig)
+            $answerCategory = ($chosenCorrect === $totalCorrect) ? 'correct' : 'partial';
+        }
+
+        // 3b. Punkte je Modus (max. 1000, nie negativ, auf ganze Zahlen gerundet).
+        $pointsEarned = 0;
+        if ($answerCategory === 'correct') {
+            if ($pointMode === 'time_bonus') {
+                // Zeitbonus: 500 Grundpunkte + bis zu 500 aus der serverseitigen Restzeit (LH 18.1).
+                $ratio = ($remainingTime !== null && $serverTimeLimit > 0) ? ($remainingTime / $serverTimeLimit) : 0;
+                $pointsEarned = (int) round(500 + 500 * $ratio);
+            } else {
+                $pointsEarned = 1000;
+            }
+        } elseif ($answerCategory === 'partial') {
             if ($pointMode === 'all_or_nothing') {
-                sort($chosenIds);
-                sort($correctIds);
-                if ($chosenIds === $correctIds) {
-                    $pointsEarned = 1000;
-                }
-            } 
-            // MODUS: Teilpunkte
-            elseif ($pointMode === 'partial') {
-                $falscheGewaehlt = false;
-                $richtigeGewaehltGraf = 0;
-                $anzahlRichtigeAntwortenInsgesamt = count($correctIds);
-
-                foreach ($chosenIds as $id) {
-                    if (in_array($id, $correctIds)) {
-                        $richtigeGewaehltGraf++;
-                    } else {
-                        $falscheGewaehlt = true;
-                    }
-                }
-
-                if ($falscheGewaehlt) {
-                    // Sobald eine falsche Antwort gewählt wurde, gibt es immer 0 Punkte
-                    $pointsEarned = 0;
-                } 
-                elseif ($richtigeGewaehltGraf > 0) {
-                    if ($anzahlRichtigeAntwortenInsgesamt === 1) {
-                        // Wenn es nur eine einzige richtige Antwort gibt, gibt es 1000 Punkte
-                        $pointsEarned = 1000;
-                    } 
-                    elseif ($richtigeGewaehltGraf === $anzahlRichtigeAntwortenInsgesamt) {
-                        // Alle richtigen Antworten aus einer Mehrfachauswahl getroffen
-                        $pointsEarned = 1000;
-                    } 
-                    else {
-                        // Mindestens eine richtige Antwort und keine falsche Antwort gewählt
-                        $pointsEarned = 500;
-                    }
-                }
+                $pointsEarned = 0;            // "Ganz oder gar nicht": nur exakt richtig zählt
+            } elseif ($pointMode === 'time_bonus') {
+                // Teilrichtig im Zeitbonus gibt die halben Zeitpunkte (LH 18.2).
+                $ratio = ($remainingTime !== null && $serverTimeLimit > 0) ? ($remainingTime / $serverTimeLimit) : 0;
+                $pointsEarned = (int) round((500 + 500 * $ratio) / 2);
+            } else {
+                $pointsEarned = 500;          // Teilpunkte
             }
         }
 
         // 4. In DB eintragen, dass dieser Spieler geantwortet hat
-        //    (inkl. Korrektheit & erreichter Punkte – Grundlage für die Archiv-Statistik)
-        //    is_correct = 1 nur bei vollständig richtiger Antwort (1000 Punkte), sonst 0.
-        $isCorrect = (!$isTimeout && $pointsEarned === 1000) ? 1 : 0;
+        //    (inkl. Korrektheit und erreichter Punkte, Grundlage für die Archiv-Statistik)
+        //    is_correct = 1 nur bei VOLLSTÄNDIG richtiger Antwort (modusunabhängig, LH 19).
+        $isCorrect = ($answerCategory === 'correct') ? 1 : 0;
         $stmt = $pdo->prepare("INSERT IGNORE INTO player_answers (lobby_id, question_id, player_name, is_correct, points_earned) VALUES (?, ?, ?, ?, ?)");
         $stmt->execute([$lobby_id, $current_question['id'], $username, $isCorrect, $pointsEarned]);
 
@@ -112,13 +119,15 @@ if ($lobby_id && $current_question) {
         }
         $_SESSION['quiz_score'] += $pointsEarned;
 
-        // 7. Status für die Einblendung ermitteln (timeout, correct, partial oder wrong)
+        // 7. Status für die Einblendung ermitteln (timeout, correct, partial oder wrong).
+        //    An die Korrektheit gekoppelt (nicht an feste Punktwerte), damit auch der
+        //    Zeitbonus mit variablen Punkten korrekt als richtig/teilrichtig erscheint.
         $resultStatus = 'wrong';
         if ($isTimeout) {
             $resultStatus = 'timeout';
-        } elseif ($pointsEarned === 1000) {
+        } elseif ($answerCategory === 'correct' && $pointsEarned > 0) {
             $resultStatus = 'correct';
-        } elseif ($pointsEarned === 500) {
+        } elseif ($answerCategory === 'partial' && $pointsEarned > 0) {
             $resultStatus = 'partial';
         }
 
@@ -138,7 +147,7 @@ if ($lobby_id && $current_question) {
         $stmtAnswers->execute([$lobby_id, $current_question['id']]);
         $answeredPlayers = (int)$stmtAnswers->fetchColumn();
 
-        // Wenn alle fertig sind ODER die Zeit ablief -> Auflösung freischalten
+        // Wenn alle fertig sind oder die Zeit abgelaufen ist, die Auflösung freischalten
         if ($answeredPlayers >= $totalPlayers || $isTimeout) {
             $stmtUpdate = $pdo->prepare("UPDATE quiz_lobbies SET show_explanation = 1 WHERE id = ?");
             $stmtUpdate->execute([$lobby_id]);

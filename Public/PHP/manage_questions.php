@@ -11,6 +11,7 @@ if (!in_array($role, ['admin', 'teacher'])) {
     exit;
 }
 
+// Kurzes Kürzel, um Text sicher auszugeben (HTML-Sonderzeichen werden escaped).
 function e($val) {
     return htmlspecialchars((string)$val, ENT_QUOTES, 'UTF-8');
 }
@@ -50,7 +51,7 @@ function resolveQuestionImageId(?string $fileName, PDO $pdo, string $dir, array 
     $row = $stmt->fetch();
     if ($row) return (int)$row['id'];
 
-    // Noch nicht registriert -> Datensatz nachtragen
+    // Noch nicht registriert, also den Datensatz nachtragen
     $finfo = new finfo(FILEINFO_MIME_TYPE);
     $mime  = $finfo->file($path) ?: 'application/octet-stream';
     $size  = (int)(@filesize($path) ?: 0);
@@ -62,7 +63,7 @@ function resolveQuestionImageId(?string $fileName, PDO $pdo, string $dir, array 
     return (int)$pdo->lastInsertId();
 }
 
-// Eingeloggten User ermitteln – primär über die beim Login gesetzte Session-ID
+// Eingeloggten User ermitteln, in erster Linie über die beim Login gesetzte Session-ID
 $currentUserId = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
 
 // Fallback: über den Benutzernamen, falls die Session-ID einmal fehlt
@@ -79,6 +80,7 @@ $importErrors = []; // Zeilengenaue Fehlermeldungen beim Import (leer = kein Imp
 
 // POST-Aktionen
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_check();
     $action = $_POST['action'] ?? '';
 
     // Status umschalten
@@ -286,7 +288,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 foreach ($sheet->xpath('//*[local-name()="row"]') as $row) {
                     $rowData = [];
                     foreach ($row->xpath('*[local-name()="c"]') as $cell) {
-                        // Spaltenindex aus Zelladresse (A1 → 0, B1 → 1 ...)
+                        // Spaltenindex aus der Zelladresse (A1 ist 0, B1 ist 1 und so weiter)
                         $ref  = (string)$cell['r'];
                         preg_match('/^([A-Z]+)/', $ref, $m);
                         $col  = 0;
@@ -314,7 +316,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $tmpPath = $_FILES['import_file']['tmp_name'];
             $allRows = parseXlsxRows($tmpPath);
 
-            // Zeile 0 = Display-Header (★ PFLICHTFELD …), Zeile 1 = Feldnamen, ab Zeile 2 = Daten
+            // Zeile 0 ist die Überschrift fürs Auge, Zeile 1 sind die Feldnamen, ab Zeile 2 kommen die Daten
             if (count($allRows) < 2) {
                 $message     = 'Die Datei enthält keine verwertbaren Zeilen.';
                 $messageType = 'error';
@@ -339,7 +341,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      VALUES (?, ?, ?, ?, ?, ?)"
                 );
 
-                // ── Phase A: ALLE Datenzeilen prüfen, dabei NICHTS in die DB schreiben ──
+                // Phase A: alle Datenzeilen prüfen, dabei noch nichts in die Datenbank schreiben
                 $validRows = [];
 
                 foreach (array_slice($allRows, 2, null, true) as $i => $row) {
@@ -411,16 +413,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ];
                 }
 
-                // ── Auswertung von Phase A ──
+                // Auswertung von Phase A
                 if (empty($validRows) && empty($importErrors)) {
                     $message     = 'Die Datei enthält keine verwertbaren Datenzeilen.';
                     $messageType = 'error';
                 } elseif (!empty($importErrors)) {
-                    // Mindestens ein Fehler -> KOMPLETTER Abbruch, es wird NICHTS gespeichert
+                    // Mindestens ein Fehler, also kompletter Abbruch, es wird nichts gespeichert
                     $message     = 'Import fehlgeschlagen – es wurde nichts gespeichert. Bitte korrigiere die folgenden Punkte:';
                     $messageType = 'error';
                 } else {
-                    // ── Phase B: Schreiben, gekapselt in einer Transaktion ──
+                    // Phase B: schreiben, gekapselt in einer Transaktion
                     try {
                         $pdo->beginTransaction();
                         foreach ($validRows as $vr) {
@@ -642,6 +644,7 @@ if (!empty($questions)) {
 
                         <div class="col-qaktion">
                             <form method="POST" action="manage_questions.php<?php echo $selectedPool ? '?pool=' . $selectedPool : ''; ?>" class="inline-form">
+                                <?php echo csrf_field(); ?>
                                 <input type="hidden" name="action" value="toggle_status">
                                 <input type="hidden" name="question_id" value="<?php echo $q['id']; ?>">
                                 <button type="submit" class="btn-icon <?php echo $q['is_active'] ? 'btn-toggle-active' : 'btn-toggle-inactive'; ?>">
@@ -705,6 +708,7 @@ if (!empty($questions)) {
         <div class="modal-subtitle">Wähle einen Fragenpool und erfasse die Frage mit Antworten.</div>
 
         <form method="POST" action="manage_questions.php<?php echo $selectedPool ? '?pool=' . $selectedPool : ''; ?>">
+            <?php echo csrf_field(); ?>
             <input type="hidden" name="action" value="create_question">
 
             <div class="modal-field">
@@ -835,6 +839,7 @@ if (!empty($questions)) {
         <?php endif; ?>
 
         <form method="POST" action="manage_questions.php" enctype="multipart/form-data">
+            <?php echo csrf_field(); ?>
             <input type="hidden" name="action" value="import_questions">
 
             <div class="modal-field">
@@ -871,6 +876,7 @@ if (!empty($questions)) {
         <div class="modal-subtitle" id="editQuestionSubtitle">Fragedaten anpassen</div>
 
         <form method="POST" action="manage_questions.php<?php echo $selectedPool ? '?pool=' . $selectedPool : ''; ?>">
+            <?php echo csrf_field(); ?>
             <input type="hidden" name="action" value="update_question">
             <input type="hidden" name="question_id" id="editQuestionId">
 
@@ -986,6 +992,7 @@ if (!empty($questions)) {
         <div class="modal-subtitle" id="deleteQuestionSubtitle">Möchtest du diese Frage wirklich löschen?</div>
 
         <form method="POST" action="manage_questions.php<?php echo $selectedPool ? '?pool=' . $selectedPool : ''; ?>">
+            <?php echo csrf_field(); ?>
             <input type="hidden" name="action" value="delete_question">
             <input type="hidden" name="question_id" id="deleteQuestionId">
 
@@ -1004,12 +1011,14 @@ if (!empty($questions)) {
     const dropContent = document.getElementById('importDropContent');
     const submitBtn   = document.getElementById('importSubmit');
 
+    // Schaltet den Import-Button nur frei, wenn ein Pool und eine Datei gewählt sind.
     function checkImportReady() {
         const poolSelected = document.getElementById('import_pool').value !== '';
         const fileSelected = fileInput.files && fileInput.files.length > 0;
         submitBtn.disabled = !(poolSelected && fileSelected);
     }
 
+    // Zeigt die gewählte Datei in der Drop-Zone an und prüft danach die Bereitschaft.
     function setFile(file) {
         if (!file) return;
         dropContent.innerHTML = `
@@ -1140,10 +1149,12 @@ if (!empty($questions)) {
         let perPage = parseInt(perPageSel.value, 10) || 10;
         let current = 1;
 
+        // Berechnet, wie viele Seiten die Liste bei der gewählten Seitengröße hat.
         function totalPages() {
             return Math.max(1, Math.ceil(rows.length / perPage));
         }
 
+        // Baut die Liste der anzuzeigenden Seitenzahlen, bei vielen Seiten mit Auslassungspunkten.
         function pageList(total, cur) {
             const out = [];
             for (let i = 1; i <= total; i++) {
@@ -1156,6 +1167,7 @@ if (!empty($questions)) {
             return out;
         }
 
+        // Zeigt nur die Zeilen der aktuellen Seite an und baut die Seiten-Buttons neu.
         function render() {
             const total = totalPages();
             if (current > total) current = total;

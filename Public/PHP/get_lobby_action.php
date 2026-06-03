@@ -2,10 +2,12 @@
 require_once 'db.php';
 header('Content-Type: application/json');
 
+// Setzt die Lobby auf gestartet, sobald der Host das Quiz beginnt.
 $lobby_id = (int)($_GET['lobby_id'] ?? 0);
 
 if ($lobby_id > 0) {
     try {
+        // Spiel als gestartet markieren
         $stmt = $pdo->prepare("UPDATE quiz_lobbies SET is_started = 1 WHERE id = ?");
         $stmt->execute([$lobby_id]);
         echo json_encode(['success' => true]);

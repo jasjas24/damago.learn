@@ -11,12 +11,13 @@ if (!in_array($role, ['admin', 'teacher'], true)) {
     exit;
 }
 
+// Kurzes Kürzel, um Text sicher auszugeben (HTML-Sonderzeichen werden escaped).
 function e($value)
 {
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
-// Punkte-Modus-Code -> Anzeigename
+// Wandelt den Punkte-Modus-Code in den lesbaren Anzeigenamen um
 function modeName(?string $code): string
 {
     switch ($code) {
@@ -34,12 +35,13 @@ function pct(int $correct, int $answered): ?int
     return $answered > 0 ? (int) round($correct / $answered * 100) : null;
 }
 
+// Formatiert die Quote als Prozenttext für die Anzeige.
 function pctLabel(?int $p): string
 {
     return $p === null ? '—' : $p . '%';
 }
 
-// Quoten unter 50 % zur Hervorhebung markieren (— bleibt unmarkiert);
+// Quoten unter 50 % zur Hervorhebung markieren (ohne Wert bleibt unmarkiert);
 // 0 % gilt als kritisch und wird zusätzlich rot dargestellt.
 function pctClass(?int $p): string
 {
@@ -49,6 +51,7 @@ function pctClass(?int $p): string
     return $p === 0 ? ' pct-low pct-zero' : ' pct-low';
 }
 
+// Bringt einen Zeitstempel in ein lesbares deutsches Datumsformat.
 function formatDateTime($dt): string
 {
     if (empty($dt)) return '—';
@@ -78,7 +81,7 @@ try {
 }
 
 // ---------------------------------------------------------------------------
-// Spiele (Ebene 2) inkl. Aggregaten laden – gefiltert
+// Spiele (Ebene 2) inkl. Summen laden, nach den Filtern
 // ---------------------------------------------------------------------------
 $where  = ['ql.is_started = 1'];
 $params = [];
@@ -150,7 +153,7 @@ if (!empty($lobbyIds)) {
             $playersByLobby[(int) $p['lobby_id']][] = $p;
         }
     } catch (PDOException $e) {
-        // Teilnehmerdaten optional – Seite bleibt funktionsfähig
+        // Teilnehmerdaten sind optional, die Seite bleibt auch ohne sie nutzbar
     }
 }
 
@@ -365,12 +368,17 @@ $hasFilter = ($fPool !== '' || $fFrom !== '' || $fTo !== '' || $fUser !== '');
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
+                                                                        <?php $arPrevScore = null; $arRank = 0; ?>
                                                                         <?php foreach ($gPlayers as $rankIdx => $p):
                                                                             $pAns = (int) $p['answered'];
                                                                             $pCor = (int) $p['correct'];
                                                                             $pWrong = $pAns - $pCor;
                                                                             $pPct = pct($pCor, $pAns);
-                                                                            $pRank = $rankIdx + 1;
+                                                                            // Standard-Competition-Ranking (LH 20): gleiche Punkte = gleicher Platz.
+                                                                            $pPoints = (int) $p['points'];
+                                                                            if ($arPrevScore === null || $pPoints < $arPrevScore) { $arRank = $rankIdx + 1; }
+                                                                            $arPrevScore = $pPoints;
+                                                                            $pRank = $arRank;
                                                                         ?>
                                                                             <tr<?php echo $pRank === 1 ? ' class="archive-winner-row"' : ''; ?>>
                                                                                 <td class="cell-num"><?php echo $pRank; ?>.</td>
@@ -485,11 +493,14 @@ $hasFilter = ($fPool !== '' || $fFrom !== '' || $fTo !== '' || $fUser !== '');
             let perPage = parseInt(perPageSel.value, 10) || 10;
             let current = 1;
 
+            // Findet die zugehörige aufklappbare Detailzeile zu einer Pool-Zeile, falls vorhanden.
             function detailOf(row) {
                 const n = row.nextElementSibling;
                 return (n && n.classList.contains('archive-detail-row')) ? n : null;
             }
+            // Berechnet, wie viele Seiten die Pool-Liste bei der gewählten Seitengröße hat.
             function totalPages() { return Math.max(1, Math.ceil(poolRows.length / perPage)); }
+            // Baut die Liste der anzuzeigenden Seitenzahlen, bei vielen Seiten mit Auslassungspunkten.
             function pageList(total, cur) {
                 const out = [];
                 for (let i = 1; i <= total; i++) {
@@ -501,6 +512,7 @@ $hasFilter = ($fPool !== '' || $fFrom !== '' || $fTo !== '' || $fUser !== '');
                 }
                 return out;
             }
+            // Zeigt nur die Pools der aktuellen Seite an und baut die Seiten-Buttons neu.
             function render() {
                 const total = totalPages();
                 if (current > total) current = total;

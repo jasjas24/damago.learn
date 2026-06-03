@@ -2,20 +2,33 @@
 require_once 'init.php';
 require_once 'db.php';
 
+// Nimmt das Registrierungsformular entgegen und legt daraus ein neues Benutzerkonto an.
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // 1. Daten bereinigen (trim entfernt Leerzeichen am Anfang/Ende)
-    $username = trim($_POST['username'] ?? '');
-    $email    = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
+    $username       = trim($_POST['username'] ?? '');
+    $email          = trim($_POST['email'] ?? '');
+    $password       = $_POST['password'] ?? '';
+    $passwordRepeat = $_POST['password_repeat'] ?? '';
 
     // 2. Einfache Validierung (Backend-Sicherheit)
-    if (empty($username) || empty($email) || empty($password)) {
+    if (empty($username) || empty($email) || empty($password) || empty($passwordRepeat)) {
         header("Location: ../register.html?error=empty_fields");
         exit;
     }
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         header("Location: ../register.html?error=invalid_email");
+        exit;
+    }
+
+    // Passwort: Mindestlänge und Übereinstimmung serverseitig prüfen (LH 27.1)
+    if (strlen($password) < 8) {
+        header("Location: ../register.html?error=password_too_short");
+        exit;
+    }
+
+    if ($password !== $passwordRepeat) {
+        header("Location: ../register.html?error=password_mismatch");
         exit;
     }
 

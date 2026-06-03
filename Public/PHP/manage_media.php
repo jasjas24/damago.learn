@@ -2,6 +2,7 @@
 require_once 'init.php';
 require_once 'db.php'; // PDO-Verbindung
 
+// Kurzes Kürzel, um Text sicher auszugeben (HTML-Sonderzeichen werden escaped).
 function e($value) {
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
@@ -32,6 +33,7 @@ $pools = $stmtPools->fetchAll(PDO::FETCH_ASSOC);
 
 // POST-Aktionen
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_check();
     $action = $_POST['action'] ?? '';
 
     // Löschen
@@ -104,8 +106,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Bilder laden (nur nicht-gelöschte)
-$stmt = $pdo->query("SELECT * FROM media_files WHERE deleted_at IS NULL ORDER BY created_at DESC");
+// Bilder laden (nur nicht-gelöschte) inkl. zugehörigem Fragenpool-Namen
+$stmt = $pdo->query("
+    SELECT m.*, p.name AS pool_name
+    FROM media_files m
+    LEFT JOIN question_pools p ON p.id = m.question_pool_id
+    WHERE m.deleted_at IS NULL
+    ORDER BY m.created_at DESC
+");
 $images = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
@@ -116,7 +124,7 @@ $images = $stmt->fetchAll();
 <title>Medienverwaltung | damago Quizsystem</title>
 <link rel="stylesheet" href="../CSS/style.css">
 </head>
-<body class="manage-questions-page">
+<body class="manage-questions-page media-page">
 
 <?php include_once 'topbar.php'; ?>
 
@@ -124,7 +132,7 @@ $images = $stmt->fetchAll();
 <section class="quiz-main">
 
 <div class="mq-topbar">
-    <div class="mq-topbar-info-inline">
+    <div class="mq-topbar-info">
         <span class="eyebrow">Medienverwaltung</span>
         <h2>Hochgeladene Dateien</h2>
         <p>Hier kannst du Bilder für das Quizsystem hochladen und verwalten. Wähle beim Upload einen Fragenpool aus, um die Datei diesem Pool zuzuordnen.</p>
@@ -143,6 +151,7 @@ $images = $stmt->fetchAll();
 
 <div class="mq-toolbar">
     <form action="manage_media.php" method="POST" enctype="multipart/form-data" class="questions-form">
+        <?php echo csrf_field(); ?>
         <input type="hidden" name="action" value="upload">
         <div class="form-group">
             <label>Fragenpool auswählen *</label>
@@ -154,38 +163,82 @@ $images = $stmt->fetchAll();
             </select>
         </div>
         <div class="form-group">
-            <label>Neue Datei:</label>
+            <label>Neue Datei (JPG, JPEG, PNG, WebP · max. 20 MB):</label>
             <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" required>
         </div>
         <button type="submit" class="btn btn-primary">Hochladen</button>
     </form>
 </div>
 
-<div class="question-list">
 <?php if(empty($images)): ?>
     <div class="empty-list-hint">Keine Dateien vorhanden.</div>
 <?php else: ?>
-    <?php foreach($images as $img): ?>
-    <div class="question-card">
-        <div class="col-frage">
-            <div><?php echo e($img['original_name']); ?></div>
-            <div><?php echo e($img['mime_type']); ?> | <?php echo e(round($img['file_size']/1024,1)); ?> KB</div>
+    <div class="media-list">
+        <div class="media-list-head">
+            <span>Dateiname</span>
+            <span>Fachbereich</span>
+            <span class="media-head-action">Aktion</span>
         </div>
-        <div class="col-qaktion mq-action-row">
-            <form method="POST" action="manage_media.php">
-                <input type="hidden" name="action" value="delete_media">
-                <input type="hidden" name="media_id" value="<?php echo $img['id']; ?>">
-                <button type="submit" class="btn-icon btn-toggle-inactive" title="Datei löschen">🗑</button>
-            </form>
-            <a href="<?php echo e($uploadUrl . $img['file_name']); ?>" target="_blank" class="btn-icon btn-edit">Anzeigen</a>
-        </div>
+        <?php foreach($images as $img): ?>
+            <?php $fileUrl = e($uploadUrl . $img['file_name']); ?>
+            <div class="media-row">
+                <span class="media-row-name" title="<?php echo e($img['original_name']); ?>"><?php echo e($img['original_name']); ?></span>
+                <span class="media-row-pool"><?php echo $img['pool_name'] ? e($img['pool_name']) : '— kein Pool —'; ?></span>
+                <div class="media-row-actions">
+                    <button type="button" class="btn-icon btn-edit"
+                            onclick="openMediaModal(<?php echo htmlspecialchars(json_encode($uploadUrl . $img['file_name']), ENT_QUOTES); ?>, <?php echo htmlspecialchars(json_encode($img['original_name']), ENT_QUOTES); ?>)">
+                        Anzeigen
+                    </button>
+                    <form method="POST" action="manage_media.php" onsubmit="return confirm('Datei wirklich löschen?');">
+                        <?php echo csrf_field(); ?>
+                        <input type="hidden" name="action" value="delete_media">
+                        <input type="hidden" name="media_id" value="<?php echo $img['id']; ?>">
+                        <button type="submit" class="btn-icon btn-delete" aria-label="Datei löschen" title="Datei löschen">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                                <path d="M10 11v6M14 11v6"></path>
+                                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        <?php endforeach; ?>
     </div>
-    <?php endforeach; ?>
 <?php endif; ?>
-</div>
 
 </section>
 </main>
+
+<!-- Vorschau-Modal für "Anzeigen" -->
+<div id="mediaModal" class="media-modal" hidden>
+    <div class="media-modal-backdrop" onclick="closeMediaModal()"></div>
+    <div class="media-modal-content">
+        <button type="button" class="media-modal-close" onclick="closeMediaModal()" aria-label="Schließen">×</button>
+        <img id="mediaModalImg" src="" alt="" class="media-modal-img">
+        <div id="mediaModalCaption" class="media-modal-caption"></div>
+    </div>
+</div>
+
+<script>
+    // Öffnet die Bildvorschau im Modal mit dem gewählten Bild.
+    function openMediaModal(url, name) {
+        document.getElementById('mediaModalImg').src = url;
+        document.getElementById('mediaModalImg').alt = name || '';
+        document.getElementById('mediaModalCaption').textContent = name || '';
+        document.getElementById('mediaModal').hidden = false;
+    }
+    // Schließt die Bildvorschau wieder.
+    function closeMediaModal() {
+        const modal = document.getElementById('mediaModal');
+        modal.hidden = true;
+        document.getElementById('mediaModalImg').src = '';
+    }
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeMediaModal();
+    });
+</script>
 
 <?php include_once 'footbar.php'; ?>
 </body>

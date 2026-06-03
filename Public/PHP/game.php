@@ -8,6 +8,7 @@ require_once 'helpers.php';
 // 1. Lobby-ID und Host-Status ermitteln
 $isHost = isset($_SESSION['quiz_setup']['lobby_id']);
 $lobby_id = $_SESSION['quiz_setup']['lobby_id'] ?? $_SESSION['player_lobby_id'] ?? null;
+$hostToken = $_SESSION['quiz_setup']['host_token'] ?? ''; // für Host-Aktionen (LH 27.5)
 
 // 2. Prüfen auf !isset ODER empty, damit leere Arrays neu aus der DB geladen werden
 if (!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) {
@@ -42,12 +43,13 @@ if (!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) {
 
                 if (!empty($questionsRaw)) {
                     $quizQuestions = [];
-                    $stmtAnswers = $pdo->prepare("SELECT id, answer_text AS text, is_correct, explanation FROM answer_options WHERE question_id = ?");
+                    $stmtAnswers = $pdo->prepare("SELECT id, answer_text AS text, is_correct, explanation FROM answer_options WHERE question_id = ? ORDER BY sort_order ASC");
 
                     foreach ($questionsRaw as $q) {
                         $stmtAnswers->execute([$q['question_id']]);
+                        // Kein Mischen pro Client (LH 11.4: gleiche Reihenfolge für alle).
+                        // Feste Reihenfolge über sort_order; die gemischte Reihenfolge kommt aus quiz_data (Variante A).
                         $answers = $stmtAnswers->fetchAll(PDO::FETCH_ASSOC);
-                        shuffle($answers);
 
                         $quizQuestions[] = [
                             'id'            => $q['question_id'],
@@ -71,10 +73,12 @@ if (!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) {
 
 // 3. ALLE Einstellungen (PointMode, Status UND Zeitlimit) direkt aus der DB holen
 $timeLimit = 30; // Globaler Fallback, falls in der DB nichts steht
+$questionStartedAt = null; // Server-Startzeitpunkt der aktuellen Frage
+$elapsedSeconds = 0;       // serverseitig verstrichene Sekunden
 
 if ($lobby_id) {
     try {
-        $stmtStatus = $pdo->prepare("SELECT show_explanation, current_question_index, point_mode, time_limit FROM quiz_lobbies WHERE id = ?");
+        $stmtStatus = $pdo->prepare("SELECT show_explanation, current_question_index, point_mode, time_limit, current_question_started_at, TIMESTAMPDIFF(SECOND, current_question_started_at, NOW()) AS elapsed FROM quiz_lobbies WHERE id = ?");
         $stmtStatus->execute([$lobby_id]);
         $lobbyStatus = $stmtStatus->fetch(PDO::FETCH_ASSOC);
         
@@ -89,6 +93,12 @@ if ($lobby_id) {
             if (!empty($lobbyStatus['time_limit'])) {
                 $timeLimit = (int)$lobbyStatus['time_limit'];
                 $_SESSION['quiz_setup']['time_limit'] = $timeLimit;
+            }
+
+            // Server-Startzeitpunkt der aktuellen Frage merken (maßgebliche Zeitquelle)
+            if (!empty($lobbyStatus['current_question_started_at'])) {
+                $questionStartedAt = $lobbyStatus['current_question_started_at'];
+                $elapsedSeconds = (int)$lobbyStatus['elapsed'];
             }
 
             if ($_SESSION['show_explanation']) {
@@ -108,6 +118,10 @@ $hostPlays = $_SESSION['quiz_setup']['host_plays'] ?? 'yes';
 if (isset($_SESSION['quiz_setup']['time_limit'])) {
     $timeLimit = (int)$_SESSION['quiz_setup']['time_limit'];
 }
+
+// Anzeige-Startwert des Timers = serverseitig verbleibende Zeit.
+// So zeigen auch spät ladende / neu ladende Clients dieselbe Restzeit (Server ist maßgeblich).
+$remainingTime = ($questionStartedAt !== null) ? max(0, $timeLimit - $elapsedSeconds) : $timeLimit;
 
 $retryLoading = false;
 if (!isset($_SESSION['quiz_questions']) || empty($_SESSION['quiz_questions'])) {
@@ -183,6 +197,22 @@ if ($lobby_id) {
 if (empty($rankingPlayers)) {
     $rankingPlayers = [[ 'username' => $currentDisplayName, 'score' => $_SESSION['quiz_score'] ?? 0 ]];
 }
+
+// Antwort-Zähler für die aktuelle Frage (Host-/Beameransicht, LH 9.5): Anfangswert.
+// Live-Aktualisierung erfolgt per Polling über check_next_question.php.
+$answeredCount = 0;
+$totalCount = 0;
+if ($lobby_id && !empty($currentQuestion['id'])) {
+    try {
+        $stmtTotalP = $pdo->prepare("SELECT COUNT(*) FROM lobby_players WHERE lobby_id = ?");
+        $stmtTotalP->execute([$lobby_id]);
+        $totalCount = (int)$stmtTotalP->fetchColumn();
+
+        $stmtAnsP = $pdo->prepare("SELECT COUNT(*) FROM player_answers WHERE lobby_id = ? AND question_id = ?");
+        $stmtAnsP->execute([$lobby_id, $currentQuestion['id']]);
+        $answeredCount = (int)$stmtAnsP->fetchColumn();
+    } catch (PDOException $e) {}
+}
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -212,12 +242,29 @@ if (empty($rankingPlayers)) {
 
     <main class="play-layout">
         <section class="quiz-main">
+            <aside class="quiz-side">
+                <div class="quiz-timer-stack">
+                    <div class="timer-box">
+                        <strong><span id="timer-display"><?php echo $remainingTime; ?></span></strong>
+                    </div>
+                    <?php if ($isHost): ?>
+                        <div class="answer-count-box" id="answer-count-box" title="Teilnehmer, die geantwortet haben">
+                            <strong><span id="answered-count"><?php echo $answeredCount; ?></span>/<span id="total-count"><?php echo $totalCount; ?></span></strong>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <?php if ($isHost): ?>
+                    <form action="abort_game.php" method="POST" class="abort-form" onsubmit="return confirm('Willst du das Spiel wirklich abbrechen? Alle Teilnehmer werden entfernt.');">
+                        <input type="hidden" name="host_token" value="<?php echo htmlspecialchars($hostToken); ?>">
+                        <button type="submit" class="btn btn-abort">Spiel abbrechen</button>
+                    </form>
+                <?php endif; ?>
+            </aside>
+
+            <div class="quiz-content">
             <div class="quiz-topline">
                 <div>
                     <span class="eyebrow">Frage <?php echo $currentIndex + 1; ?> von <?php echo $totalQuestions; ?></span>
-                </div>
-                <div class="timer-box">
-                    <strong><span id="timer-display"><?php echo $timeLimit; ?></span></strong>
                 </div>
             </div>
 
@@ -281,9 +328,11 @@ if (empty($rankingPlayers)) {
             <?php if ($showExplanation): ?>
                 <div class="confirm-button-wrapper">
                     <?php if ($isHost): ?>
+                        <?php $isLastQuestion = ($totalQuestions > 0 && $currentIndex >= $totalQuestions - 1); ?>
                         <form action="go_next.php" method="POST" class="next-question-form">
-                            <button type="submit" class="millionaire-answer confirm-button btn-green">
-                                <span class="answer-text">Nächste Frage (Host)</span>
+                            <input type="hidden" name="host_token" value="<?php echo htmlspecialchars($hostToken); ?>">
+                            <button type="submit" class="millionaire-answer confirm-button <?php echo $isLastQuestion ? 'btn-show-results' : 'btn-green'; ?>">
+                                <span class="answer-text"><?php echo $isLastQuestion ? 'Endergebnis anzeigen' : 'Nächste Frage (Host)'; ?></span>
                             </button>
                         </form>
                     <?php else: ?>
@@ -332,6 +381,7 @@ if (empty($rankingPlayers)) {
                     </ul>
                 </section>
             <?php endif; ?>
+            </div><!-- /.quiz-content -->
         </section>
 
         <aside class="ranking-panel">
@@ -392,7 +442,7 @@ if (empty($rankingPlayers)) {
                     fetch('kick_player.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: 'username=' + encodeURIComponent(username)
+                        body: 'username=' + encodeURIComponent(username) + '&host_token=' + encodeURIComponent(<?php echo json_encode($hostToken); ?>)
                     }).then(() => {
                         // Zeile ausblenden
                         this.closest('tr').remove();
@@ -430,7 +480,9 @@ if (empty($rankingPlayers)) {
 
         // 2. TIMEOUT LOGIK (GEÄNDERT: LÖST NUN DIREKT DEN CONFIRM-KLICK AUS)
         <?php if (!$showExplanation): ?>
-            let timeLeft = <?php echo intval($timeLimit); ?>;
+            // Startwert = serverseitig verbleibende Zeit (Server ist maßgeblich, LH 13.4 / 26.3).
+            // Der JS-Countdown dient nur der Anzeige und dem automatischen Absenden der aktuellen Auswahl.
+            let timeLeft = <?php echo intval($remainingTime); ?>;
             const display = document.getElementById('timer-display');
             const timerBox = document.querySelector('.timer-box');
 
@@ -480,9 +532,27 @@ if (empty($rankingPlayers)) {
     clearInterval(checkInterval);
     alert("Du wurdest aus dem Spiel entfernt.");
     // Wir senden den Spieler zu einem Skript, das die Session löscht
-    window.location.href = 'logout.php'; 
+    window.location.href = 'logout.php';
     return;
 }
+
+                        // Host hat das Spiel abgebrochen, also hinausleiten.
+                        if (data.aborted === true) {
+                            clearInterval(checkInterval);
+                            alert("Der Host hat das Spiel abgebrochen.");
+                            window.location.href = 'dashboard.php';
+                            return;
+                        }
+
+                        // Antwort-Zähler live aktualisieren (LH 9.5)
+                        const answeredEl = document.getElementById('answered-count');
+                        if (answeredEl && typeof data.answered !== 'undefined') {
+                            answeredEl.textContent = data.answered;
+                            const totalEl = document.getElementById('total-count');
+                            if (totalEl && typeof data.total !== 'undefined') {
+                                totalEl.textContent = data.total;
+                            }
+                        }
 
                         // BESTEHENDER CODE:
                         if (data.success) {

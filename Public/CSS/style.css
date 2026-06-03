@@ -10,6 +10,22 @@
 }
 .kick-btn:hover { background: #cc0000; }
 
+/* "Spiel abbrechen" – Host-Aktion in Lobby und laufendem Spiel (LH 9.5).
+   Nutzt die .btn-Basis (Größe/Form) und ergänzt die rote Gefahr-Optik passend zum .btn-primary. */
+.btn-abort {
+    margin-top: 10px;
+    background: linear-gradient(135deg, #dc2626, #991b1b);
+    color: #fff;
+    box-shadow: 0 4px 18px rgba(153, 27, 27, 0.45);
+}
+.btn-abort:hover {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 22px rgba(153, 27, 27, 0.55);
+}
+.btn-abort:active { transform: translateY(0); }
+.abort-form { margin: 0; width: 100%; }
+
 /* ============================================================
    01 · Grundlagen (Variablen, Reset, Body, Hintergrund-Orbs)
    ============================================================ */
@@ -38,14 +54,21 @@
     --radius-lg:  20px;
     --radius-md:  14px;
     --radius-sm:  10px;
+
+    /* Reservierter Platz für die fest fixierte Fußzeile (.footbar). Zentral, damit
+       alle Seiten denselben Wert nutzen und nichts unter der Footbar verschwindet. */
+    --footbar-height: 56px;
 }
+
+/* Anker/Smooth-Scroll-Ziele nicht hinter der fixierten Footbar verstecken. */
+html { scroll-padding-bottom: var(--footbar-height); }
 
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; }
 
 body {
     margin: 0;
-    padding: 0 0 68px;           /* Platz für die fest fixierte Fußzeile (.footbar) */
+    padding: 0 0 var(--footbar-height);   /* Platz für die fest fixierte Fußzeile (.footbar) */
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
     min-height: 100vh;
     background: var(--bg-gradient);
@@ -191,6 +214,16 @@ main.container {
     border-color: rgba(255,255,255,0.55);
 }
 
+/* Rechte Topbar-Gruppe (Profil / Dashboard / Logout). Abstand per gap statt Inline-Styles. */
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
 /* ============================================================
    03 · Karten-Basis (Glass)
    ============================================================ */
@@ -216,11 +249,12 @@ main.container {
     flex: 1;
     display: grid;
     grid-template-columns: 1.1fr 440px;
-    gap: 40px;
-    align-items: center;
+    gap: clamp(24px, 3vw, 40px);
+    /* "safe center": bei zu hohem Inhalt wird oben NICHT abgeschnitten, sondern scrollbar. */
+    align-items: safe center;
     max-width: 1100px;
     margin: 0 auto;
-    padding: 48px 32px;
+    padding: clamp(24px, 4vw, 48px) clamp(20px, 3vw, 32px);
     width: 100%;
 }
 
@@ -524,6 +558,17 @@ main.container {
     transform: translateY(-1px);
 }
 
+/* Resume-Karte (laufendes eigenes Spiel) – dezenter blauer Akzent passend zur Palette. */
+.dashboard-action-card.resume-card {
+    background: rgba(47, 102, 163, 0.14);
+    border-color: rgba(74, 133, 199, 0.55);
+}
+.dashboard-action-card.resume-card:hover {
+    background: rgba(47, 102, 163, 0.22);
+    border-color: rgba(120, 170, 230, 0.75);
+}
+.dashboard-action-card.resume-card .dashboard-action-icon { color: var(--primary-light); }
+
 .dashboard-action-icon {
     min-width: 38px;
     height: 38px;
@@ -581,19 +626,21 @@ main.container {
 /* ============================================================
    06 · Lobby (lobby.html / host_lobby.php)
    ============================================================ */
-body.lobby-page { overflow: hidden; }
+body.lobby-page { overflow: auto; }
 
 .lobby-layout {
     width: 100%;
     max-width: 1280px;
-    height: calc(100vh - 64px);
+    /* min-height statt fixer Hoehe: Inhalt darf wachsen und scrollen.
+       Topbar (64px) UND Footbar werden abgezogen, damit nichts ueberlappt. */
+    min-height: calc(100vh - 64px - var(--footbar-height));
     margin: 0 auto;
     padding: 36px 40px;
     display: grid;
     grid-template-columns: 1fr 520px;
     gap: 48px;
     align-items: center;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .lobby-info h1 {
@@ -836,7 +883,7 @@ body.quiz-play-page {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
     color: #fff;
     margin: 0;
-    padding: 0 0 68px;           /* Platz für die fest fixierte Fußzeile (.footbar) */
+    padding: 0 0 var(--footbar-height);   /* Platz für die fest fixierte Fußzeile (.footbar) */
 }
 
 .play-layout {
@@ -861,14 +908,15 @@ body.quiz-play-page {
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     box-shadow: var(--glass-shadow);
-    padding: 32px;
+    padding: clamp(18px, 2.5vw, 32px);
 }
 
 .quiz-topline {
     width: 100%;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
+    gap: 16px;
     margin-bottom: 24px;
     position: relative;
 }
@@ -891,16 +939,46 @@ body.quiz-play-page {
     font-weight: 600;
 }
 
+/* Spielansicht als zwei Spalten: links Timer-Spalte, rechts Inhalt.
+   Bewusst nur auf der LIVE-Spielseite (.game-live), damit Fragen-Verwaltung UND
+   results.php (beide nutzen .quiz-main) ihr normales Spalten-Layout behalten. */
+.game-live .quiz-main {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: clamp(16px, 2vw, 28px);
+}
+
+/* Linke Spalte der Spielansicht: nimmt nur so viel Breite wie der Timer (kein grosser
+   Leerraum oben mehr, da Timer/Zaehler NEBEN dem Inhalt stehen, nicht darueber). */
+.quiz-side {
+    flex: 0 0 auto;
+}
+
+/* Rechte Spalte: eigentlicher Inhalt (Frage, Antworten, Aufloesung), bleibt zentriert. */
+.quiz-content {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Timer + Antwort-Zähler untereinander (1cm Abstand), linksbuendig in der Seitenspalte. */
+.quiz-timer-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1cm;
+    flex: 0 0 auto;
+}
+
 .timer-box {
-    /* Gleicher (blauer) Stil wie der "Live-Ranking"-Eyebrow. Groesse bleibt 80x80. */
-    position: absolute;
-    top: 0;
-    right: 0;
+    /* Gleicher (blauer) Stil wie der "Live-Ranking"-Eyebrow. Groesse 120x120. */
     background: rgba(47, 102, 163, 0.35);
     border: 1px solid rgba(74, 133, 199, 0.45);
-    border-radius: 18px;
-    width: 80px;
-    height: 80px;
+    border-radius: 27px;
+    width: 120px;
+    height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -908,7 +986,7 @@ body.quiz-play-page {
 }
 
 .timer-box strong {
-    font-size: 44px;
+    font-size: 66px;
     font-weight: 800;
     color: var(--primary-light);
     letter-spacing: -1px;
@@ -939,8 +1017,28 @@ body.quiz-play-page {
 
 .timer-box.danger strong {
     color: #f87171;
-    font-size: 50px;
+    font-size: 75px;
     font-weight: 900;
+}
+
+/* Antwort-Zaehler (LH 9.5): gleicher Rahmen/Groesse wie der Timer, steht im Stack darunter. */
+.answer-count-box {
+    background: rgba(47, 102, 163, 0.35);
+    border: 1px solid rgba(74, 133, 199, 0.45);
+    border-radius: 27px;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.answer-count-box strong {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--primary-light);
+    letter-spacing: -1px;
+    line-height: 1;
 }
 
 .question-card { margin-bottom: 16px; width: 100%; }
@@ -961,6 +1059,53 @@ body.quiz-play-page {
     color: #fff;
     font-weight: 700;
     line-height: 1.3;
+}
+
+/* Gewinner-Überschrift: Schrift um die Hälfte groesser (28px -> 42px) inkl. Avatar.
+   Avatar ist in em angegeben, skaliert also automatisch mit der Schriftgroesse. */
+.question-card h2.winner-heading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.4em;
+    font-size: clamp(30px, 4vw, 42px);
+}
+
+.winner-avatar {
+    width: 1.3em;
+    height: 1.3em;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(74, 133, 199, 0.6);
+}
+
+/* Mehrere Gewinner bei Punktgleichstand: untereinander, zentriert, ohne Überlappung.
+   Der Avatar (in em) skaliert automatisch mit der Eintrags-Schriftgröße mit. */
+.winner-heading-multi {
+    margin-bottom: 0;
+}
+
+.winner-list {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.winner-entry {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    font-size: clamp(22px, 2.8vw, 32px);
+    font-weight: 700;
+    color: #fff;
+    text-align: center;
 }
 
 /* Antwort-Buttons */
@@ -1075,6 +1220,19 @@ body.quiz-play-page {
 .confirm-button:disabled {
     opacity: 0.65;
     cursor: not-allowed;
+}
+
+/* Blaue Variante fuer "Endergebnis anzeigen" (nur letzte Frage), passend zur Timer-/Eyebrow-Palette. */
+.confirm-button.btn-show-results {
+    background: rgba(47, 102, 163, 0.75);
+    border-color: rgba(74, 133, 199, 0.70);
+    color: #fff;
+}
+
+.confirm-button.btn-show-results:hover:not(:disabled) {
+    background: rgba(47, 102, 163, 0.92);
+    border-color: rgba(120, 170, 230, 0.85);
+    color: #fff;
 }
 
 /* Ranking-Panel */
@@ -1196,6 +1354,8 @@ h1 + p {
     font-size: 15px;
 }
 
+/* GENERISCHE Karten – werden u. a. von archive.php und statistic.php genutzt.
+   Diese Basis-Stile NICHT spezialisieren (sonst bricht das Archiv-Layout). */
 .statistics-card {
     display: flex;
     flex-direction: column;
@@ -1224,6 +1384,62 @@ h1 + p {
     color: rgba(255,255,255,0.75);
     margin-right: 16px;
     margin-bottom: 4px;
+}
+
+/* ERGEBNISSEITE (results.php, body.quiz-play-page): eigene Optik der beiden Felder
+   "Dein Ergebnis" / "Quiz-Übersicht" – bewusst nur hier gescopt, damit Archiv/Statistik
+   (gleiche Klassen, aber body ohne quiz-play-page) unberührt bleiben. */
+.quiz-play-page .statistics-card {
+    align-items: center;      /* Rahmen mittig, nicht über die volle Breite */
+    gap: 10px;
+    width: 100%;
+    margin-top: 6px;
+}
+
+.quiz-play-page .stat-row {
+    width: 100%;
+    max-width: 440px;
+    padding: clamp(18px, 2vw, 24px);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(160deg, rgba(47,102,163,0.20), rgba(255,255,255,0.04));
+    border-color: rgba(74,133,199,0.35);
+    box-shadow: var(--glass-shadow);
+    align-items: center;
+    gap: 16px;
+}
+
+.quiz-play-page .stat-title {
+    font-size: 16px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.quiz-play-page .stat-values {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 18px 32px;
+}
+
+.quiz-play-page .stat-metric {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+}
+
+.quiz-play-page .stat-label {
+    font-size: 15px;
+    color: var(--text-muted);
+}
+
+.quiz-play-page .stat-num {
+    font-size: clamp(30px, 3vw, 42px);
+    font-weight: 800;
+    line-height: 1;
+    color: #fff;
 }
 
 .back-button-wrapper { margin-bottom: 22px; }
@@ -1296,7 +1512,7 @@ h1 + p {
    damit darin Code-Blöcke (<pre>) gültig dargestellt werden können. */
 .question-title {
     text-align: center;
-    font-size: 28px;
+    font-size: clamp(20px, 2.2vw, 28px);
     margin: 12px auto 0;
     color: #fff;
     font-weight: 700;
@@ -2837,10 +3053,20 @@ h1 + p {
 }
 
 @media (max-width: 600px) {
+    /* Footbar bricht hier ggf. auf zwei Zeilen um -> mehr Platz reservieren,
+       damit nie Inhalt unter der Footbar verschwindet. */
+    :root { --footbar-height: 92px; }
+    .footbar { padding: 12px 16px; }
+    .footbar-inner { justify-content: center; text-align: center; }
+
     .topbar { padding: 0 16px; }
     .topbar-account { gap: 8px; }
     .account-name { font-size: 12px; }
     .logout-button { padding: 6px 10px; font-size: 12px; }
+
+    /* Sehr schmale Fenster: Timer-Spalte nicht mehr daneben, sondern kompakt darueber. */
+    .game-live .quiz-main { flex-direction: column; align-items: stretch; }
+    .quiz-timer-stack { flex-direction: row; align-items: center; justify-content: center; gap: 16px; }
 }
 
 @media (max-width: 540px) {
@@ -2945,10 +3171,111 @@ h1 + p {
 .join-code-input { text-transform: uppercase; letter-spacing: 2px; }
 
 /* --- host_lobby.php: Teilnahme-Code-Anzeige --- */
-.info-list .info-list-code { font-size: 1.3rem; font-weight: bold; }
+.info-list .info-list-code { font-size: 1rem; font-weight: 600; }
+/* Nur der Teilnahme-Code selbst wird groß dargestellt (etwa doppelte Größe). */
+.join-code-value { font-size: 2.4rem; font-weight: 800; letter-spacing: 4px; color: #fff; line-height: 1.1; }
+
+/* Host-Lobby: keine blauen ✓-Haken (nur hier, Dashboard nutzt dieselbe .info-list). */
+.lobby-info-list div::before { content: none; }
+/* Spieleinstellungen als saubere Label/Wert-Reihen – Werte alle in einer Spalte ausgerichtet. */
+.lobby-meta-item { display: grid; grid-template-columns: 150px 1fr; align-items: baseline; gap: 8px; }
+.lobby-meta-label { color: var(--text-muted); font-weight: 600; }
+.lobby-meta-value { color: #fff; font-weight: 700; }
+
 
 /* --- manage_media.php: Bild-Vorschau --- */
-.media-thumb { max-width: 120px; max-height: 80px; border-radius: 10px; }
+/* Medienseite: Inhaltsbereich breiter als die Fragenverwaltung – nur hier gescopt,
+   damit die geteilte Klasse .manage-questions-page .quiz-main unberührt bleibt. */
+.media-page .quiz-main { width: 75%; max-width: 75%; }
+
+/* "Medienverwaltung"-Badge: nur so breit wie der Text, linksbündig (nur Medienseite). */
+.media-page .mq-topbar-info .eyebrow { align-self: flex-start; }
+
+/* Langer Beschreibungstext soll den "Zurück"-Button nicht nach unten drängen:
+   Info-Block nimmt den Platz (Text bricht darin um), Button bleibt oben rechts (nur Medienseite). */
+.media-page .mq-topbar-info { flex: 1; min-width: 0; }
+
+/* Medienbibliothek (manage_media.php): Liste – Dateiname · Fragenpool · Aktionen. */
+.media-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+/* Kopfzeile: gleiche Spaltenbreiten wie die Datenzeilen -> fluchtet exakt. */
+.media-list-head {
+    display: grid;
+    grid-template-columns: 1fr 1fr 140px;
+    align-items: center;
+    gap: 16px;
+    padding: 4px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+.media-head-action { text-align: center; }
+.media-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 140px;
+    align-items: center;
+    gap: 16px;
+    background: var(--glass-md);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+}
+.media-row-name { font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.media-row-pool { color: var(--text-muted); font-size: 14px; word-break: break-word; }
+.media-row-actions { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.media-row-actions form { margin: 0; }
+
+/* Vorschau-Modal */
+.media-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+.media-modal[hidden] { display: none; }
+.media-modal-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.78); }
+.media-modal-content {
+    position: relative;
+    z-index: 1;
+    max-width: 92vw;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.media-modal-img {
+    max-width: 92vw;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 50px rgba(0, 0, 0, 0.6);
+}
+.media-modal-caption { margin-top: 12px; color: #fff; font-size: 14px; text-align: center; }
+.media-modal-close {
+    position: absolute;
+    top: -16px;
+    right: -16px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: #fff;
+    color: #111;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+.media-modal-close:hover { background: #e5e7eb; }
 
 /* --- manage_questions.php: Import-Meldung --- */
 .import-section.import-message { padding: 12px 20px; margin-bottom: 0; }

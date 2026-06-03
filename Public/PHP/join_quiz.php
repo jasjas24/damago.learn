@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (empty($joinCode) || empty($playerName)) {
         $error = 'Bitte fülle alle Felder aus.';
     } elseif (!damago_is_valid_avatar($selectedAvatar)) {
-        // Avatar ist Pflicht – ohne gültigen Avatar kein Beitritt.
+        // Avatar ist Pflicht, ohne gültigen Avatar kein Beitritt.
         $error = 'Bitte wähle einen Avatar aus.';
     } else {
         try {
@@ -59,9 +59,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     unset($_SESSION['quiz_score']);
                     unset($_SESSION['last_result']);
 
-                    // 4. Spieler in die Tabelle eintragen
-                    $stmtJoin = $pdo->prepare("INSERT INTO lobby_players (lobby_id, player_name, avatar) VALUES (?, ?, ?)");
-                    $stmtJoin->execute([$lobby['id'], $playerName, $selectedAvatar]);
+                    // 4. Spieler in die Tabelle eintragen (registrierter Nutzer bekommt seine echte user_id,
+                    //    ein Gast bleibt NULL, damit die Historie eindeutig pro Konto zuordenbar ist, LH 21.2)
+                    $joinUserId = $isGuestMode ? null : ($_SESSION['user_id'] ?? null);
+                    $stmtJoin = $pdo->prepare("INSERT INTO lobby_players (lobby_id, player_name, avatar, user_id) VALUES (?, ?, ?, ?)");
+                    $stmtJoin->execute([$lobby['id'], $playerName, $selectedAvatar, $joinUserId]);
 
                     // 5. Wichtige Daten für den Spieler in die Session schreiben
                     $_SESSION['player_lobby_id']   = $lobby['id'];
@@ -130,7 +132,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         id="join_code"
                         name="join_code"
                         value="<?php echo htmlspecialchars($joinCode ?? ''); ?>"
-                        placeholder="z. B. A7K9X"
+                        placeholder="z. B. A7K9XM"
                         class="join-code-input"
                         maxlength="6"
                         required

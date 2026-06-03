@@ -10,20 +10,19 @@ require_once 'init.php';
 
     <div class="topbar-right">
         <?php if ($username !== 'Gast'): ?>
-            <a href="profile.php" class="logout-button" style="margin-right: 15px;" title="Zum Profil">
+            <a href="profile.php" class="logout-button" title="Zum Profil">
                 <?php echo htmlspecialchars($username); ?>
             </a>
-        <?php endif; ?>    
+        <?php endif; ?>
 
         <a href="dashboard.php" class="logout-button">Dashboard</a>
 
         <?php if ($username !== 'Gast'): ?>
-            <a href="logout.php" class="logout-button" style="margin-left: 10px;">
+            <a href="logout.php" class="logout-button">
                 logout
             </a>
         <?php endif; ?>
-        
-        </div>
+    </div>
 </header>
 
 <script>

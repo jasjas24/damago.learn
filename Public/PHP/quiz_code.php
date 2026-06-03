@@ -9,6 +9,7 @@ require_once 'init.php';
 $hostCode = "A7K9";
 $error = "";
 
+// Eingegebenen Code prüfen und bei Treffer in die Lobby weiterleiten.
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $enteredCode = strtoupper(trim($_POST["join_code"] ?? ""));
 
@@ -64,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     type="text"
                     id="join_code"
                     name="join_code"
-                    placeholder="z. B. A7K9"
+                    placeholder="z. B. A7K9XM"
                     maxlength="6"
                     required
                 >
