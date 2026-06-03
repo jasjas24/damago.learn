@@ -450,14 +450,23 @@ if ($lobby_id && !empty($currentQuestion['id'])) {
             btn.addEventListener('click', function() {
                 const username = this.getAttribute('data-username');
                 if (confirm('Willst du ' + username + ' wirklich aus dem Spiel werfen?')) {
+                    const row = this.closest('tr');
                     fetch('kick_player.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                         body: 'username=' + encodeURIComponent(username) + '&host_token=' + encodeURIComponent(<?php echo json_encode($hostToken); ?>)
-                    }).then(() => {
-                        // Zeile ausblenden
-                        this.closest('tr').remove();
-                    });
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Zeile nur entfernen, wenn der Spieler serverseitig wirklich gekickt wurde.
+                        // So sieht der Host sofort, falls der Kick fehlschlägt (statt scheinbarem Erfolg).
+                        if (data && data.success) {
+                            if (row) row.remove();
+                        } else {
+                            alert('Der Spieler konnte nicht entfernt werden. Bitte erneut versuchen.');
+                        }
+                    })
+                    .catch(() => alert('Der Spieler konnte nicht entfernt werden. Bitte erneut versuchen.'));
                 }
             });
         });
