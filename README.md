@@ -43,7 +43,7 @@ Das Quizsystem lässt sich in wenigen Schritten in einer lokalen Entwicklungsumg
 ### 1. Projekt klonen
 Bringe das Projekt in das Stammverzeichnis deines Webservers (z. B. in den `htdocs`-Ordner deiner XAMPP-Installation):
 ```bash
-git clone [https://github.com/dein-username/damago-quizsystem.git](https://github.com/dein-username/damago-quizsystem.git) `
+git clone https://github.com/jasjas24/damago-quizsystem.git
 ```
 ### 2. Datenbank importieren
 1. Öffne dein Datenbank-Verwaltungstool (z. B. **phpMyAdmin**).
